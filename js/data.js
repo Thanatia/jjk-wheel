@@ -1,430 +1,598 @@
-/* =========================================================
- * 咒术回战 · 全能转盘模拟器 - 角色与能力数据（B站短视频同款）
- * ========================================================= */
 (function (global) {
   'use strict';
 
-  const TIER_META = {
-    SSR:  { label: '特级', color: '#f59e0b' },
-    SR:   { label: '一级', color: '#a855f7' },
-    R:    { label: '常规', color: '#0ea5e9' },
-    MEME: { label: '整活', color: '#f43f5e' }
+  var SLICE_COLORS = [
+    '#ef5d58', // 珊瑚红
+    '#ffa500', // 琥珀橙
+    '#8fd14f', // 青柠绿
+    '#2ac19a', // 翡翠青
+    '#29bce8', // 晴空蓝
+    '#3d7ae8', // 钴蓝
+    '#7b4ce2', // 罗兰紫
+    '#ec4899', // 桃红
+    '#eab308', // 金黄
+    '#14b8a6', // 青绿
+    '#6366f1', // 靛蓝
+    '#64748b'  // 岩灰
+  ];
+
+  var RANK_SCALE = [
+    { level: 0, code: 'E-', badgeClass: 'rank-low', label: '笑死级' },
+    { level: 1, code: 'E', badgeClass: 'rank-low', label: '垫底' },
+    { level: 2, code: 'D', badgeClass: 'rank-low', label: '四级' },
+    { level: 3, code: 'C-', badgeClass: 'rank-low', label: '准三级' },
+    { level: 4, code: 'C', badgeClass: 'rank-low', label: '三级 / 常人' },
+    { level: 5, code: 'B', badgeClass: 'rank-b', label: '二级' },
+    { level: 6, code: 'A', badgeClass: 'rank-a', label: '一级' },
+    { level: 7, code: 'S', badgeClass: 'rank-s', label: '特级门槛' },
+    { level: 8, code: 'SS', badgeClass: 'rank-ss', label: '顶尖强者' },
+    { level: 9, code: 'SSS', badgeClass: 'rank-ex', label: '传世巅峰' },
+    { level: 10, code: 'EX', badgeClass: 'rank-ex', label: '规格之外' },
+    { level: 11, code: 'EX+', badgeClass: 'rank-ex', label: '破格极限' },
+    { level: 12, code: 'EX++', badgeClass: 'rank-omega', label: '神域领域' },
+    { level: 13, code: 'Ω', badgeClass: 'rank-omega', label: '终极奇点' }
+  ];
+
+  var ATTRIBUTE_DEFS = [
+    { key: 'taijutsu', name: '体术', desc: '影响近战交锋输出与招式上限' },
+    { key: 'body', name: '体质', desc: '影响生存率，大幅降低重伤与死亡概率' },
+    { key: 'ceTotal', name: '咒力总量', desc: '决定持久战能力与大招释放底气' },
+    { key: 'ceControl', name: '咒力操纵', desc: '影响精确度、黑闪触发率与对抗稳定性' },
+    { key: 'ceEfficiency', name: '咒力效率', desc: '影响续航与极限战中的翻盘能力' },
+    { key: 'iq', name: '智力', desc: '影响战术应对、战斗权重修正与避险能力' },
+    { key: 'talent', name: '天赋', desc: '影响每次事件后是否成长的概率' },
+    { key: 'looks', name: '颜值', desc: '影响部分事件权重及 NPC 初见态度' },
+    { key: 'morality', name: '道德', desc: '影响后续事件的选项与阵营倾向' },
+    { key: 'reputation', name: '声望', desc: '人生终点定格时揭晓的世间评价' }
+  ];
+
+  var IDENTITIES = [
+    { id: 'sorcerer', label: '咒术师', weight: 22, faction: 'good', desc: '正统入世的咒术行使者，行走于明暗交界' },
+    { id: 'curseUser', label: '诅咒师', weight: 13, faction: 'evil', desc: '以咒术行私欲或暗杀之事的法外之人' },
+    { id: 'civilian', label: '普通人', weight: 28, faction: 'neutral', desc: '看似平凡的常人，命运也可能卷入咒力漩涡' },
+    { id: 'higherUp', label: '咒术高层', weight: 11, faction: 'neutral', desc: '端坐屏风之后制定规矩与处刑令的掌权者' },
+    { id: 'curse', label: '咒灵', weight: 9, faction: 'evil', desc: '人类负面情绪凝结诞生的诅咒具现' },
+    { id: 'shikigami', label: '式神', weight: 9, faction: 'neutral', desc: '依附术式或御主显化的异界灵体战力' },
+    { id: 'corpse', label: '咒骸', weight: 8, faction: 'good', desc: '灌注咒核、具备自我意识的人造傀儡存在' }
+  ];
+
+  var ERAS = [
+    { id: 'heian', label: '千年前平安时代', short: '平安时代', order: 0 },
+    { id: 'edo400', label: '400年前', short: '江户初年', order: 1 },
+    { id: 'hiddenInv', label: '怀玉时期', short: '怀玉篇', order: 2 },
+    { id: 'vol0', label: '0卷时期', short: '百鬼夜行', order: 3 },
+    { id: 'canonStart', label: '剧情开始时', short: '开篇时期', order: 4 },
+    { id: 'shibuya', label: '涩谷事变时期', short: '涩谷事变', order: 5 },
+    { id: 'culling', label: '死灭回游时期', short: '死灭回游', order: 6 },
+    { id: 'shinjuku', label: '新宿决战时期', short: '新宿决战', order: 7 },
+    { id: 'future68', label: '68年后', short: '六十八年后', order: 8 }
+  ];
+
+  var BIRTH_ERA_SLICES = [
+    { id: 'heian', label: '千年前平安时代', weight: 12 },
+    { id: 'edo400', label: '400年前', weight: 10 },
+    { id: 'hiddenInv', label: '怀玉时期', weight: 13 },
+    { id: 'vol0', label: '0卷时期', weight: 12 },
+    { id: 'canonStart', label: '剧情开始时', weight: 21 },
+    { id: 'shibuya', label: '涩谷事变时期', weight: 14 },
+    { id: 'culling', label: '死灭回游时期', weight: 10 },
+    { id: 'shinjuku', label: '新宿决战时期', weight: 8 }
+  ];
+
+  var BIRTHPLACE_SLICES = [
+    { id: 'jp', label: '日本', weight: 76, note: '身处咒力最浓厚的漩涡中心' },
+    { id: 'overseas', label: '海外', weight: 16, note: '异域魔境成长，罕为人知' },
+    { id: 'barrier', label: '特异结界内', weight: 8, note: '诞生于特殊术式回响之中' }
+  ];
+
+  var SORCERER_LINEAGES = [
+    { id: 'gojo', label: '御三家·五条家', weight: 9, buff: { ceEfficiency: 1, talent: 1 }, skill: '六眼血脉余晖' },
+    { id: 'zenin', label: '御三家·禅院家', weight: 15, buff: { taijutsu: 1 }, skill: '御三家实战体术秘传' },
+    { id: 'kamo', label: '御三家·加茂家', weight: 14, buff: { ceControl: 1 }, skill: '名门咒力控流家传' },
+    { id: 'minorClan', label: '传统术师旁支', weight: 22, buff: { iq: 1 }, skill: '家族简易结界心法' },
+    { id: 'ordinaryFamily', label: '普通家庭偶然觉醒', weight: 28, buff: { moraleTag: '草根' }, skill: '野生战斗直觉' },
+    { id: 'orphan', label: '孤儿 / 高专特招', weight: 12, buff: { talent: 1 }, skill: '高专特训适应力' }
+  ];
+
+  var TECHNIQUES_BY_IDENTITY = {
+    sorcerer: [
+      { id: 'limitless', label: '无下限咒术', weight: 5, power: 16, desc: '支配无限收敛与排斥的至高术式' },
+      { id: 'tenShadows', label: '十种影法术', weight: 8, power: 14, desc: '以影为媒介调伏十种式神' },
+      { id: 'bloodManip', label: '赤血操术', weight: 12, power: 10, desc: '操纵自身血液强化攻防' },
+      { id: 'boogieWoogie', label: '不义游戏', weight: 11, power: 11, desc: '拍手瞬间调换含咒力物体位置' },
+      { id: 'projection', label: '投射咒法', weight: 10, power: 11, desc: '将一秒拆为二十四帧高速移动' },
+      { id: 'cursedSpeech', label: '咒言', weight: 10, power: 10, desc: '以喉舌承载诅咒强制生效' },
+      { id: 'ratio', label: '十划咒法', weight: 13, power: 11, desc: '强行制造七比三的绝对弱点' },
+      { id: 'strawDoll', label: '刍灵咒法', weight: 14, power: 9, desc: '通过共鸣直接打击对方灵魂本体' },
+      { id: 'newShadow', label: '新阴流·无生得术式', weight: 17, power: 8, desc: '专精体术、刀法与简易领域' }
+    ],
+    curseUser: [
+      { id: 'curseManip', label: '咒灵操术', weight: 8, power: 15, desc: '吸收调伏无数咒灵为己用' },
+      { id: 'inverse', label: '逆转术法', weight: 14, power: 10, desc: '将适度攻击伤害翻转成无效' },
+      { id: 'clone', label: '分身术式', weight: 16, power: 9, desc: '制造本体与分身随意切换' },
+      { id: 'seance', label: '降灵术', weight: 14, power: 10, desc: '召唤死者肉体与情报降临战场' },
+      { id: 'miracle', label: '奇迹存储', weight: 14, power: 9, desc: '积攒微不足道的小幸运抵消致命伤' },
+      { id: 'shrineShard', label: '暗杀斩击流', weight: 17, power: 11, desc: '隐匿咒力气息的一击毙命刺杀' },
+      { id: 'contract', label: '收据再现术式', weight: 17, power: 9, desc: '以燃烧纸契兑现契约物体' }
+    ],
+    curse: [
+      { id: 'disasterFlames', label: '大地灼炎', weight: 14, power: 14, desc: '足以焚尽都市的熔岩烈焰' },
+      { id: 'idleTransfig', label: '无为转变', weight: 10, power: 16, desc: '触碰即可捏塑改变灵魂形状' },
+      { id: 'disasterPlants', label: '灾厄森罗', weight: 15, power: 12, desc: '吸收植物生命转化的诅咒之木' },
+      { id: 'disasterTides', label: '陀艮潮汐', weight: 15, power: 12, desc: '无穷无尽的海域式神奔流' },
+      { id: 'rottingBlood', label: '蚀烂腐血', weight: 20, power: 10, desc: '带有猛毒腐朽效果的特化咒血' },
+      { id: 'miasma', label: '幽暗怨念拟态', weight: 26, power: 8, desc: '依托黑夜伏击猎物的普通诅咒' }
+    ],
+    shikigami: [
+      { id: 'extermSword', label: '退魔之剑', weight: 9, power: 15, desc: '专门克制诅咒与灵体的神圣锋刃' },
+      { id: 'adaptWheel', label: '法阵适应回路', weight: 6, power: 17, desc: '承伤后逐步解析并免疫一切现象' },
+      { id: 'frostWing', label: '极寒羽织', weight: 16, power: 11, desc: '振翅散播冻结空间的冰霜咒力' },
+      { id: 'thunderBeak', label: '高空雷鸣', weight: 17, power: 11, desc: '如电光俯冲贯穿敌人防线' },
+      { id: 'jadeFang', label: '浑影利爪', weight: 22, power: 10, desc: '专司撕裂防线的近身突袭牙爪' },
+      { id: 'scoutLink', label: '千里共视术', weight: 30, power: 7, desc: '将视觉信息即时回传御主' }
+    ],
+    corpse: [
+      { id: 'threeCores', label: '三核相互支撑', weight: 15, power: 14, desc: '三颗核心协同切换战力模式' },
+      { id: 'heavyArmor', label: '重装傀儡核', weight: 22, power: 11, desc: '强硬接下特级正面冲击' },
+      { id: 'bladePuppet', label: '机关暗器枢', weight: 25, power: 10, desc: '周身隐藏高出力咒具机关' },
+      { id: 'autoGuard', label: '自律守护回路', weight: 38, power: 8, desc: '专为护卫造物主而生的坚韧躯体' }
+    ],
+    higherUp: [
+      { id: 'wardSecret', label: '秘传结界守护', weight: 30, power: 8, desc: '借助高专结界中枢隔空防御' },
+      { id: 'shikigamiGuard', label: '家传护卫式神', weight: 28, power: 9, desc: '祖辈流传下来的契约守卫灵' },
+      { id: 'politicalVeto', label: '秘密束缚令', weight: 24, power: 7, desc: '以体制规则与筹码牵制对手' },
+      { id: 'retiredBlade', label: '退隐老牌剑术', weight: 18, power: 10, desc: '年轻时曾走过一线战场的底牌' }
+    ],
+    civilian: [
+      { id: 'none', label: '无生得术式（常人）', weight: 52, power: 0, desc: '没有任何咒术才能的普通居民' },
+      { id: 'heavenZero', label: '天与咒缚（零咒力）', weight: 12, power: 15, desc: '彻底舍弃咒力换取超神级肉体' },
+      { id: 'vesselAwake', label: '受肉体质觉醒', weight: 16, power: 9, desc: '灵魂意外承载远古残响，睁开术师之眼' },
+      { id: 'mahitoPoke', label: '大脑微改（开眼）', weight: 20, power: 7, desc: '在异变中被唤醒潜藏的初级术式' }
+    ]
   };
 
-  const SPEED_CONFIG = {
-    slow:   { duration: 3400, extraSpins: 7 },
-    normal: { duration: 1700, extraSpins: 5 },
-    fast:   { duration: 700,  extraSpins: 3 }
-  };
-
-  // 核心原作人物库（用于转盘绘制头像 + 角色配色 + 台词）
-  const CHARACTERS = {
-    gojo: {
-      key: 'gojo', name: '五条悟', color: '#0284c7', tier: 'SSR',
-      quote: '“天上天下，唯我独尊。会赢的！”',
-      abilities: {
-        physique: '190cm修长战神体格（90）',
-        speed:    '苍之瞬移·全作天花板（99）',
-        iq:       '六眼超算级战场直觉（95）',
-        ce:       '六眼·无限近零消耗（99）',
-        weapon:   '无咒具（全靠无下限手撕）',
-        technique:'无下限术式（苍·赫·虚式茈）',
-        domain:   '无量空处（0.2秒极限展开）'
-      },
-      stats: { physique: 90, speed: 99, iq: 95, ce: 99, weapon: 76, technique: 100, domain: 100 }
+  var ATTRIBUTE_WHEELS = [
+    {
+      attr: 'ceTotal',
+      title: '咒力总量',
+      slices: [
+        { label: 'EX（深不见底）', level: 10, weight: 4 },
+        { label: 'SSS（乙骨/宿傩阶）', level: 9, weight: 6 },
+        { label: 'SS（庞大）', level: 8, weight: 10 },
+        { label: 'S（特级水准）', level: 7, weight: 14 },
+        { label: 'A（一级）', level: 6, weight: 20 },
+        { label: 'B（二级）', level: 5, weight: 22 },
+        { label: 'C（三级）', level: 4, weight: 14 },
+        { label: 'D（四级）', level: 2, weight: 10 }
+      ]
     },
-    sukuna: {
-      key: 'sukuna', name: '两面宿傩', color: '#b91c1c', tier: 'SSR',
-      quote: '“小鬼，让我看看你拿什么取悦我？”',
-      abilities: {
-        physique: '四手两嘴完美战斗躯壳（98）',
-        speed:    '超音速突袭+四臂格挡（97）',
-        iq:       '千年战斗老祖·即时学世界斩（98）',
-        ce:       '双倍乙骨海啸级蓝量（100）',
-        weapon:   '神武解 + 飞天双神器',
-        technique:'御厨子（解·捌·灶开·世界斩）',
-        domain:   '伏魔御厨子（200米无结界）'
-      },
-      stats: { physique: 98, speed: 97, iq: 98, ce: 100, weapon: 92, technique: 99, domain: 100 }
+    {
+      attr: 'ceControl',
+      title: '咒力操纵',
+      slices: [
+        { label: 'EX（神之微操）', level: 10, weight: 5 },
+        { label: 'SSS（大师级）', level: 9, weight: 8 },
+        { label: 'SS（收放自如）', level: 8, weight: 12 },
+        { label: 'S（特级水准）', level: 7, weight: 15 },
+        { label: 'A（一级）', level: 6, weight: 22 },
+        { label: 'B（二级）', level: 5, weight: 20 },
+        { label: 'C（勉强成形）', level: 4, weight: 12 },
+        { label: 'E-（根本控制不了）', level: 0, weight: 6 }
+      ]
     },
-    toji: {
-      key: 'toji', name: '伏黑甚尔', color: '#047857', tier: 'SSR',
-      quote: '“怎么会是免费打手呢？”',
-      abilities: {
-        physique: '完全体天与暴君肉身（100）',
-        speed:    '人类肉体极限·鬼魅闪现（98）',
-        iq:       '咒术师杀手·精密伏击流（92）',
-        ce:       '完全 0 咒力黑洞（免疫必中）',
-        weapon:   '游云 + 天逆鉾 + 释魂刀',
-        technique:'无术式（全靠天与咒缚物理破防）',
-        domain:   '无视一切封闭领域结界'
-      },
-      stats: { physique: 100, speed: 98, iq: 92, ce: 0, weapon: 100, technique: 40, domain: 68 }
+    {
+      attr: 'ceEfficiency',
+      title: '咒力效率',
+      slices: [
+        { label: 'EX（比肩六眼）', level: 10, weight: 4 },
+        { label: 'SSS（接近无限）', level: 9, weight: 7 },
+        { label: 'SS（极省耗）', level: 8, weight: 11 },
+        { label: 'S（精打细算）', level: 7, weight: 16 },
+        { label: 'A（一级标准）', level: 6, weight: 22 },
+        { label: 'B（正常损耗）', level: 5, weight: 22 },
+        { label: 'C（略微浪费）', level: 4, weight: 12 },
+        { label: 'D（漏气严重）', level: 2, weight: 6 }
+      ]
     },
-    yuji: {
-      key: 'yuji', name: '虎杖悠仁', color: '#e11d48', tier: 'SSR',
-      quote: '“我就是你啊，真人！”',
-      abilities: {
-        physique: '堪比天与的怪力容器体（95）',
-        speed:    '50米3秒怪兽级爆发力（91）',
-        iq:       '纯正热血直觉+灵魂共鸣（76）',
-        ce:       '黑闪连打8发·咒力沸腾（86）',
-        weapon:   '屠坐魔 / 咒力双拳硬刚',
-        technique:'赤血操术 + 魂之御厨子',
-        domain:   '灵魂车站必中领域'
-      },
-      stats: { physique: 95, speed: 91, iq: 76, ce: 86, weapon: 72, technique: 86, domain: 84 }
+    {
+      attr: 'body',
+      title: '体质',
+      slices: [
+        { label: 'EX（天与暴君级）', level: 10, weight: 5 },
+        { label: 'SSS（怪物身躯）', level: 9, weight: 8 },
+        { label: 'SS（入学虎）', level: 8, weight: 12 },
+        { label: 'S（顽强耐打）', level: 7, weight: 16 },
+        { label: 'A（强健体魄）', level: 6, weight: 22 },
+        { label: 'B（健康青年）', level: 5, weight: 21 },
+        { label: 'C（普通人）', level: 4, weight: 11 },
+        { label: 'D（体弱多病）', level: 2, weight: 5 }
+      ]
     },
-    megumi: {
-      key: 'megumi', name: '伏黑惠', color: '#1d4ed8', tier: 'SR',
-      quote: '“布都御魂，要死一起死！”',
-      abilities: {
-        physique: '高专主力均衡体格（74）',
-        speed:    '影潜机动+玉犬突袭（80）',
-        iq:       '冷静派战术分析师（88）',
-        ce:       '十影召唤耗蓝中等（76）',
-        weapon:   '影子武器库（含游云备品）',
-        technique:'十种影法术（底牌：魔虚罗）',
-        domain:   '嵌合暗翳庭（未完成室内特化）'
-      },
-      stats: { physique: 74, speed: 80, iq: 88, ce: 76, weapon: 80, technique: 94, domain: 78 }
+    {
+      attr: 'taijutsu',
+      title: '体术水平',
+      slices: [
+        { label: 'EX（格斗宗师）', level: 10, weight: 4 },
+        { label: 'SSS（贴身碾压）', level: 9, weight: 8 },
+        { label: 'SS（顶尖近战）', level: 8, weight: 12 },
+        { label: 'S（特级体术）', level: 7, weight: 15 },
+        { label: 'A（一级）', level: 6, weight: 23 },
+        { label: 'B（二级）', level: 5, weight: 22 },
+        { label: 'C（打架水平）', level: 4, weight: 11 },
+        { label: 'D（体育不及格）', level: 2, weight: 5 }
+      ]
     },
-    yuta: {
-      key: 'yuta', name: '乙骨忧太', color: '#7e22ce', tier: 'SSR',
-      quote: '“这就是纯爱啊！”',
-      abilities: {
-        physique: '看似瘦弱实则咒力护体极肉（86）',
-        speed:    '里香联动超高速突进（90）',
-        iq:       '新宿总策划军师级别（92）',
-        ce:       '深渊级溢出蓝量+5分钟外挂（98）',
-        weapon:   '武士刀 + 里香兵器库',
-        technique:'模仿 Copy（想抄谁就抄谁）',
-        domain:   '真赝相爱（满地无限剑制）'
-      },
-      stats: { physique: 86, speed: 90, iq: 92, ce: 98, weapon: 90, technique: 95, domain: 95 }
+    {
+      attr: 'iq',
+      title: '智力水平',
+      slices: [
+        { label: 'EX（超越五十三万）', level: 10, weight: 5 },
+        { label: 'SSS（绝对谋士）', level: 9, weight: 8 },
+        { label: 'SS（战术鬼才）', level: 8, weight: 12 },
+        { label: 'S（冷静通透）', level: 7, weight: 16 },
+        { label: 'A（敏锐细致）', level: 6, weight: 20 },
+        { label: 'B（机灵靠谱）', level: 5, weight: 20 },
+        { label: 'C（普通人）', level: 4, weight: 14 },
+        { label: 'E-（只有脑花没脑子）', level: 0, weight: 5 }
+      ]
     },
-    maki: {
-      key: 'maki', name: '禅院真希', color: '#0f766e', tier: 'SSR',
-      quote: '“全都破坏掉就行了。”',
-      abilities: {
-        physique: '完全觉醒天与肉体（98）',
-        speed:    '踩空气二段跳追打3马赫（96）',
-        iq:       '实战派兵器宗师（86）',
-        ce:       '0咒力·透明隐身流',
-        weapon:   '释魂刀（无视防御直斩灵魂）',
-        technique:'纯物理暴君（不吃常规术式判定）',
-        domain:   '无视常规结界必中'
-      },
-      stats: { physique: 98, speed: 96, iq: 86, ce: 0, weapon: 98, technique: 42, domain: 66 }
+    {
+      attr: 'talent',
+      title: '成长天赋',
+      slices: [
+        { label: 'EX（百年一遇）', level: 10, weight: 5 },
+        { label: 'SSS（天纵奇才）', level: 9, weight: 8 },
+        { label: 'SS（极快蜕变）', level: 8, weight: 13 },
+        { label: 'S（潜力惊人）', level: 7, weight: 17 },
+        { label: 'A（悟性极佳）', level: 6, weight: 22 },
+        { label: 'B（稳步提升）', level: 5, weight: 20 },
+        { label: 'C（努力派）', level: 4, weight: 10 },
+        { label: 'D（开窍极慢）', level: 2, weight: 5 }
+      ]
     },
-    todo: {
-      key: 'todo', name: '东堂葵', color: '#b45309', tier: 'SR',
-      quote: '“你喜欢什么类型的女人？！”',
-      abilities: {
-        physique: '铁血肌肉猛男（88）',
-        speed:    '0帧拍掌换位·神鬼莫测（89）',
-        iq:       '自称 53 万超绝智商（99）',
-        ce:       '扎实一级咒力+曾打黑闪（78）',
-        weapon:   '改·乐器手（1秒50次置换）',
-        technique:'不义游戏（团战最恶心神技）',
-        domain:   '曾开过简易领域硬扛真人'
-      },
-      stats: { physique: 88, speed: 89, iq: 99, ce: 78, weapon: 75, technique: 90, domain: 66 }
+    {
+      attr: 'looks',
+      title: '外貌颜值',
+      slices: [
+        { label: 'EX（美神之貌）', level: 10, weight: 6 },
+        { label: 'SSS（盛世绝颜）', level: 9, weight: 10 },
+        { label: 'SS（出众美型）', level: 8, weight: 14 },
+        { label: 'S（俊美凌厉）', level: 7, weight: 18 },
+        { label: 'A（清秀耐看）', level: 6, weight: 20 },
+        { label: 'B（端正顺眼）', level: 5, weight: 18 },
+        { label: 'C（路人长相）', level: 4, weight: 10 },
+        { label: 'E（抽象长相）', level: 1, weight: 4 }
+      ]
     },
-    nanami: {
-      key: 'nanami', name: '七海建人', color: '#a16207', tier: 'R',
-      quote: '“现在起进入加班时间！”',
-      abilities: {
-        physique: '西装暴徒健壮体格（84）',
-        speed:    '稳健格斗步法（78）',
-        iq:       '冷静成熟的社畜逻辑（88）',
-        ce:       '下班时间束缚·咒力120%（78）',
-        weapon:   '七三缠布钝刀（斩首级威力）',
-        technique:'十划咒法（7:3强行造弱点暴击）',
-        domain:   '不会领域（全靠硬实力砍）'
-      },
-      stats: { physique: 84, speed: 78, iq: 88, ce: 78, weapon: 84, technique: 82, domain: 42 }
-    },
-    geto: {
-      key: 'geto', name: '夏油杰', color: '#4338ca', tier: 'SR',
-      quote: '“这可是大义啊，悟。”',
-      abilities: {
-        physique: '体术顶级·单挑一打二（82）',
-        speed:    '咒灵掩护高速近身（82）',
-        iq:       '曾经清醒但陷入苦夏（82）',
-        ce:       '特级标准庞大咒力（86）',
-        weapon:   '特级三节棍【游云】',
-        technique:'咒灵操术（6461只咒灵军团）',
-        domain:   '借用特级咒灵展开简易/自带领域'
-      },
-      stats: { physique: 82, speed: 82, iq: 82, ce: 86, weapon: 88, technique: 90, domain: 74 }
-    },
-    kenjaku: {
-      key: 'kenjaku', name: '羂索', color: '#6b21a8', tier: 'SSR',
-      quote: '“呵呵，千年老阴比笑而不语。”',
-      abilities: {
-        physique: '换身获得的特级肉体（82）',
-        speed:    '老练闪避·反重力控场（84）',
-        iq:       '活了一千年的幕后黑手（100）',
-        ce:       '千年精炼级咒力操控（90）',
-        weapon:   '万只咒灵 + 狱门疆',
-        technique:'大脑换身 + 咒灵操术 + 反重力',
-        domain:   '胎藏遍野（开放式无结界领域）'
-      },
-      stats: { physique: 82, speed: 84, iq: 100, ce: 90, weapon: 76, technique: 95, domain: 96 }
-    },
-    hakari: {
-      key: 'hakari', name: '秤金次', color: '#be185d', tier: 'SSR',
-      quote: '“先让我的主题曲响起来！”',
-      abilities: {
-        physique: '街头恶霸铁拳体魄（86）',
-        speed:    '大当たり期间全程疯狗冲锋（88）',
-        iq:       '赌徒直觉拉满（80）',
-        ce:       '4分11秒无限咒力溢出（99）',
-        weapon:   '柏青哥列车门板+双拳',
-        technique:'坐杀博徒（全自动无限反转）',
-        domain:   '光速展开（比0.2秒还快！）'
-      },
-      stats: { physique: 86, speed: 88, iq: 80, ce: 99, weapon: 74, technique: 88, domain: 90 }
-    },
-    kashimo: {
-      key: 'kashimo', name: '鹿紫云一', color: '#0e7490', tier: 'SR',
-      quote: '“这是弱者的葬礼！”',
-      abilities: {
-        physique: '江户武痴狂战士肉体（84）',
-        speed:    '电磁化肉体·近乎光速（92）',
-        iq:       '只懂干架的战斗脑（74）',
-        ce:       '自带麻痹落雷特性咒力（88）',
-        weapon:   '如意雷电铁棒',
-        technique:'幻兽琥珀（一次性自爆神级大招）',
-        domain:   '没有领域（靠硬核体术与落雷）'
-      },
-      stats: { physique: 84, speed: 92, iq: 74, ce: 88, weapon: 82, technique: 88, domain: 48 }
-    },
-    choso: {
-      key: 'choso', name: '胀相', color: '#991b1b', tier: 'SR',
-      quote: '“大哥我是来保护弟弟的！”',
-      abilities: {
-        physique: '咒胎九相图半人半咒灵（82）',
-        speed:    '赤鳞跃动大幅提速（82）',
-        iq:       '150年修炼的老哥经验（82）',
-        ce:       '咒力直接造血·续航神技（82）',
-        weapon:   '超新星血刃 + 穿血水枪',
-        technique:'赤血操术·百敛穿血',
-        domain:   '不会领域（曾撑起简易领域）'
-      },
-      stats: { physique: 82, speed: 82, iq: 82, ce: 82, weapon: 76, technique: 84, domain: 58 }
-    },
-    higuruma: {
-      key: 'higuruma', name: '日车宽见', color: '#475569', tier: 'SR',
-      quote: '“有罪！判处没收加死刑！”',
-      abilities: {
-        physique: '文弱律师硬靠天赋现学（74）',
-        speed:    '临阵突破·躲避斩击（78）',
-        iq:       '律政学霸·十二天学会领域与反转（96）',
-        ce:       '高效率术师蓝量（78）',
-        weapon:   '处刑人之剑（一击必杀！）',
-        technique:'司法裁判官（先定罪后砍人）',
-        domain:   '诛伏赐死（禁止暴力+没收术式）'
-      },
-      stats: { physique: 74, speed: 78, iq: 96, ce: 78, weapon: 98, technique: 90, domain: 92 }
-    },
-    takaba: {
-      key: 'takaba', name: '高羽史彦', color: '#ca8a04', tier: 'SSR',
-      quote: '“哈哈哈哈这不挺好笑的吗！”',
-      abilities: {
-        physique: '搞笑艺人迷之抗揍（80）',
-        speed:    '漫画式瞬间切换场景（85）',
-        iq:       '脑回路异于常人（55）',
-        ce:       '靠笑点驱动的因果律蓝条（85）',
-        weapon:   '塑料扇子 + 泥头车场景道具',
-        technique:'超人（只要我觉得好笑就成真）',
-        domain:   '自带现实强制拉入小品剧场'
-      },
-      stats: { physique: 80, speed: 85, iq: 55, ce: 85, weapon: 80, technique: 99, domain: 88 }
-    },
-    nobara: {
-      key: 'nobara', name: '钉崎野蔷薇', color: '#ea580c', tier: 'R',
-      quote: '“少瞧不起老娘啊！”',
-      abilities: {
-        physique: '钢铁心态狠人女高（70）',
-        speed:    '灵活走位+快速拔钉（74）',
-        iq:       '直爽果断不拖泥带水（76）',
-        ce:       '中等术师咒力量（68）',
-        weapon:   '铁锤 + 钢钉 + 草人偶',
-        technique:'刍灵咒法（共鸣直击灵魂）',
-        domain:   '未觉醒领域（黑闪高手）'
-      },
-      stats: { physique: 70, speed: 74, iq: 76, ce: 68, weapon: 78, technique: 82, domain: 45 }
-    },
-    mahito: {
-      key: 'mahito', name: '真人', color: '#2563eb', tier: 'SR',
-      quote: '“让我摸摸你的灵魂是什么形状！”',
-      abilities: {
-        physique: '遍杀即灵体·肉身变形硬扛（88）',
-        speed:    '变成鸟/豹任意高速变形（86）',
-        iq:       '成长速度堪比怪物的恶童（86）',
-        ce:       '特级灾厄诅咒储备（86）',
-        weapon:   '手刀变刃 + 改造人炸弹',
-        technique:'无为转变（非灵魂攻击打不死）',
-        domain:   '自闭圆顿裹（0.2秒手心绝杀）'
-      },
-      stats: { physique: 88, speed: 86, iq: 86, ce: 86, weapon: 80, technique: 94, domain: 90 }
-    },
-    jogo: {
-      key: 'jogo', name: '漏瑚', color: '#c2410c', tier: 'SR',
-      quote: '“真可惜，你只是生在了没有我的时代。”',
-      abilities: {
-        physique: '脆皮火山法师（68）',
-        speed:    '极速喷火闪避（84）',
-        iq:       '容易上头挑战天花板（70）',
-        ce:       '约8~9根宿傩手指级（88）',
-        weapon:   '火砾虫 + 岩浆爆发',
-        technique:'大地火焰 + 极之番·陨石',
-        domain:   '盖棺铁围山（可惜总撞挂壁）'
-      },
-      stats: { physique: 68, speed: 84, iq: 70, ce: 88, weapon: 76, technique: 88, domain: 86 }
-    },
-    miwa: {
-      key: 'miwa', name: '三轮霞', color: '#0284c7', tier: 'MEME', isMeme: true,
-      quote: '“大家好，我是没用的三轮！”',
-      abilities: {
-        physique: '普通可爱女高中生（52）',
-        speed:    '脚一动就会散架的拔刀（56）',
-        iq:       '老实人乖乖女（66）',
-        ce:       '勉强够拉简易领域（48）',
-        weapon:   '一砍就断的普通武士刀',
-        technique:'无生得术式（全靠新阴流）',
-        domain:   '新阴流·简易领域（不能挪步）'
-      },
-      stats: { physique: 52, speed: 56, iq: 66, ce: 48, weapon: 42, technique: 30, domain: 55 }
-    },
-    naoya: {
-      key: 'naoya', name: '禅院直哉', color: '#d97706', tier: 'MEME', isMeme: true,
-      quote: '“连我背影都追不上，怎么配叫男人！”',
-      abilities: {
-        physique: '咒灵化后超音速甲壳（82）',
-        speed:    '三马赫超音速冲撞（95）',
-        iq:       '嘴臭度远超战术智商（60）',
-        ce:       '御三家精锐级别（78）',
-        weapon:   '偷偷藏在袖子里的短刀',
-        technique:'投射咒法（每秒24帧定格）',
-        domain:   '时胞月宫殿（切细胞领域）'
-      },
-      stats: { physique: 82, speed: 95, iq: 60, ce: 78, weapon: 64, technique: 86, domain: 86 }
-    },
-    gojo25: {
-      key: 'gojo25', name: '2.5条悟', color: '#64748b', tier: 'MEME', isMeme: true,
-      quote: '“好强…宿傩甚至还没拿出全力！”',
-      abilities: {
-        physique: '上下分离可拆卸拼图（45）',
-        speed:    '直飞南下候机厅头等舱（55）',
-        iq:       '机场强行吹捧对手（50）',
-        ce:       '残血但嘴硬续航（65）',
-        weapon:   '只剩半截的高专制服',
-        technique:'残缺无下限（防不住空间斩）',
-        domain:   '领域展开·机场候机室'
-      },
-      stats: { physique: 45, speed: 55, iq: 50, ce: 65, weapon: 40, technique: 72, domain: 40 }
-    },
-    ijichi: {
-      key: 'ijichi', name: '伊地知', color: '#4b5563', tier: 'MEME', isMeme: true,
-      quote: '“请系好安全带，辅助监督要撞人了！”',
-      abilities: {
-        physique: '常年被夹在中间受气的社畜（46）',
-        speed:    '百公里加速的黑色轿车（72）',
-        iq:       '最强后勤调度员（84）',
-        ce:       '专精拉【账】封印结界（45）',
-        weapon:   '1.5吨高专公车直接创飞',
-        technique:'召唤专车与高级拉账',
-        domain:   '超级无敌大黑【账】'
-      },
-      stats: { physique: 46, speed: 72, iq: 84, ce: 45, weapon: 70, technique: 55, domain: 45 }
+    {
+      attr: 'morality',
+      title: '道德水平',
+      slices: [
+        { label: 'SS（高风亮节）', level: 8, weight: 15 },
+        { label: 'S（坚守底线）', level: 7, weight: 18 },
+        { label: 'A（善良正义）', level: 6, weight: 20 },
+        { label: 'B（随心不逾矩）', level: 5, weight: 18 },
+        { label: 'C（利己主义）', level: 4, weight: 14 },
+        { label: 'D（心狠手辣）', level: 2, weight: 9 },
+        { label: 'E-（纯正混乱恶）', level: 0, weight: 6 }
+      ]
     }
+  ];
+
+  var SHIKIGAMI_SUB_BRANCHES = {
+    autonomous: {
+      title: '式神·是否能自主行动',
+      slices: [
+        { id: true, label: '是（可独立判断行动）', weight: 68 },
+        { id: false, label: '否（完全听命于御主指令）', weight: 32 }
+      ]
+    },
+    bodyType: {
+      title: '式神·身躯形态',
+      slices: [
+        { id: 'humanoid', label: '类人型', weight: 26 },
+        { id: 'avian', label: '飞禽型', weight: 25 },
+        { id: 'beast', label: '走兽型', weight: 29 },
+        { id: 'aberration', label: '异形结界体', weight: 20 }
+      ]
+    },
+    subForm: {
+      humanoid: [
+        { label: '剑士拟态', weight: 30 },
+        { label: '神官虚影', weight: 25 },
+        { label: '鬼武者躯', weight: 25 },
+        { label: '双面人偶', weight: 20 }
+      ],
+      avian: [
+        { label: '鸦形', weight: 32 },
+        { label: '雕形', weight: 26 },
+        { label: '燕形', weight: 22 },
+        { label: '枭形', weight: 20 }
+      ],
+      beast: [
+        { label: '玉犬狼形', weight: 34 },
+        { label: '巨象形', weight: 22 },
+        { label: '虎煞形', weight: 24 },
+        { label: '大蛇形', weight: 20 }
+      ],
+      aberration: [
+        { label: '百目球体', weight: 30 },
+        { label: '浮空法轮', weight: 30 },
+        { label: '镜面幻匣', weight: 20 },
+        { label: '雾化影团', weight: 20 }
+      ]
+    },
+    mastersAncient: [
+      { id: '宿傩', label: '两面宿傩', weight: 24, faction: 'evil' },
+      { id: '里梅', label: '里梅', weight: 24, faction: 'evil' },
+      { id: '羂索', label: '羂索', weight: 22, faction: 'evil' },
+      { id: '万', label: '万', weight: 16, faction: 'neutral' },
+      { id: '天元', label: '天元', weight: 14, faction: 'good' }
+    ],
+    mastersModern: [
+      { id: '五条悟', label: '五条悟', weight: 15, faction: 'good' },
+      { id: '伏黑惠', label: '伏黑惠', weight: 25, faction: 'good' },
+      { id: '乙骨忧太', label: '乙骨忧太', weight: 20, faction: 'good' },
+      { id: '夏油杰', label: '夏油杰', weight: 18, faction: 'evil' },
+      { id: '羂索', label: '羂索', weight: 22, faction: 'evil' }
+    ],
+    supplyRates: [
+      { label: '100% 全额供能（×1.32）', mult: 1.32, weight: 14 },
+      { label: '80% 充沛供能（×1.22）', mult: 1.22, weight: 26 },
+      { label: '60% 标准供能（×1.10）', mult: 1.10, weight: 34 },
+      { label: '40% 节流供能（×0.95）', mult: 0.95, weight: 18 },
+      { label: '20% 勉强维持（×0.82）', mult: 0.82, weight: 8 }
+    ],
+    bonds: [
+      { label: '+3（绝对死忠与共鸣）', score: 3, weight: 10 },
+      { label: '+2（生死与共的搭档）', score: 2, weight: 18 },
+      { label: '+1（值得信赖）', score: 1, weight: 26 },
+      { label: '0（纯粹契约工具关系）', score: 0, weight: 24 },
+      { label: '-1（彼此提防猜忌）', score: -1, weight: 12 },
+      { label: '-2（暗藏反噬之心）', score: -2, weight: 7 },
+      { label: '-3（不死不休的厌恶）', score: -3, weight: 3 }
+    ]
   };
 
-  // 模式1：B站经典「战力拼图」7大属性槽位
-  const PUZZLE_SLOTS = [
-    { id: 'physique',  title: '体格 / 肉身',  icon: '💪' },
-    { id: 'speed',     title: '速度 / 反应',  icon: '⚡' },
-    { id: 'iq',        title: '智商 / 战术',  icon: '🧠' },
-    { id: 'ce',        title: '咒力 / 蓝量',  icon: '🔵' },
-    { id: 'weapon',    title: '武器 / 咒具',  icon: '🗡️' },
-    { id: 'technique', title: '生得术式',     icon: '🔮' },
-    { id: 'domain',    title: '领域展开',     icon: '⛩️' }
-  ];
-
-  // 模式2：B站/抖音爆火「人物关系命运转盘」7大格
-  const RELATION_SLOTS = [
-    { id: 'self',    title: '我的本体/长相', icon: '🪪', desc: '你在咒术界将以谁的身体与颜值登场' },
-    { id: 'bestie',  title: '我的挚友/死党', icon: '🤝', desc: '整天跟你一起吃拉面/闯祸的好兄弟' },
-    { id: 'crush',   title: '结婚/恋爱对象', icon: '💘', desc: '转盘停在谁头上，今晚就和谁领证！' },
-    { id: 'mentor',  title: '我的高专老师',  icon: '🎓', desc: '负责教你咒力操控与实战的引路人' },
-    { id: 'nemesis', title: '追杀我的宿敌',  icon: '💢', desc: '一见面就开大招往死里砍你的冤家' },
-    { id: 'savior',  title: '濒死谁来救我',  icon: '🛡️', desc: '血条见底时从天而降救场的援军' },
-    { id: 'airport', title: '陪我去机场的人',icon: '✈️', desc: '大结局陪你坐在候机室聊天的搭档' }
-  ];
-
-  // 斗蛐蛐随机场地
-  const DUEL_ARENAS = [
-    { id: 'a_shinjuku', key: 'sukuna', name: '新宿废墟（全员出力+15%）', color: '#991b1b', tier: 'SR', mod: 'all_boost', desc: '全员解除限制，开局直接互扔大招！' },
-    { id: 'a_shibuya',  key: 'gojo',   name: '涩谷B5F车站（0.2秒领域特化）', color: '#1d4ed8', tier: 'SSR', mod: 'fast_domain', desc: '空间狭小人群密集，体术与极速领域伤害提升！' },
-    { id: 'a_airport',  key: 'gojo25', name: '南下机场候机厅（B站名场面）', color: '#475569', tier: 'MEME', mod: 'airport', desc: '每回合有概率陷入“夸赞对手”发呆状态！' },
-    { id: 'a_court',    key: 'higuruma',name: '日车法庭（禁止物理殴打）', color: '#334155', tier: 'SR', mod: 'no_tai', desc: '术式与智谋权重暴增，纯物理天与暴君伤害减半！' },
-    { id: 'a_rain',     key: 'yuji',   name: '京都暴雨夜（黑闪概率翻倍）', color: '#be123c', tier: 'SSR', mod: 'black_flash', desc: '咒力火花四溅，极易出现连续黑闪翻盘！' },
-    { id: 'a_maho',     key: 'megumi', name: '魔虚罗观战台（第3回合介入）', color: '#b45309', tier: 'MEME', mod: 'mahoraga_drop', desc: '打到第3回合，天降魔虚罗无差别抽人！' }
-  ];
-
-  const BOSSES = {
-    jogo: {
-      name: '特级咒灵 · 漏瑚',
-      hp: 165, atk: 27, def: 16,
-      intro: '火山头傲然登场：“区区人类，也敢直视大地之怒？”',
-      skills: ['火砾虫群爆', '火山喷射火柱', '极之番·陨', '领域展开·盖棺铁围山'],
-      winMeme: '漏瑚倒在焦土上：“真可惜……你只是生在了有我的时代（才怪）。”',
-      loseMeme: '你被漏瑚当场烤成焦炭，喜提“九分熟高专烤肉”称号！'
-    },
-    mahito: {
-      name: '完全体 · 真人',
-      hp: 205, atk: 32, def: 24,
-      intro: '真人咧嘴冷笑：“让我看看你的灵魂是什么形状吧~”',
-      skills: ['无为转变·灵魂触碰', '改造人齐射', '遍杀即灵体冲锋', '0.2秒自闭圆顿裹'],
-      winMeme: '真人像兔子一样在雪地里逃窜，你赢下了灵魂死斗！',
-      loseMeme: '灵魂防线被真人摸穿，直接被捏成了一只可怜的茶壶。'
-    },
-    kenjaku: {
-      name: '千年老阴比 · 羂索',
-      hp: 245, atk: 36, def: 28,
-      intro: '脑花掀开额头缝合线：“千年的计划，就拿你来试刀吧。”',
-      skills: ['万只咒灵漩涡', '反重力机构重力碾压', '无结界·胎藏遍野', '阴险偷袭补刀'],
-      winMeme: '你用绝妙的节奏配合斩击送脑花上路，终结了他千年的布局！',
-      loseMeme: '你被反重力死死摁在地上，脑花顺手给你讲了半小时人类进化哲学。'
-    },
-    gojo: {
-      name: '现代最强 · 五条悟',
-      hp: 295, atk: 43, def: 36,
-      intro: '五条悟拉下眼罩：“别眨眼哦，一不小心可能会直接输掉~”',
-      skills: ['术式顺转·苍', '术式反转·赫', '虚式·茈', '0.2秒无量空处'],
-      winMeme: '不可思议！你居然强行突破了无下限，把五条悟打进了机场候机厅！',
-      loseMeme: '被塞进0.2秒【无量空处】信息过载，你当场变成只会夸人强的好人。'
-    },
-    sukuna: {
-      name: '完全体 · 两面宿傩',
-      hp: 350, atk: 47, def: 35,
-      intro: '新宿废墟之上，四手两嘴的诅咒之王睁开四瞳：“小鬼，让我看看你拿什么取悦我？”',
-      skills: ['不可视之解', '四手连打压制', '伏魔御厨子·灶开', '空间世界斩（束缚发动）'],
-      winMeme: '奇迹诞生！新宿车轮战终结！宿傩被你打出防盗网并化作一滩黑泥！弹幕刷爆：【真正的新宿战神】！',
-      loseMeme: '恭喜成为第18位“2.5条体验卡”持有者！你已在南下机场落地，正和五条悟讨论“宿傩其实还没出全力”。'
-    }
+  var GRADE_WHEELS = {
+    standard: [
+      { id: '特级', label: '特级（可覆灭一国）', weight: 10, bonus: 14 },
+      { id: '准特级', label: '准特级（规格外边缘）', weight: 12, bonus: 11 },
+      { id: '一级', label: '一级（术师中流砥柱）', weight: 26, bonus: 8 },
+      { id: '准一级', label: '准一级（精锐骨干）', weight: 22, bonus: 6 },
+      { id: '二级', label: '二级（独当一面）', weight: 18, bonus: 4 },
+      { id: '三级', label: '三级（常规战力）', weight: 12, bonus: 2 }
+    ],
+    civilian: [
+      { id: '未评级·潜力体', label: '未评级·隐性潜力', weight: 25, bonus: 3 },
+      { id: '四级（普通人限界）', label: '四级（一般路人）', weight: 75, bonus: 0 }
+    ]
   };
 
-  global.JJK_DATA = {
-    TIER_META,
-    SPEED_CONFIG,
-    CHARACTERS,
-    PUZZLE_SLOTS,
-    RELATION_SLOTS,
-    DUEL_ARENAS,
-    BOSSES
+  var CURSED_TOOLS = [
+    '游云（特级三节棍）',
+    '释魂刀（直击灵魂）',
+    '天逆鉾（强制解除术式）',
+    '屠坐魔（附带诅咒短刀）',
+    '黑绳（干扰术式织物）',
+    '精制一级咒刀'
+  ];
+
+  var DOMAIN_NAMES = [
+    '领域展开·无量天穹',
+    '领域展开·伏魔幻界',
+    '领域展开·暗翳影庭',
+    '领域展开·极寒寂灭',
+    '领域展开·万象裁决'
+  ];
+
+  // 各时代核心剧情池
+  var ERA_EVENTS = {
+    heian: [
+      {
+        id: 'heian_yorozu',
+        title: '千年前·遇见万',
+        intro: '你在平安京边缘碰见了对宿傩执着入魔的术师·万',
+        choiceTitle: '面对执着于宿傩的万，你的行动',
+        choices: [
+          { label: '阻拦她', weight: 45, action: 'fight', enemyName: '万', enemyPower: 52, rewardSkill: '真球见闻录' },
+          { label: '顺势搭话切磋', weight: 35, action: 'fight', enemyName: '万', enemyPower: 48, rewardSkill: '构筑术式心得' },
+          { label: '悄悄绕道避开', weight: 20, action: 'safe', effectText: '稳健蛰伏，避开无谓消耗（智力 +1）', statUp: 'iq' }
+        ]
+      },
+      {
+        id: 'heian_sukuna_feast',
+        title: '千年前·平安京夜宴异变',
+        intro: '平安京贵族祭坛爆发浓重诅咒，两面宿傩的威压笼罩百里',
+        choiceTitle: '宿傩阴影迫近时的抉择',
+        choices: [
+          { label: '正面硬撼堕天压迫', weight: 34, action: 'fight', enemyName: '两面宿傩（千年前）', enemyPower: 68 },
+          { label: '协助镇压外围诅咒潮', weight: 44, action: 'fight', enemyName: '平安京百鬼残党', enemyPower: 38, statUp: 'ceControl' },
+          { label: '蛰伏观战偷师古法', weight: 22, action: 'safe', effectText: '暗中领悟平安古法（咒力操纵 +1）', statUp: 'ceControl' }
+        ]
+      }
+    ],
+    edo400: [
+      {
+        id: 'edo_kashimo',
+        title: '400年前·鹿紫云一邀战',
+        intro: '电光缠身的强者鹿紫云一听闻你的名号，提棍登门寻战',
+        choiceTitle: '面对鹿紫云一的决斗邀请',
+        choices: [
+          { label: '爽快接战！痛快一战', weight: 52, action: 'fight', enemyName: '鹿紫云一', enemyPower: 54 },
+          { label: '设局试探雷电特性', weight: 30, action: 'fight', enemyName: '鹿紫云一', enemyPower: 48, statUp: 'iq' },
+          { label: '婉拒比试闭门参悟', weight: 18, action: 'safe', effectText: '避其锋芒，静心凝炼（咒力效率 +1）', statUp: 'ceEfficiency' }
+        ]
+      }
+    ],
+    hiddenInv: [
+      {
+        id: 'hi_star_vessel',
+        title: '怀玉篇·星浆体护卫波澜',
+        intro: '咒术界暗流涌动，伏黑甚尔接受悬赏悄然入场',
+        choiceTitle: '怀玉风波中你的行动',
+        choices: [
+          { label: '突入薨星宫正面对抗', weight: 46, action: 'fight', enemyName: '伏黑甚尔', enemyPower: 58, rewardTool: '天逆鉾碎片' },
+          { label: '截击Q与盘星教外围暗杀组', weight: 36, action: 'fight', enemyName: '盘星教刺客团', enemyPower: 34 },
+          { label: '远观局势谨守自身', weight: 18, action: 'safe', effectText: '看清「天与束缚」实质（体术 +1）', statUp: 'taijutsu' }
+        ]
+      }
+    ],
+    vol0: [
+      {
+        id: 'vol0_night_parade',
+        title: '百鬼夜行·新宿与京都战线',
+        intro: '夏油杰号令千余咒灵掀起百鬼夜行，全咒术界总动员！',
+        choiceTitle: '百鬼夜行中你的去向',
+        choices: [
+          { label: '奔赴最前线迎战特级威胁', weight: 46, action: 'fight', enemyName: '夏油杰（百鬼夜行）', enemyPower: 54 },
+          { label: '清剿新宿街头百鬼咒灵', weight: 38, action: 'fight', enemyName: '新宿特级咒灵群', enemyPower: 38 },
+          { label: '后方结界支援救助伤员', weight: 16, action: 'safe', effectText: '救治多名同伴积累声望（道德 +1）', statUp: 'morality' }
+        ]
+      }
+    ],
+    canonStart: [
+      {
+        id: 'cs_exchange',
+        title: '姐妹校交流会·特级咒灵突袭',
+        intro: '原本热闹的校际对抗中途被特级花御与黑闪觉醒打断！',
+        choiceTitle: '交流会突发异变时的应对',
+        choices: [
+          { label: '迎击特级自然咒灵花御', weight: 48, action: 'fight', enemyName: '花御', enemyPower: 46 },
+          { label: '全力比拼黑闪手感与体术', weight: 36, action: 'fight', enemyName: '交流会精英对决', enemyPower: 34, statUp: 'taijutsu' },
+          { label: '布下「帐」疏散其余学员', weight: 16, action: 'safe', effectText: '顺利完成全员掩护（智力 +1）', statUp: 'iq' }
+        ]
+      }
+    ],
+    shibuya_good: [
+      {
+        id: 'shi_g_frontline',
+        title: '涩谷事变·地铁B5F激战',
+        intro: '胀相、漏瑚与改造人铺天盖地，七海建人陷入苦战危险！',
+        choiceTitle: '涩谷地铁深处的紧急行动',
+        choices: [
+          { label: '迎战灼热灾害·漏瑚', weight: 36, action: 'fight', enemyName: '漏瑚', enemyPower: 52 },
+          { label: '死战胀相并尝试解救同伴', weight: 42, action: 'fight', enemyName: '胀相', enemyPower: 42, defeatsKey: 'choso' },
+          { label: '突入涉谷站台救下七海前辈', weight: 22, action: 'fight', enemyName: '真人', enemyPower: 50, savesNanami: true }
+        ]
+      }
+    ],
+    shibuya_evil: [
+      {
+        id: 'shi_e_late',
+        title: '涩谷事变·敌方追击迎战',
+        intro: '虎杖悠仁与东堂葵强行联手突破，九十九由基压轴现身！',
+        choiceTitle: '涩谷夜战中御主/同伙指示的行动',
+        choices: [
+          { label: '联手迎战虎杖、东堂等追击者', weight: 44, action: 'fight', enemyName: '虎杖与东堂', enemyPower: 46 },
+          { label: '掩护羂索撤离并对峙九十九', weight: 34, action: 'fight', enemyName: '九十九由基', enemyPower: 56 },
+          { label: '趁乱收割游离战场的胀相', weight: 22, action: 'fight', enemyName: '胀相', enemyPower: 42, defeatsKey: 'choso' }
+        ]
+      }
+    ],
+    culling: [
+      {
+        id: 'cg_colony',
+        title: '死灭回游·仙台/东京结界激战',
+        intro: '死灭回游泳者大混战全面打响，突破薨星宫防线成为关键！',
+        choiceTitle: '死灭回游结界内的关键行动',
+        choices: [
+          { label: '闯入结界单挑顶尖泳者日车宽见', weight: 34, action: 'fight', enemyName: '日车宽见', enemyPower: 44 },
+          { label: '正面交锋不死赌徒·秤金次', weight: 34, action: 'fight', enemyName: '秤金次', enemyPower: 52 },
+          { label: '随大部队强突薨星宫结界阵地', weight: 32, action: 'fight', enemyName: '薨星宫守护阵线', enemyPower: 50 }
+        ]
+      }
+    ],
+    shinjuku: [
+      {
+        id: 'sj_showdown',
+        title: '新宿决战·人外魔境终局',
+        intro: '最强术师与诅咒之王震撼天地，全员轮番切入绝境决斗！',
+        choiceTitle: '新宿终局战场中的站位',
+        choices: [
+          { label: '切入一线正面迎击最强宿傩', weight: 44, action: 'fight', enemyName: '完全体宿傩', enemyPower: 68 },
+          { label: '牵制里梅寒冰结界支援主战场', weight: 36, action: 'fight', enemyName: '里梅', enemyPower: 50 },
+          { label: '抢救濒死战友维持医疗后防', weight: 20, action: 'safe', effectText: '成功保下主力战力（体质 +1，声望加分）', statUp: 'body' }
+        ]
+      }
+    ],
+    future68: [
+      {
+        id: 'f68_opponent',
+        title: '68年后·跨时代强者传闻',
+        intro: '六十八年过去，新的强者传说仍在延续，宿命余波再次敲门',
+        choiceTitle: '68年后·你的战斗对手',
+        choices: [
+          { label: '友好切磋·挑战达布拉', weight: 26, action: 'fight', enemyName: '达布拉', enemyPower: 56, defeatsKey: 'dabura', canDie: false },
+          { label: '生死决斗·直面八握剑异戒神将魔虚罗', weight: 22, action: 'fight', enemyName: '魔虚罗', enemyPower: 64, canDie: true },
+          { label: '切磋迟暮传说·68虎杖', weight: 20, action: 'fight', enemyName: '68虎杖', enemyPower: 54, canDie: false },
+          { label: '镇压卷土重来·灵魂形态真人', weight: 18, action: 'fight', enemyName: '灵魂形态·真人', enemyPower: 52, canDie: true },
+          { label: '归隐讲学安度余生', weight: 14, action: 'safe', effectText: '成为跨越时代的前辈传说（智力 +1）', statUp: 'iq' }
+        ]
+      }
+    ]
+  };
+
+  var CROSS_ERA_WHEEL = {
+    title: '如何跨越时代延续至今',
+    slices: [
+      { id: 'sealSleep', label: '封存沉睡待后世苏醒', weight: 40, preserved: true, effect: '化身媒介或被封印，在现代重新苏醒！' },
+      { id: 'curseObject', label: '化为特级咒物等待受肉', weight: 35, preserved: true, effect: '以手指或咒核形式跨越数百年寻找容器！' },
+      { id: 'bloodline', label: '随血脉与术式秘传延续', weight: 25, preserved: false, effect: '术式与意志在后代身上重现风华！' }
+    ]
+  };
+
+  var REPUTATION_BY_FACTION = {
+    good: [
+      { label: 'EX·传奇救世支柱', level: 10, weight: 8 },
+      { label: 'SS·受人敬仰的名宿', level: 8, weight: 18 },
+      { label: 'S·功绩卓著的英雄', level: 7, weight: 24 },
+      { label: 'A·可靠的资深前辈', level: 6, weight: 24 },
+      { label: 'B·小有名气的术师', level: 5, weight: 16 },
+      { label: 'C·默默无闻', level: 4, weight: 10 }
+    ],
+    neutral: [
+      { label: 'SS·超然世外的传说', level: 8, weight: 12 },
+      { label: 'A·令人捉摸不透', level: 6, weight: 26 },
+      { label: 'B·业界略有耳闻', level: 5, weight: 28 },
+      { label: 'C·平凡过客', level: 4, weight: 22 },
+      { label: 'D·无人理会', level: 2, weight: 12 }
+    ],
+    evil: [
+      { label: 'SS·令人闻风丧胆', level: 8, weight: 14 },
+      { label: 'A·令人忌惮', level: 6, weight: 22 },
+      { label: 'B·小有凶名', level: 5, weight: 26 },
+      { label: 'C·偶有恶名', level: 4, weight: 18 },
+      { label: 'D·无人理会', level: 2, weight: 12 },
+      { label: 'E-·遭到唾弃', level: 0, weight: 8 }
+    ]
+  };
+
+  var MODES = {
+    normal: { id: 'normal', name: '正常模式', battleBonus: 0, growthBonus: 0 },
+    story: { id: 'story', name: '剧情模式', battleBonus: 4, growthBonus: 10 },
+    duel: { id: 'duel', name: '对决模式', battleBonus: 0, growthBonus: 8 },
+    fun: { id: 'fun', name: '娱乐模式', battleBonus: 8, growthBonus: 18 }
+  };
+
+  global.JJK_OMEGA_DATA = {
+    SLICE_COLORS: SLICE_COLORS,
+    RANK_SCALE: RANK_SCALE,
+    ATTRIBUTE_DEFS: ATTRIBUTE_DEFS,
+    IDENTITIES: IDENTITIES,
+    ERAS: ERAS,
+    BIRTH_ERA_SLICES: BIRTH_ERA_SLICES,
+    BIRTHPLACE_SLICES: BIRTHPLACE_SLICES,
+    SORCERER_LINEAGES: SORCERER_LINEAGES,
+    TECHNIQUES_BY_IDENTITY: TECHNIQUES_BY_IDENTITY,
+    ATTRIBUTE_WHEELS: ATTRIBUTE_WHEELS,
+    SHIKIGAMI_SUB_BRANCHES: SHIKIGAMI_SUB_BRANCHES,
+    GRADE_WHEELS: GRADE_WHEELS,
+    CURSED_TOOLS: CURSED_TOOLS,
+    DOMAIN_NAMES: DOMAIN_NAMES,
+    ERA_EVENTS: ERA_EVENTS,
+    CROSS_ERA_WHEEL: CROSS_ERA_WHEEL,
+    REPUTATION_BY_FACTION: REPUTATION_BY_FACTION,
+    MODES: MODES
   };
 })(window);
