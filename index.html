@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>咒术转盘 · 穿越人生</title>
+  <title>咒术转盘 Ω · 穿越人生（静音纯净版）</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,8 +13,8 @@
       <!-- ==================== 封面开始界面 ==================== -->
       <section class="screen screen-start" id="startScreen" aria-label="开始界面">
         <div class="start-top-actions">
-          <button type="button" class="pill-chip" id="btnStartSettings">⚙ 设置</button>
-          <button type="button" class="pill-chip" id="btnStartNotice">📢 说明与规则</button>
+          <button type="button" class="pill-chip" id="btnStartSettings">⚙ 设置 (<span id="startSpeedBadge">1.5s</span>)</button>
+          <button type="button" class="pill-chip" id="btnStartNotice">📢 公告与Q&A</button>
         </div>
 
         <div class="start-hero">
@@ -23,80 +23,112 @@
             <h1>咒术转盘</h1>
             <span class="title-omega">Ω</span>
           </div>
-          <p class="start-subtitle">穿越咒术世界的多分支命运转盘 · 静音纯净版（无语音播报）</p>
+          <p class="start-subtitle">静音纯净版（无任何语音播报）· 含 10 维属性 / 宿傩回合决战 / 天命自定 / 竞技场</p>
 
           <div class="split-art-card" aria-hidden="true">
             <div class="split-half split-gojo">
               <div class="art-ring art-ring-blue"></div>
               <div class="art-emblem">苍</div>
-              <span class="art-caption">六眼 · 无下限</span>
+              <span class="art-caption">六眼 · 无量空处</span>
             </div>
             <div class="split-divider">VS</div>
             <div class="split-half split-sukuna">
               <div class="art-ring art-ring-red"></div>
               <div class="art-emblem">斩</div>
-              <span class="art-caption">御厨子 · 伏魔</span>
+              <span class="art-caption">十影 · 伏魔御厨子</span>
             </div>
           </div>
 
-          <div class="start-mode-pills" id="startModeQuickPick" role="group" aria-label="快捷选择模式">
-            <button type="button" class="mode-tag is-active" data-mode="normal">正常模式</button>
-            <button type="button" class="mode-tag" data-mode="story">剧情模式</button>
-            <button type="button" class="mode-tag" data-mode="duel">对决模式</button>
-            <button type="button" class="mode-tag" data-mode="fun">娱乐模式</button>
+          <div class="start-mode-pills" id="startRunTypePick" role="group" aria-label="选择开局方式">
+            <button type="button" class="mode-tag is-active" data-runtype="dream">🌌 浮生若梦（标准随机 · 产命运点）</button>
+            <button type="button" class="mode-tag" data-runtype="custom">✨ 天命自定（自选词条开局）</button>
           </div>
         </div>
 
         <div class="start-footer">
-          <button type="button" class="btn-primary-large" id="btnEnterGame">进入游戏</button>
+          <button type="button" class="btn-resume-large is-hidden" id="btnResumeLife">▶ 继续未完成人生（第 <span id="resumeStepNum">1</span> 轮）</button>
+          <button type="button" class="btn-primary-large" id="btnEnterGame">开始新的人生</button>
           <div class="start-secondary-row">
-            <button type="button" class="text-link-btn" id="btnStartCards">已保存角色卡 (<span id="startCardCount">0</span>)</button>
+            <button type="button" class="text-link-btn" id="btnStartCards">🃏 角色卡与排行榜 (<span id="startCardCount">0</span>)</button>
             <span class="dot-sep">·</span>
-            <span class="fate-mini">命运点：<strong id="startFatePoints">0</strong></span>
+            <button type="button" class="text-link-btn" id="btnStartArena">⚔ 咒术竞技场</button>
+            <span class="dot-sep">·</span>
+            <span class="fate-mini">💎 命运点 <strong id="startFatePoints">30</strong></span>
           </div>
         </div>
       </section>
 
       <!-- ==================== 主转盘界面 ==================== -->
       <section class="screen screen-game is-hidden" id="gameScreen" aria-label="转盘主界面">
-        <!-- 顶部转盘标题胶囊（可点击查看本轮概率权重） -->
+        <!-- 顶部信息与即时调速条 -->
+        <div class="top-utility-strip">
+          <div class="fate-pill-top" id="topFateBadge" title="剩余命运点（浮生若梦结算每10分+1，重抽消耗1）">
+            💎 <span id="gameFatePoints">30</span>
+          </div>
+          <div class="speed-quick-bar">
+            <button type="button" class="quick-speed-btn" id="btnCycleSpeed" title="点击切换转盘旋转速度（或点设置微调 0.2s~8.0s）">
+              ⚡ <span id="quickSpeedLabel">1.5s</span>
+            </button>
+            <button type="button" class="quick-auto-btn" id="btnToggleAutoSpin" title="开启后每次出结果自动按间隔连抽下一轮">
+              自动连抽：<strong id="quickAutoLabel">关</strong>
+            </button>
+          </div>
+        </div>
+
+        <!-- 转盘标题胶囊（可点击查看本轮概率权重） -->
         <header class="game-header">
           <button type="button" class="wheel-title-pill" id="btnShowOdds" title="点击查看当前转盘各选项概率">
             <span class="pill-list-icon" aria-hidden="true">☰</span>
             <span class="pill-title-text" id="wheelTitleText">穿越后的初始身份</span>
           </button>
-          <div class="era-subtag" id="wheelSubtag">初始降生 · 第 1 轮</div>
+          <div class="era-subtag" id="wheelSubtag">浮生若梦 · 第 1 轮</div>
         </header>
 
+        <!-- 新宿/高难回合制战斗实时态势卡（仅在回合决战阶段显示） -->
+        <section class="battle-hud is-hidden" id="battleHud" aria-label="决战态势面板">
+          <div class="battle-hud-row">
+            <div class="battle-side">
+              <div class="battle-name" id="hudPlayerName">我方 · 主角</div>
+              <div class="battle-stat-line" id="hudPlayerStat">战值 0 · 出招 0</div>
+            </div>
+            <div class="battle-round-pill" id="hudRoundBadge">第 1 回合</div>
+            <div class="battle-side is-right">
+              <div class="battle-name" id="hudEnemyName">十影宿傩</div>
+              <div class="battle-stat-line" id="hudEnemyStat">战值 0 · 出招 0</div>
+            </div>
+          </div>
+          <div class="battle-tags-row" id="hudTagsRow"></div>
+        </section>
+
         <!-- 结果大字展示区 -->
-        <div class="result-stage">
+        <div class="result-stage" id="resultStage">
           <div class="result-main-text" id="resultMainText">准备就绪</div>
-          <div class="result-effect-text" id="resultEffectText">点击下方「点击旋转」决定你在咒术界的起点</div>
+          <div class="result-effect-text" id="resultEffectText">点击转盘或下方按钮旋转；旋转中点击任意转盘位置可瞬间急停！</div>
         </div>
 
-        <!-- 中央转盘区（纯白主界面风格：动态加权扇区 + 中心12点方向白色箭头） -->
+        <!-- 中央转盘区（旋转中支持点击Canvas任意位置瞬间落定） -->
         <div class="wheel-stage" id="wheelStage">
-          <div class="wheel-outer-shadow">
+          <div class="wheel-outer-shadow" id="wheelTapZone" title="旋转中点击可立即急停出结果">
             <canvas id="wheelCanvas" width="680" height="680" aria-label="命运转盘"></canvas>
-            <button type="button" class="wheel-center-hub" id="wheelCenterHub" aria-label="转盘中心指针">
+            <button type="button" class="wheel-center-hub" id="wheelCenterHub" aria-label="转盘中心指针（点击旋转或急停）">
               <span class="hub-pointer" aria-hidden="true"></span>
             </button>
           </div>
         </div>
 
-        <!-- 中间阶段视图：能力雷达图卡片（默认隐藏，进入初始/中期/最终面板时展示） -->
+        <!-- 中间阶段视图：10维能力雷达图卡片 -->
         <div class="radar-stage is-hidden" id="radarStage">
           <div class="radar-card">
             <div class="radar-card-header">
               <span class="radar-badge" id="radarTitleBadge">初始能力面板</span>
-              <span class="radar-grade-chip" id="radarGradeChip">一级 · 平衡</span>
+              <span class="radar-grade-chip" id="radarGradeChip">一级 · 健康</span>
             </div>
             <div class="radar-svg-wrap" id="radarSvgWrap"></div>
             <div class="radar-stats-summary" id="radarStatsSummary"></div>
           </div>
         </div>
 
-        <!-- 中间阶段视图：人生结算页（默认隐藏，通关或死亡结算时展示） -->
+        <!-- 中间阶段视图：人生结算页 -->
         <div class="settlement-stage is-hidden" id="settlementStage">
           <div class="settlement-card">
             <div class="settlement-header">
@@ -118,18 +150,18 @@
           </div>
         </div>
 
-        <!-- 底部操作区（复刻参考界面下方的按钮布局） -->
+        <!-- 底部操作区 -->
         <footer class="game-footer">
           <div class="utility-top-row">
-            <button type="button" class="circle-action-btn" id="btnOpenCharacter" title="查看当前人物属性面板">人物</button>
-            <div class="fate-reroll-slot" id="fateRerollSlot">
-              <button type="button" class="reroll-chip is-hidden" id="btnFateReroll" title="消耗 1 命运点重转上一轮">↺ 改命重转 (<span id="rerollCostCount">0</span>)</button>
+            <button type="button" class="circle-action-btn" id="btnOpenCharacter" title="查看当前人物十维档案">人物</button>
+            <div class="fate-reroll-slot">
+              <button type="button" class="reroll-chip" id="btnFateReroll" disabled title="花费 1 命运点重抽上一轮结果">↺ 重抽本轮 (-1💎)</button>
             </div>
-            <button type="button" class="circle-action-btn" id="btnRebirth" title="重新开始新的人生">重生</button>
+            <button type="button" class="circle-action-btn" id="btnRebirth" title="放弃当前进度并重生重开">重生</button>
           </div>
 
           <div class="primary-bottom-row">
-            <button type="button" class="circle-omega-btn" id="btnOpenMenu" title="模式设置与历史存档">Ω</button>
+            <button type="button" class="circle-omega-btn" id="btnOpenMenu" title="打开 Ω 菜单（竞技场 / 排行 / 设置 / 天命自定）">Ω</button>
             <button type="button" class="spin-main-pill" id="btnMainAction">点击旋转</button>
             <button type="button" class="circle-log-btn" id="btnOpenTimeline" title="查看本局经历日志">
               <span class="log-icon">📜</span>
@@ -152,7 +184,7 @@
             <span class="char-status-tag" id="charStatusTag">健康</span>
             <span class="char-grade-tag" id="charGradeTag">一级</span>
           </div>
-          <p class="char-subline" id="charSubline">出身：普通术师家庭 · 时期：剧情开始时</p>
+          <p class="char-subline" id="charSubline">出生地：日本 · 时期：剧情开始时</p>
         </div>
         <button type="button" class="dark-close-btn" id="btnCloseCharModal" aria-label="关闭人物面板">✕</button>
       </div>
@@ -160,89 +192,259 @@
       <div class="dark-modal-body">
         <div class="char-quick-pills" id="charQuickPills"></div>
 
-        <h3 class="dark-section-title">十项核心属性 <span class="dark-section-hint">综合战力：<strong id="charPowerScore">0</strong></span></h3>
+        <h3 class="dark-section-title">十维核心属性 <span class="dark-section-hint">综合战力：<strong id="charPowerScore">0</strong></span></h3>
         <div class="attr-grid" id="charAttrGrid"></div>
 
-        <h3 class="dark-section-title">基础招式与属性公式</h3>
-        <div class="dark-info-card" id="charFormulaCard"></div>
+        <h3 class="dark-section-title">生得术式与觉醒状态</h3>
+        <div class="dark-info-card" id="charTechCard"></div>
 
-        <h3 class="dark-section-title">术式与已学能力</h3>
+        <h3 class="dark-section-title">高级技巧与战斗秘技</h3>
         <div class="dark-tag-list" id="charSkillsList"></div>
 
-        <h3 class="dark-section-title">领域展开</h3>
-        <div class="dark-info-card" id="charDomainCard">尚未掌握领域展开</div>
+        <h3 class="dark-section-title">咒具库存详情（器形与特效）</h3>
+        <div class="dark-info-list" id="charToolsList"></div>
 
-        <h3 class="dark-section-title">咒具与咒骸</h3>
-        <div class="dark-tag-list" id="charToolsList"></div>
+        <h3 class="dark-section-title">基础招式伤害与抗性参考公式</h3>
+        <div class="dark-info-card" id="charFormulaCard"></div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== Ω 菜单 / 设置 / 存档弹窗 ==================== -->
+  <!-- ==================== Ω 全能菜单 & 设置弹窗 ==================== -->
   <div class="modal-backdrop is-hidden" id="menuModal" role="dialog" aria-modal="true" aria-labelledby="menuModalTitle">
     <div class="light-modal-panel">
       <div class="light-modal-header">
-        <h2 id="menuModalTitle">Ω 设置与菜单</h2>
-        <button type="button" class="light-close-btn" id="btnCloseMenuModal" aria-label="关闭设置">✕</button>
+        <h2 id="menuModalTitle">Ω 功能菜单与设置</h2>
+        <button type="button" class="light-close-btn" id="btnCloseMenuModal" aria-label="关闭菜单">✕</button>
       </div>
       <div class="light-modal-body">
+        <!-- 快捷导航网格 -->
+        <div class="menu-hub-grid">
+          <button type="button" class="hub-card-btn" id="btnHubChar">
+            <span class="hub-emoji">🪪</span>
+            <strong>当前人物</strong>
+            <span>十维属性与咒具</span>
+          </button>
+          <button type="button" class="hub-card-btn" id="btnHubArena">
+            <span class="hub-emoji">⚔</span>
+            <strong>咒术竞技场</strong>
+            <span>切磋/对战码/战报</span>
+          </button>
+          <button type="button" class="hub-card-btn" id="btnHubBoards">
+            <span class="hub-emoji">🏆</span>
+            <strong>排行与角色卡</strong>
+            <span>生涯榜 / 回放人生</span>
+          </button>
+          <button type="button" class="hub-card-btn" id="btnHubCustom">
+            <span class="hub-emoji">✨</span>
+            <strong>天命自定开局</strong>
+            <span>花命运点自选词条</span>
+          </button>
+        </div>
+
+        <div class="setting-divider"></div>
+
         <div class="setting-block">
-          <div class="setting-label">游玩模式（即时或下局生效）</div>
-          <div class="mode-grid" id="menuModeGrid">
-            <button type="button" class="mode-choice is-active" data-mode="normal">
-              <strong>正常模式</strong>
-              <span>原汁原味分支推进与战力权重</span>
-            </button>
-            <button type="button" class="mode-choice" data-mode="story">
-              <strong>剧情模式</strong>
-              <span>事件更丰富，关键名场面必触发</span>
-            </button>
-            <button type="button" class="mode-choice" data-mode="duel">
-              <strong>对决模式</strong>
-              <span>强敌战次增多，黑闪与生死战高频</span>
-            </button>
-            <button type="button" class="mode-choice" data-mode="fun">
-              <strong>娱乐模式</strong>
-              <span>高波动概率、逆天改命词条更多</span>
-            </button>
+          <div class="setting-row-between">
+            <label for="spinDurationRange" class="setting-label">转盘旋转时长（旋转中点击可瞬间停）</label>
+            <span class="setting-value" id="spinDurationValue">1.5s</span>
+          </div>
+          <input type="range" id="spinDurationRange" min="0.2" max="8.0" step="0.1" value="1.5" class="range-input" />
+          <div class="preset-speed-row" id="speedPresetRow">
+            <button type="button" class="preset-chip" data-speed="0.2">0.2s 极速</button>
+            <button type="button" class="preset-chip" data-speed="0.8">0.8s 流畅</button>
+            <button type="button" class="preset-chip" data-speed="1.5">1.5s 默认</button>
+            <button type="button" class="preset-chip" data-speed="3.0">3.0s 悬念</button>
+            <button type="button" class="preset-chip" data-speed="5.0">5.0s 慢放</button>
           </div>
         </div>
 
         <div class="setting-block">
           <div class="setting-row-between">
-            <label for="spinDurationRange" class="setting-label">转盘旋转时长</label>
-            <span class="setting-value" id="spinDurationValue">1.2s</span>
+            <label for="autoIntervalRange" class="setting-label">自动连抽间隔</label>
+            <span class="setting-value" id="autoIntervalValue">0.8s</span>
           </div>
-          <input type="range" id="spinDurationRange" min="0.6" max="4.0" step="0.2" value="1.2" class="range-input" />
+          <input type="range" id="autoIntervalRange" min="0.2" max="8.0" step="0.1" value="0.8" class="range-input" />
+          <label class="toggle-row">
+            <input type="checkbox" id="chkAutoSpin" />
+            <span>开启自动连抽（出结果后按以上间隔自动转下一轮）</span>
+          </label>
         </div>
 
         <div class="setting-block">
           <div class="setting-row-between">
             <div>
-              <div class="setting-label">语音播报与音效</div>
-              <div class="setting-desc">本版本已完全移除语音播报，点击旋转即停即走不卡顿</div>
+              <div class="setting-label">静音纯净模式（无语音播报）</div>
+              <div class="setting-desc">全程完全静音无朗读、无播报卡顿，纯靠界面节奏推进</div>
             </div>
             <span class="mute-badge">🔇 已静音</span>
           </div>
         </div>
 
         <div class="setting-block">
-          <div class="setting-row-between">
-            <div>
-              <div class="setting-label">命运点余额</div>
-              <div class="setting-desc">每次完成人生结算自动获得，可用于任意回合「改命重转」</div>
-            </div>
-            <span class="fate-badge" id="menuFatePoints">0 点</span>
+          <div class="setting-label">下一局开局方式</div>
+          <div class="mode-grid" id="menuRunTypeGrid">
+            <button type="button" class="mode-choice is-active" data-runtype="dream">
+              <strong>浮生若梦（标准）</strong>
+              <span>全随机轮盘 · 每10分奖1命运点</span>
+            </button>
+            <button type="button" class="mode-choice" data-runtype="custom">
+              <strong>天命自定（沙盒）</strong>
+              <span>消耗命运点自选开局 · 不产命运点</span>
+            </button>
           </div>
         </div>
 
         <div class="menu-action-grid">
-          <button type="button" class="menu-btn" id="btnMenuViewCards">🃏 查看已有角色卡 (<span id="menuCardCount">0</span>)</button>
-          <button type="button" class="menu-btn" id="btnMenuViewTimeline">📜 查看本局经历</button>
-          <button type="button" class="menu-btn" id="btnMenuBackStart">🏠 返回标题封面</button>
+          <button type="button" class="menu-btn" id="btnMenuNotice">📖 QA与版本说明</button>
+          <button type="button" class="menu-btn" id="btnMenuBackStart">🏠 返回封面</button>
           <button type="button" class="menu-btn menu-btn-danger" id="btnMenuResetAll">🗑 清空本地存档</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== 天命自定·开局配置面板 ==================== -->
+  <div class="modal-backdrop is-hidden" id="customModal" role="dialog" aria-modal="true" aria-labelledby="customModalTitle">
+    <div class="light-modal-panel">
+      <div class="light-modal-header">
+        <h2 id="customModalTitle">✨ 天命自定 · 预设开局</h2>
+        <button type="button" class="light-close-btn" id="btnCloseCustomModal" aria-label="关闭天命自定">✕</button>
+      </div>
+      <div class="light-modal-body">
+        <div class="custom-balance-bar">
+          <span>当前命运点：<strong id="customFateRemain">30</strong></span>
+          <span>本次消耗：<strong id="customFateCost">0</strong> 点</span>
+        </div>
+        <p class="odds-explain">选为「🎲 随机」不消耗命运点；锁定强力出身/术式/天赋或新宿直通车需消耗对应点数（天命自定局不产出新命运点，成绩入天命自定榜）。</p>
+
+        <div class="custom-form-grid">
+          <label class="custom-field">
+            <span>初始身份</span>
+            <select id="custIdentity" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>活跃/出生时期</span>
+            <select id="custEra" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>生得术式</span>
+            <select id="custTech" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>初始官方评级</span>
+            <select id="custGrade" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>天赋潜力（影响技巧数与成长）</span>
+            <select id="custTalent" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>自带核心底牌</span>
+            <select id="custPerk" class="select-input">
+              <option value="random" data-cost="0">🎲 正常随机抽取 (0 点)</option>
+              <option value="rct" data-cost="3">💚 必带「反转术式」 (3 点)</option>
+              <option value="domain" data-cost="5">🌌 必带「领域展开」 (5 点)</option>
+              <option value="both" data-cost="8">👑 反转+领域+黑闪全套 (8 点)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="save-actions" style="margin-top: 14px;">
+          <button type="button" class="btn-primary-small" id="btnStartCustomRun">消耗点数并开启天命人生</button>
+          <button type="button" class="btn-ghost-small" id="btnResetCustomForm">全部设回随机</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 咒术竞技场弹窗 ==================== -->
+  <div class="modal-backdrop is-hidden" id="arenaModal" role="dialog" aria-modal="true" aria-labelledby="arenaModalTitle">
+    <div class="light-modal-panel">
+      <div class="light-modal-header">
+        <h2 id="arenaModalTitle">⚔ 咒术竞技场</h2>
+        <button type="button" class="light-close-btn" id="btnCloseArenaModal" aria-label="关闭竞技场">✕</button>
+      </div>
+      <div class="light-modal-body">
+        <div class="tab-strip" id="arenaTabStrip">
+          <button type="button" class="tab-btn is-active" data-arenatab="fight">随机切磋 / 好友码</button>
+          <button type="button" class="tab-btn" data-arenatab="history">历史战报 (<span id="arenaLogCount">0</span>/100)</button>
+          <button type="button" class="tab-btn" data-arenatab="rules">7大对决规则</button>
+        </div>
+
+        <!-- 切磋面板 -->
+        <div id="arenaTabFight">
+          <label class="custom-field">
+            <span>1. 选择我方出战角色（本地档案卡或当前进行中角色）</span>
+            <select id="arenaPlayerSelect" class="select-input"></select>
+          </label>
+          <div class="arena-code-box">
+            <button type="button" class="pill-chip" id="btnCopyMyCode">📋 生成我方角色对战码</button>
+            <span class="setting-desc" id="arenaCodeFeedback"></span>
+          </div>
+
+          <label class="custom-field" style="margin-top: 10px;">
+            <span>2. 对手来源：随机挑战原型 / 粘贴好友对战码</span>
+            <div class="arena-vs-row">
+              <button type="button" class="btn-primary-small" id="btnArenaRandomFight">🎲 随机匹配强敌开战</button>
+            </div>
+            <div class="arena-friend-row">
+              <input type="text" id="arenaFriendCodeInput" class="text-input" placeholder="粘贴好友对战码（或留空选下方内置强者）" style="margin-bottom:0;" />
+              <button type="button" class="btn-ghost-small" id="btnArenaCodeFight">按码开战</button>
+            </div>
+          </label>
+
+          <div class="arena-result-box is-hidden" id="arenaResultBox"></div>
+        </div>
+
+        <!-- 历史战报面板 -->
+        <div id="arenaTabHistory" class="is-hidden">
+          <div class="timeline-list" id="arenaHistoryList"></div>
+        </div>
+
+        <!-- 7大规则 -->
+        <div id="arenaTabRules" class="is-hidden notice-copy">
+          <p><strong>规则1 · 十维基准值</strong>：体术、体质、咒力总量、操纵、效率、灵魂抗性、结界术共同决定回合攻击与减伤基准。</p>
+          <p><strong>规则2 · 术式与觉醒</strong>：生得术式与觉醒程度影响技能系数；天与咒缚拥有超高体术穿透加成。</p>
+          <p><strong>规则3 · 领域压制</strong>：持有领域展开的一方在前三回合可压制无领域或仅简易领域的对手。</p>
+          <p><strong>规则4 · 反转续航</strong>：拥有反转术式会在每回合末自动回复重创损耗，大幅提升耐力战胜率。</p>
+          <p><strong>规则5 · 黑闪暴击</strong>：操纵与体术越高，回合内越容易打出黑闪实现高倍爆发逆转。</p>
+          <p><strong>规则6 · 咒具词条加成</strong>：特级或附带灵魂/破防词条的咒具会参与破盾与额外爆发计算。</p>
+          <p><strong>规则7 · 对战码互通</strong>：任意档案均可导出编码，粘贴即可与任何朋友的角色在本地离线比拼回合战报！</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 排行榜与角色卡图鉴 / 人生回放 ==================== -->
+  <div class="modal-backdrop is-hidden" id="cardsModal" role="dialog" aria-modal="true" aria-labelledby="cardsModalTitle">
+    <div class="light-modal-panel">
+      <div class="light-modal-header">
+        <h2 id="cardsModalTitle">🃏 角色卡图鉴与排行</h2>
+        <button type="button" class="light-close-btn" id="btnCloseCardsModal" aria-label="关闭角色卡">✕</button>
+      </div>
+      <div class="light-modal-body">
+        <div class="tab-strip" id="cardsTabStrip">
+          <button type="button" class="tab-btn is-active" data-cardtab="dream">🌌 浮生若梦榜</button>
+          <button type="button" class="tab-btn" data-cardtab="custom">✨ 天命自定榜</button>
+        </div>
+        <div class="cards-toolbar">
+          <button type="button" class="pill-chip" id="btnExportCards">导出全部 JSON</button>
+          <label class="pill-chip file-label">导入 JSON<input type="file" id="inputImportCards" accept="application/json" hidden /></label>
+        </div>
+        <div class="saved-cards-list" id="savedCardsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 角色卡「回放人生」与最终10维详情弹窗 ==================== -->
+  <div class="modal-backdrop is-hidden" id="replayModal" role="dialog" aria-modal="true" aria-labelledby="replayModalTitle">
+    <div class="light-modal-panel">
+      <div class="light-modal-header">
+        <h2 id="replayModalTitle">📖 回放人生传记</h2>
+        <button type="button" class="light-close-btn" id="btnCloseReplayModal" aria-label="关闭回放">✕</button>
+      </div>
+      <div class="light-modal-body" id="replayModalBody"></div>
     </div>
   </div>
 
@@ -265,27 +467,10 @@
     <div class="light-modal-panel">
       <div class="light-modal-header">
         <h2 id="timelineModalTitle">本局命运历程记录</h2>
-        <button type="button" class="light-close-btn" id="btnCloseTimelineModal" aria-label="关闭历程弹窗">✕</button>
+        <button type="button" class="light-close-btn" id="btnCloseTimelineModal" aria-label="关闭历程">✕</button>
       </div>
       <div class="light-modal-body">
         <div class="timeline-list" id="timelineList"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== 已保存角色卡弹窗 ==================== -->
-  <div class="modal-backdrop is-hidden" id="cardsModal" role="dialog" aria-modal="true" aria-labelledby="cardsModalTitle">
-    <div class="light-modal-panel">
-      <div class="light-modal-header">
-        <h2 id="cardsModalTitle">已保存角色卡与回放</h2>
-        <button type="button" class="light-close-btn" id="btnCloseCardsModal" aria-label="关闭角色卡弹窗">✕</button>
-      </div>
-      <div class="light-modal-body">
-        <div class="cards-toolbar">
-          <button type="button" class="pill-chip" id="btnExportCards">导出 JSON</button>
-          <label class="pill-chip file-label">导入 JSON<input type="file" id="inputImportCards" accept="application/json" hidden /></label>
-        </div>
-        <div class="saved-cards-list" id="savedCardsList"></div>
       </div>
     </div>
   </div>
@@ -295,7 +480,7 @@
     <div class="light-modal-panel light-modal-compact">
       <div class="light-modal-header">
         <h2 id="saveNameTitle">为这次人生命名并保存</h2>
-        <button type="button" class="light-close-btn" id="btnCloseSaveNameModal" aria-label="关闭命名弹窗">✕</button>
+        <button type="button" class="light-close-btn" id="btnCloseSaveNameModal" aria-label="关闭命名">✕</button>
       </div>
       <div class="light-modal-body">
         <p class="save-desc" id="saveNameDesc"></p>
@@ -308,18 +493,18 @@
     </div>
   </div>
 
-  <!-- ==================== 说明与规则弹窗 ==================== -->
+  <!-- ==================== 公告与 Q&A 弹窗 ==================== -->
   <div class="modal-backdrop is-hidden" id="noticeModal" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
-    <div class="light-modal-panel light-modal-compact">
+    <div class="light-modal-panel">
       <div class="light-modal-header">
-        <h2 id="noticeModalTitle">游玩说明（静音纯净版）</h2>
+        <h2 id="noticeModalTitle">说明与 Q&amp;A（静音纯净版）</h2>
         <button type="button" class="light-close-btn" id="btnCloseNoticeModal" aria-label="关闭说明">✕</button>
       </div>
       <div class="light-modal-body notice-copy">
-        <p><strong>1. 多分支穿越人生转盘</strong>：从「穿越后的初始身份」出发（咒术师 / 诅咒师 / 普通人 / 咒术高层 / 咒灵 / 式神 / 咒骸），每一次旋转结果都会决定下一个转盘内容。</p>
-        <p><strong>2. 实时动态加权</strong>：战斗胜负、五条悟封印事件（96% vs 4%）、重伤与死亡风险、天赋成长触发率等，全部按你当前的真实属性、术式、领域与御主供能实时计算扇区大小。点击顶部标题胶囊可随时查看概率。</p>
-        <p><strong>3. 纯净无语音播报</strong>：无任何强制语音朗读或等待读秒，支持按 <code>Space</code> 空格键快捷旋转与继续。</p>
-        <p><strong>4. 角色档案与结算词条</strong>：随时点左下「人物」查看 10 项属性（E- 到 Ω）；抵达终点后进入「人生结算」，自动评定正负成就词条、计算总分并入账命运点。</p>
+        <p><strong>Q1：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部随时可点 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动跑完剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 精细滑块调整。而且在<strong>转盘旋转过程中点击转盘圆盘任意位置或按 Space 键，都会瞬间急停落定出结果！</strong></p>
+        <p><strong>Q2：为什么默认送 30 命运点？怎么获得与使用？</strong><br />新玩家自带 30 点命运点！每当不满意当前轮盘结果时，点底部「重抽本轮 (-1💎)」即可重抽一次；也可以在「天命自定」中消费点数自选强力开局词条。只有在「浮生若梦」模式通关结算时（每满 10 分奖 1 点，保底 1 点）才会产出新命运点。</p>
+        <p><strong>Q3：新宿决战宿傩机制是怎么算的？</strong><br />进入新宿决战前会二次提升能力并决定参战顺序，随后进入真正的<strong>回合制出招转盘博弈</strong>：每回合抽双方出招数、逐招累积战斗值、简易领域/展延抵消攻击、魔虚罗永久适应已用过的招式（最高 100% 免疫）、咒具损耗，还可触发五条悟入场开「无量空处」削减宿傩行动次数！</p>
+        <p><strong>Q4：全程有没有语音播报？</strong><br />本网页按需求已彻底移除所有语音播报与 TTS 阻塞等待，全程静音丝滑体验。</p>
       </div>
     </div>
   </div>

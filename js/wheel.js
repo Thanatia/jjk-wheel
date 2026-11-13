@@ -20,6 +20,7 @@
     var spinning = false;
     var rafId = null;
     var winnerIndex = null;
+    var activeSpinState = null;
 
     function setSlices(rawSlices) {
       winnerIndex = null;
@@ -66,7 +67,7 @@
       var cx = w / 2;
       var cy = h / 2;
       var radius = Math.min(cx, cy) - 4;
-      var hubRadius = radius * 0.235;
+      var hubRadius = radius * 0.23;
 
       ctx.clearRect(0, 0, w, h);
       if (!layoutSlices.length) return;
@@ -92,7 +93,7 @@
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.stroke();
 
-        // 径向文字绘制
+        // 径向文字
         var textDist = (radius + hubRadius) * 0.54;
         var availLen = (radius - hubRadius) * 0.78;
         ctx.translate(cx, cy);
@@ -100,12 +101,12 @@
         ctx.rotate(flipLeft ? mid + Math.PI : mid);
 
         var arcPixels = Math.sin(Math.min(s.span, 1.2) / 2) * textDist * 2;
-        var fontSize = Math.round(Math.max(15, Math.min(25, arcPixels * 0.55)));
-        if (s.label.length >= 9) {
-          fontSize = Math.min(fontSize, 19);
+        var fontSize = Math.round(Math.max(14, Math.min(24, arcPixels * 0.54)));
+        if (s.label.length >= 8) {
+          fontSize = Math.min(fontSize, 18);
         }
-        if (s.span < 0.2) {
-          fontSize = Math.min(fontSize, 14);
+        if (s.span < 0.22) {
+          fontSize = Math.min(fontSize, 13);
         }
 
         ctx.font = '700 ' + fontSize + 'px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -122,7 +123,7 @@
         }
 
         var tx = flipLeft ? -textDist : textDist;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
         ctx.shadowBlur = 3;
         ctx.fillText(label, tx, 0);
         ctx.restore();
@@ -140,11 +141,32 @@
       return layoutSlices.length - 1;
     }
 
+    function finalizeActiveSpin() {
+      if (!activeSpinState) return;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      currentRotation = activeSpinState.endRot;
+      var landed = getSliceAtRotation(currentRotation) || activeSpinState.targetSlice;
+      winnerIndex = landed.index;
+      spinning = false;
+      activeSpinState = null;
+      draw();
+      if (typeof onTickLabel === 'function') {
+        onTickLabel(landed.label);
+      }
+      if (typeof onSpinFinish === 'function') {
+        onSpinFinish(landed.raw);
+      }
+    }
+
     function spin(durationSec) {
       if (spinning || !layoutSlices.length) return false;
       spinning = true;
       winnerIndex = null;
 
+      var sec = Math.max(0.1, Number(durationSec) || 1.5);
       var targetIdx = pickWeightedSliceIndex();
       var slice = layoutSlices[targetIdx];
       var margin = Math.min(slice.span * 0.18, 0.08);
@@ -153,16 +175,24 @@
       var baseNeeded = normalizeAngle(POINTER_ANGLE - relTarget);
       var curNorm = normalizeAngle(currentRotation);
       var deltaMod = normalizeAngle(baseNeeded - curNorm);
-      var spins = durationSec >= 2.0 ? 7 : 5;
+
+      // 旋转圈数按时长等比例自然变化（0.2s ~ 8.0s）
+      var spins = Math.max(1, Math.min(16, Math.round(sec * 2.2)));
       var totalDelta = spins * TWO_PI + deltaMod;
 
       var startRot = currentRotation;
       var endRot = startRot + totalDelta;
-      var durationMs = Math.max(450, (Number(durationSec) || 1.2) * 1000);
+      var durationMs = Math.max(100, sec * 1000);
       var startTime = performance.now();
       var lastReportedLabel = '';
 
+      activeSpinState = {
+        endRot: endRot,
+        targetSlice: slice
+      };
+
       function frame(now) {
+        if (!spinning) return;
         var elapsed = now - startTime;
         var t = Math.min(1, elapsed / durationMs);
         var eased = easeOutQuart(t);
@@ -181,19 +211,17 @@
         if (t < 1) {
           rafId = requestAnimationFrame(frame);
         } else {
-          currentRotation = endRot;
-          var landed = getSliceAtRotation(currentRotation) || slice;
-          winnerIndex = landed.index;
-          spinning = false;
-          rafId = null;
-          draw();
-          if (typeof onSpinFinish === 'function') {
-            onSpinFinish(landed.raw);
-          }
+          finalizeActiveSpin();
         }
       }
 
       rafId = requestAnimationFrame(frame);
+      return true;
+    }
+
+    function snapToFinish() {
+      if (!spinning || !activeSpinState) return false;
+      finalizeActiveSpin();
       return true;
     }
 
@@ -203,6 +231,7 @@
         rafId = null;
       }
       spinning = false;
+      activeSpinState = null;
       winnerIndex = null;
     }
 
@@ -213,6 +242,7 @@
     return {
       setSlices: setSlices,
       spin: spin,
+      snapToFinish: snapToFinish,
       cancel: cancel,
       isSpinning: isSpinning,
       getSlices: function () { return layoutSlices; }
