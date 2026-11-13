@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>咒术回战 · 全能转盘模拟器</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Top Header & Mode Bar -->
+    <header class="card">
+      <div class="header-top">
+        <div class="brand-wrap">
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" stroke-opacity="0.75" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title-row">
+              <h1 class="brand-title">咒术回战 · 全能转盘模拟器</h1>
+              <span class="brand-tag">本地离线静音版</span>
+            </div>
+            <p class="brand-sub">B站热门玩法合一：人物拼图 / OC人生 / 原作1v1斗蛐蛐（纯文字与视觉呈现，无语音播报）</p>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="segmented" role="group" aria-label="转盘速度">
+            <button data-speed="slow" class="seg-btn speed-btn">节目速</button>
+            <button data-speed="normal" class="seg-btn speed-btn active">标准</button>
+            <button data-speed="fast" class="seg-btn speed-btn">极速</button>
+          </div>
+
+          <button id="toggleMemePoolBtn" class="tool-btn">
+            <span id="memeDot" class="dot-indicator"></span>
+            <span>B站整活池: <strong id="memeStateLabel">开启</strong></span>
+          </button>
+
+          <button id="themeBtn" class="tool-btn">☀️ 亮色模式</button>
+          <button id="openCustomModalBtn" class="tool-btn">⚙️ 自定义卡池</button>
+          <button id="openHistoryModalBtn" class="tool-btn">📜 战绩库 (<span id="historyCount">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="mode-tabs">
+        <button data-mode="puzzle" class="mode-tab active">
+          <div class="mode-tab-head">
+            <span>🧩 人物能力拼图转盘</span>
+            <span class="mode-badge">热门玩法</span>
+          </div>
+          <p class="mode-tab-desc">6大属性抽原作人物缝合，触发连携羁绊后车轮战Boss</p>
+        </button>
+
+        <button data-mode="oc" class="mode-tab">
+          <div class="mode-tab-head">
+            <span>🌀 OC咒术人生 / 死灭回游</span>
+            <span class="mode-badge">模拟养成</span>
+          </div>
+          <p class="mode-tab-desc">随机出身、天赋、术式与奇遇事件，生成专属咒术师履历</p>
+        </button>
+
+        <button data-mode="duel" class="mode-tab">
+          <div class="mode-tab-head">
+            <span>⚔️ 原作人物 1v1 斗蛐蛐</span>
+            <span class="mode-badge">随机PK</span>
+          </div>
+          <p class="mode-tab-desc">红蓝双转盘抽原作角色+随机决战场地，纯文字战报对轰</p>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-grid">
+
+      <!-- Left: Roulette Wheel -->
+      <section class="card wheel-card">
+        <div class="wheel-header">
+          <div>
+            <div class="wheel-kicker">当前轮盘轨道</div>
+            <h2 id="wheelTitle" class="wheel-title">体格 / 肉体</h2>
+          </div>
+          <span id="wheelPoolBadge" class="pill-badge">共 12 项</span>
+        </div>
+
+        <div class="pointer-readout">
+          <span style="color:var(--muted)">指针实时锁定：</span>
+          <span id="livePointerText" class="pointer-readout-val">等待注入咒力...</span>
+        </div>
+
+        <div class="wheel-stage">
+          <div id="wheelTicker" class="wheel-ticker">
+            <svg width="34" height="42" viewBox="0 0 34 42">
+              <path d="M17 40 L4 10 C2 5 6 1 11 1 L23 1 C28 1 32 5 30 10 Z" fill="#ef4444" stroke="#ffffff" stroke-width="2.5" />
+              <circle cx="17" cy="11" r="4" fill="#ffffff" />
+            </svg>
+          </div>
+
+          <canvas id="wheelCanvas"></canvas>
+
+          <button id="spinBtn" class="spin-btn">
+            <span>转动</span>
+            <span class="spin-btn-sub">SPIN</span>
+          </button>
+
+          <div id="wheelFlashOverlay" class="wheel-flash-overlay hidden">
+            <div id="wheelFlashBadge" class="wheel-flash-badge">
+              <div id="wheelFlashTier" class="wheel-flash-tier">特级降临</div>
+              <div id="wheelFlashName" class="wheel-flash-name">无量空处</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wheel-actions">
+          <button id="autoAllBtn" class="btn-primary">⚡ 一键全自动连抽</button>
+          <button id="resetModeBtn" class="btn-secondary">🔄 重置本局转盘</button>
+        </div>
+
+        <div class="tier-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>特级/天花板</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#a855f7"></span>一级/强力</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#0ea5e9"></span>常规/实用</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#f43f5e"></span>地狱整活</span>
+        </div>
+      </section>
+
+      <!-- Right: Mode Panels & Battle Studio -->
+      <section class="workbench-col">
+
+        <!-- MODE 1: PUZZLE -->
+        <div id="panel-puzzle" class="mode-panel" style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h3 class="section-title">角色能力拼图面板（点击任意槽位切换转盘）</h3>
+                <p class="section-sub">集齐6大部件拼出你的“缝合咒术师”，或点击单一短板重抽！</p>
+              </div>
+              <span id="puzzleProgressBadge" class="tier-badge tier-SR">进度 0 / 6</span>
+            </div>
+
+            <div id="puzzleSlotsGrid" class="slots-grid"></div>
+
+            <div id="puzzleSynergyBox" class="synergy-box hidden">
+              <div style="font-size:12px;font-weight:700;color:var(--muted)">✨ 触发连携 / B站名场面词条</div>
+              <div id="puzzleSynergyList" class="synergy-list"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="summary-grid">
+              <div class="radar-wrap">
+                <svg id="puzzleRadarSvg" viewBox="0 0 240 220" class="radar-svg"></svg>
+              </div>
+              <div class="summary-info">
+                <div class="score-row">
+                  <div>
+                    <div style="font-size:12px;color:var(--muted)">综合战力评估</div>
+                    <div class="score-val-row">
+                      <span id="puzzlePowerScore" class="score-num">0</span>
+                      <span id="puzzleRankTag" class="tier-badge tier-R">尚未成型</span>
+                    </div>
+                  </div>
+                  <button id="copyBuildBtn" class="tool-btn">📋 复制战报词条</button>
+                </div>
+
+                <p id="puzzleMemeComment" class="comment-box">
+                  请先转动左侧转盘抽取6项能力部件。抽齐后将自动评估强度并解锁新宿Boss挑战！
+                </p>
+
+                <div class="boss-launch-row">
+                  <select id="puzzleBossSelect" class="select-field flex-1">
+                    <option value="jogo">🔥 热身：特级咒灵·漏瑚（火山头教做人）</option>
+                    <option value="mahito">🧬 进阶：完全体·真人（灵魂自闭圆顿裹）</option>
+                    <option value="kenjaku">🧠 高难：千年老阴比·羂索（反重力+万只咒灵）</option>
+                    <option value="gojo">♾️ 考试：最强·五条悟（六眼无量空处）</option>
+                    <option value="sukuna" selected>💀 地狱：完全体·两面宿傩（新宿四手空间斩）</option>
+                  </select>
+                  <button id="startPuzzleBattleBtn" class="btn-gradient">⚔️ 开启Boss决战</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 2: OC LIFE -->
+        <div id="panel-oc" class="mode-panel hidden" style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h3 class="section-title">OC 咒术师人生轮盘（死灭回游篇）</h3>
+                <p class="section-sub">逐阶段转动轮盘，书写你的咒术界传奇（或者三秒领盒饭）</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input id="ocNameInput" type="text" maxlength="14" value="无名高专生" placeholder="输入你的名字..." class="input-field" style="width:130px;padding:6px 10px;font-size:12px" />
+                <span id="ocProgressBadge" class="tier-badge tier-R">阶段 0 / 6</span>
+              </div>
+            </div>
+
+            <div id="ocStagesGrid" class="slots-grid"></div>
+
+            <div style="margin-top:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">📖 命运文字履历</div>
+              <div id="ocStoryFeed" class="story-feed"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="summary-grid">
+              <div class="radar-wrap">
+                <svg id="ocRadarSvg" viewBox="0 0 240 220" class="radar-svg"></svg>
+              </div>
+              <div class="summary-info">
+                <div class="score-row">
+                  <div>
+                    <div style="font-size:12px;color:var(--muted)">人物档案评级</div>
+                    <div class="score-val-row">
+                      <span id="ocPowerScore" class="score-num">0</span>
+                      <span id="ocRankTag" class="tier-badge tier-R">未入局</span>
+                    </div>
+                  </div>
+                  <button id="copyOcBtn" class="tool-btn">📋 导出OC人设</button>
+                </div>
+
+                <p id="ocSummaryComment" class="comment-box">
+                  完成全部6阶段命运转盘后，可带入新宿决战或死灭回游检验成色！
+                </p>
+
+                <div class="boss-launch-row">
+                  <select id="ocBossSelect" class="select-field flex-1">
+                    <option value="jogo">🔥 涩谷挑战：漏瑚</option>
+                    <option value="mahito">🧬 宿敌挑战：真人</option>
+                    <option value="kenjaku">🧠 死灭回游幕后：羂索</option>
+                    <option value="gojo">♾️ 天花板测验：五条悟</option>
+                    <option value="sukuna" selected>💀 终极决战：完全体宿傩</option>
+                  </select>
+                  <button id="startOcBattleBtn" class="btn-gradient">⚔️ 投入死灭回游决战</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 3: 1v1 DUEL -->
+        <div id="panel-duel" class="mode-panel hidden">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h3 class="section-title">原作人物 1v1 斗蛐蛐擂台</h3>
+                <p class="section-sub">抽取红方、蓝方与决战场地，模拟回合制文字PK！</p>
+              </div>
+              <div class="segmented">
+                <button data-duelpool="all" class="seg-btn duel-pool-btn active">全员乱斗</button>
+                <button data-duelpool="top" class="seg-btn duel-pool-btn">神仙局</button>
+                <button data-duelpool="low" class="seg-btn duel-pool-btn">下水道局</button>
+              </div>
+            </div>
+
+            <div class="duel-fighters">
+              <div id="duelRedCard" class="fighter-card red selected">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+                  <strong style="color:#fb7185">🔴 红方选手（先手）</strong>
+                  <span style="color:var(--muted)">点击锁定转盘</span>
+                </div>
+                <div id="duelRedBody" style="margin-top:8px"></div>
+              </div>
+
+              <div class="vs-circle">VS</div>
+
+              <div id="duelBlueCard" class="fighter-card blue">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+                  <strong style="color:#38bdf8">🔵 蓝方选手（后手）</strong>
+                  <span style="color:var(--muted)">点击锁定转盘</span>
+                </div>
+                <div id="duelBlueBody" style="margin-top:8px"></div>
+              </div>
+            </div>
+
+            <div id="duelArenaBar" class="arena-bar">
+              <div>
+                <div style="font-size:12px;color:var(--muted)">🏟️ 决战场地与特殊规则（点击切到场地转盘）</div>
+                <div id="duelArenaName" style="font-size:13px;font-weight:700;margin-top:2px"></div>
+              </div>
+              <button type="button" class="tool-btn">🎯 转盘抽场地</button>
+            </div>
+
+            <button id="startDuelBattleBtn" class="btn-gradient" style="width:100%;padding:12px">
+              🔥 开始 1v1 斗蛐蛐文字模拟战！
+            </button>
+          </div>
+        </div>
+
+        <!-- TEXT BATTLE SIMULATOR -->
+        <div id="battleStudio" class="card hidden">
+          <div class="battle-head">
+            <h3 id="battleTitle" class="section-title">⚔️ 文字模拟战报</h3>
+            <div style="display:flex;gap:8px">
+              <button id="skipBattleBtn" class="tool-btn">⏩ 跳过等待</button>
+              <button id="closeBattleBtn" class="tool-btn">✕ 收起</button>
+            </div>
+          </div>
+
+          <div class="hp-grid">
+            <div class="hp-card">
+              <div class="hp-row">
+                <span id="fighterAName" style="color:#c084fc">我方角色</span>
+                <span id="fighterAHpText">100 / 100</span>
+              </div>
+              <div class="hp-track"><div id="fighterAHpBar" class="hp-fill a" style="width:100%"></div></div>
+            </div>
+            <div class="hp-card">
+              <div class="hp-row">
+                <span id="fighterBName" style="color:#fb7185">敌方角色</span>
+                <span id="fighterBHpText">100 / 100</span>
+              </div>
+              <div class="hp-track"><div id="fighterBHpBar" class="hp-fill b" style="width:100%"></div></div>
+            </div>
+          </div>
+
+          <div id="battleLogFeed" class="battle-log"></div>
+
+          <div id="battleResultBanner" class="result-banner hidden">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px">
+              <strong id="battleResultTitle" style="font-size:16px"></strong>
+              <span id="battleResultBadge" class="tier-badge"></span>
+            </div>
+            <p id="battleResultComment" style="margin:8px 0 10px;font-size:13px"></p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <button id="copyBattleReportBtn" class="tool-btn">📋 复制完整战报</button>
+              <button id="rematchBtn" class="btn-primary">🔁 再打一局</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Custom Wheel Editor -->
+  <div id="customModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h3 class="section-title">⚙️ 自定义当前转盘卡池</h3>
+          <p class="section-sub">自由增删当前轮盘上的角色或能力，支持导出 / 导入 JSON 备份</p>
+        </div>
+        <button id="closeCustomModalBtn" class="tool-btn">✕ 关闭</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="custom-form">
+          <input id="customItemName" type="text" maxlength="20" placeholder="名称（如：五条悟 / 朋友名字）" class="input-field" />
+          <select id="customItemTier" class="select-field">
+            <option value="SSR">特级/天花板 (金)</option>
+            <option value="SR">一级/强力 (紫)</option>
+            <option value="R">常规/实用 (蓝)</option>
+            <option value="MEME">地狱整活 (红)</option>
+          </select>
+          <input id="customItemDesc" type="text" maxlength="40" placeholder="能力/梗简述（可选）" class="input-field" />
+          <div style="grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span style="font-size:12px;color:var(--muted)">保存于浏览器本地存储，刷新不丢失</span>
+            <button id="addCustomItemBtn" class="btn-primary">+ 添加到当前转盘</button>
+          </div>
+        </div>
+
+        <div id="customItemsList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <div class="modal-foot">
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button id="exportPoolBtn" class="tool-btn">⬇️ 导出 JSON</button>
+          <label class="tool-btn" style="cursor:pointer">
+            ⬆️ 导入 JSON
+            <input id="importPoolInput" type="file" accept=".json,application/json" style="display:none" />
+          </label>
+          <button id="resetPoolDefaultBtn" class="tool-btn" style="color:#fb7185">↺ 恢复默认卡池</button>
+        </div>
+        <button id="saveCustomDoneBtn" class="btn-primary">完成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: History -->
+  <div id="historyModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h3 class="section-title">📜 历史抽卡与战绩图鉴</h3>
+          <p class="section-sub">自动保存最近 30 场战果记录</p>
+        </div>
+        <button id="closeHistoryModalBtn" class="tool-btn">✕ 关闭</button>
+      </div>
+      <div id="historyList" class="modal-body"></div>
+      <div class="modal-foot">
+        <button id="clearHistoryBtn" class="tool-btn" style="color:#fb7185">清空记录</button>
+        <button id="closeHistoryDoneBtn" class="btn-secondary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastBox" class="toast hidden"></div>
+
+  <script defer src="js/data.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
