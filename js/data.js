@@ -891,7 +891,7 @@
       officialGrade: '特级', gradeBonus: 15, looks: 10, morality: 2, aggro: 9,
       skills: ['反转术式', '领域展开', '黑闪', '简易领域', '落之雪（落花之情）'],
       tools: [],
-      attrs: { ceTotal: 8, ceControl: 10, ceEfficiency: 12, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 10, versatility: 10, iq: 9, talent: 11 },
+      attrs: { ceTotal: 8, ceControl: 10, ceEfficiency: 11, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 10, versatility: 10, iq: 9, talent: 10 },
       canonNote: '天生六眼与无下限并立，唯需戒备狱门疆与世界斩'
     },
     {
@@ -899,45 +899,48 @@
       faction: 'evil', eraId: 'heian', techniqueId: 'shrine', technique: '御厨子',
       officialGrade: '特级', gradeBonus: 15, looks: 6, morality: -5, aggro: 10,
       skills: ['完整咏唱', '反转术式', '领域展开', '黑闪', '领域展延', '弥虚葛笼'],
-      tools: [{ shape: '降魔杵', effect: '咒力传导增幅（输出+20%）', bonus: 6 }],
-      attrs: { ceTotal: 12, ceControl: 10, ceEfficiency: 10, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 11, versatility: 10, iq: 10, talent: 11 },
+      tools: [
+        { shape: '神武解（金刚杵）', effect: '释放咒术（神武解）', bonus: 8, thunderCast: true, tier: '特级' },
+        { shape: '飞天（三叉戟）', effect: '伤害增幅（飞天）', bonus: 8, damageMult: 1.25, tier: '特级' }
+      ],
+      attrs: { ceTotal: 11, ceControl: 10, ceEfficiency: 10, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 11, versatility: 10, iq: 10, talent: 10 },
       canonNote: '史上最强术师与开放式领域宗师，一切生灵俯首'
     },
     {
       id: 'itadori', name: '虎杖悠仁', title: '黑闪宠儿 · 宿傩受肉体', weight: 7, cost: 2,
-      faction: 'good', eraId: 'canonStart', techniqueId: 'bloodManip', technique: '赤血操术 / 宿傩残影（解）',
-      officialGrade: '一级', gradeBonus: 8, looks: 7, morality: 4, aggro: 5,
-      skills: ['黑闪', '反转术式', '简易领域'],
-      tools: [],
-      attrs: { ceTotal: 6, ceControl: 7, ceEfficiency: 7, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 5, versatility: 6, iq: 6, talent: 9 },
-      canonNote: '超常肉体耐受与近乎百发百中的黑闪直觉，专克灵魂防线'
+      faction: 'good', eraId: 'canonStart', techniqueId: 'bloodManip', technique: '径庭拳 / 黑闪适性（宿傩受肉体）',
+      officialGrade: '三级', gradeBonus: 4, looks: 7, morality: 4, aggro: 5,
+      skills: ['黑闪'],
+      tools: [{ shape: '屠坐魔（短刀）', effect: '附魔利刃（输出+10%）', bonus: 3, tier: '二级' }],
+      attrs: { ceTotal: 6, ceControl: 6, ceEfficiency: 6, taijutsu: 10, bodyResist: 10, soulResist: 9, barrier: 3, versatility: 5, iq: 6, talent: 9 },
+      canonNote: '开篇具备超常肉体与黑闪直觉；随时间线推进至死灭/新宿将陆续觉醒一级评定、简易领域、反转术式、赤血操术与御厨子'
     },
     {
       id: 'megumi', name: '伏黑惠', title: '禅院血脉 · 十种影法术师', weight: 6, cost: 3,
       faction: 'good', eraId: 'canonStart', techniqueId: 'tenShadows', technique: '十种影法术',
-      officialGrade: '一级', gradeBonus: 8, looks: 8, morality: 2, aggro: 4,
-      skills: ['领域展开', '简易领域'],
-      tools: [{ shape: '打刀', effect: '纯白板高硬度物理咒具', bonus: 3 }],
-      attrs: { ceTotal: 7, ceControl: 7, ceEfficiency: 6, taijutsu: 7, bodyResist: 6, soulResist: 7, barrier: 7, versatility: 9, iq: 8, talent: 9 },
-      canonNote: '坐拥魔虚罗潜力与嵌合暗翳庭，关键在于守住灵魂不被宿傩夺舍'
+      officialGrade: '二级', gradeBonus: 5, looks: 8, morality: 2, aggro: 4,
+      skills: [],
+      tools: [{ shape: '漆黑长刀（影中收纳）', effect: '纯白板高硬度物理咒具', bonus: 3, tier: '二级' }],
+      attrs: { ceTotal: 6, ceControl: 7, ceEfficiency: 6, taijutsu: 7, bodyResist: 6, soulResist: 7, barrier: 6, versatility: 8, iq: 8, talent: 9 },
+      canonNote: '开篇为高专二级术师；进入涩谷/死灭回游后习得未完成领域「嵌合暗翳庭」并晋升一级水准'
     },
     {
       id: 'yuta', name: '乙骨忧太', title: '纯爱特级 · 诅咒女王之主', weight: 5, cost: 5,
       faction: 'good', eraId: 'vol0', techniqueId: 'copy', technique: '模倣·术式拷贝',
       officialGrade: '特级', gradeBonus: 15, looks: 7, morality: 4, aggro: 5,
       skills: ['反转术式', '领域展开', '黑闪'],
-      tools: [{ shape: '打刀', effect: '咒力传导增幅（输出+20%）', bonus: 5 }],
-      attrs: { ceTotal: 11, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 8, barrier: 9, versatility: 10, iq: 8, talent: 10 },
-      canonNote: '底蕴深不见底的第二位现代特级，真赝相爱拥有无限可能'
+      tools: [{ shape: '打刀（里香戒指凭依）', effect: '储存咒力（里香戒指/打刀）', bonus: 6, extraCe: true, tier: '特级' }],
+      attrs: { ceTotal: 10, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 8, barrier: 9, versatility: 10, iq: 8, talent: 10 },
+      canonNote: '底蕴深厚的现代特级，借里香戒指连接外置术式库与庞大咒力储备'
     },
     {
       id: 'geto', name: '夏油杰', title: '咒灵操使 · 极之番漩涡', weight: 5, cost: 4,
-      faction: 'evil', eraId: 'hiddenInv', techniqueId: 'curseManip', technique: '咒灵操术',
-      officialGrade: '特级', gradeBonus: 15, looks: 8, morality: -2, aggro: 7,
-      skills: ['完整咏唱'],
-      tools: [{ shape: '三节棍', effect: '沉重刚烈叠加破坏力（游云系）', bonus: 7 }],
+      faction: 'good', eraId: 'hiddenInv', techniqueId: 'curseManip', technique: '咒灵操术',
+      officialGrade: '特级', gradeBonus: 15, looks: 8, morality: 2, aggro: 7,
+      skills: [],
+      tools: [{ shape: '三节棍（游云）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' }],
       attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 7, versatility: 9, iq: 9, talent: 8 },
-      canonNote: '苦夏的歧途站在眼前，若带着后世记忆或许能逆转分道扬镳'
+      canonNote: '怀玉篇尚为高专正道双璧，百鬼夜行起转为诅咒师教主并持有特级咒具游云'
     },
     {
       id: 'toji', name: '伏黑甚尔', title: '天与暴君 · 术师杀手', weight: 4, cost: 5,
@@ -945,47 +948,51 @@
       officialGrade: '特级', gradeBonus: 14, looks: 8, morality: -2, aggro: 6,
       skills: ['百兵演武'],
       tools: [
-        { shape: '短匕', effect: '强制解除敌方术式特攻（天逆系）', bonus: 8 },
-        { shape: '打刀', effect: '直切灵魂忽略防御（释魂系）', bonus: 8 }
+        { shape: '天逆鉾（短戈）', effect: '无效化术式（天逆鉾）', bonus: 8, nullify: true, canCancelMove: true, tier: '特级' },
+        { shape: '释魂刀（大太刀）', effect: '无坚不摧（释魂刀）', bonus: 8, indestructible: true, damageMult: 1.25, tier: '特级' },
+        { shape: '三节棍（游云）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' }
       ],
-      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 12, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 8, talent: 7 },
-      canonNote: '零咒力换取身体素质与免疫领域必中效果，主要依靠体术与咒具作战'
+      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 11, bodyResist: 10, soulResist: 9, barrier: 0, versatility: 8, iq: 8, talent: 8 },
+      canonNote: '零咒力换取身体素质与免疫领域必中效果，身负库存咒灵携天逆鉾、释魂刀、游云作战'
     },
     {
       id: 'nanami', name: '七海建人', title: '七三战神 · 加班社畜一级', weight: 7, cost: 2,
       faction: 'good', eraId: 'canonStart', techniqueId: 'ratio', technique: '十划咒法',
       officialGrade: '一级', gradeBonus: 8, looks: 7, morality: 3, aggro: 3,
       skills: ['黑闪'],
-      tools: [{ shape: '短匕', effect: '咒力传导增幅（输出+20%）', bonus: 4 }],
-      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 7, barrier: 5, versatility: 6, iq: 9, talent: 6 },
-      canonNote: '最可靠的成年人护盾，绝不让涩谷站台成为遗憾终点'
+      tools: [{ shape: '绷带钝刀', effect: '咒力传导增幅（十划弱点暴击）', bonus: 5, tier: '一级' }],
+      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 7, barrier: 5, versatility: 6, iq: 8, talent: 6 },
+      canonNote: '可靠的成年人护盾，以「时间外劳动」束缚与十划弱点暴击正面攻坚'
     },
     {
-      id: 'maki', name: '禅院真希', title: '鬼人觉醒 · 天与全盛体', weight: 6, cost: 4,
-      faction: 'good', eraId: 'canonStart', techniqueId: 'heavenZero', technique: '天与咒缚（零咒力）',
-      officialGrade: '特级', gradeBonus: 14, looks: 8, morality: 2, aggro: 5,
+      id: 'maki', name: '禅院真希', title: '天与咒缚 · 鬼人真希', weight: 6, cost: 4,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'heavenZero', technique: '天与咒缚（微弱咒力→零咒力觉醒）',
+      officialGrade: '四级（准一级实力）', gradeBonus: 6, looks: 8, morality: 2, aggro: 5,
       skills: ['百兵演武'],
-      tools: [{ shape: '大太刀', effect: '直切灵魂忽略防御（释魂系）', bonus: 8 }],
-      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 11, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 7, talent: 8 },
-      canonNote: '比肩甚尔的鬼神体魄，一刀释魂令御宅术师战栗'
+      tools: [
+        { shape: '三节棍（游云）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' },
+        { shape: '长柄薙刀', effect: '近战格斗强化（体术+1）', bonus: 4, tier: '二级' }
+      ],
+      attrs: { ceTotal: 1, ceControl: 1, ceEfficiency: 1, taijutsu: 8, bodyResist: 8, soulResist: 7, barrier: 0, versatility: 7, iq: 7, talent: 8 },
+      canonNote: '开篇受禅院家压制停留在四级咒具师；进入死灭回游/新宿后完全体觉醒为零咒力特级鬼人并获释魂刀'
     },
     {
       id: 'nobara', name: '钉崎野蔷薇', title: '共鸣直击 · 狂气高专少女', weight: 6, cost: 1,
       faction: 'good', eraId: 'canonStart', techniqueId: 'strawDoll', technique: '刍灵咒法',
       officialGrade: '三级', gradeBonus: 3, looks: 7, morality: 3, aggro: 5,
       skills: ['黑闪'],
-      tools: [{ shape: '重锤', effect: '命中附带诅咒侵蚀与灼伤', bonus: 4 }],
-      attrs: { ceTotal: 5, ceControl: 7, ceEfficiency: 6, taijutsu: 5, bodyResist: 5, soulResist: 8, barrier: 4, versatility: 7, iq: 7, talent: 7 },
-      canonNote: '灵魂共鸣在最终战能直接跨过千里锁死宿傩最后一根手指'
+      tools: [{ shape: '铁锤与咒力五寸钉', effect: '命中附带诅咒侵蚀与共鸣伤', bonus: 4, tier: '三级' }],
+      attrs: { ceTotal: 5, ceControl: 6, ceEfficiency: 6, taijutsu: 5, bodyResist: 5, soulResist: 6, barrier: 4, versatility: 6, iq: 6, talent: 7 },
+      canonNote: '开篇为高专三级术师；刍灵共鸣直击灵魂，后期在涩谷/新宿对灵魂共鸣有奇效'
     },
     {
-      id: 'todo', name: '东堂葵', title: '五十万智力 · 不义游戏挚友', weight: 6, cost: 2,
+      id: 'todo', name: '东堂葵', title: '不义游戏 · 京都校主力一级', weight: 6, cost: 2,
       faction: 'good', eraId: 'canonStart', techniqueId: 'boogieWoogie', technique: '不义游戏',
       officialGrade: '一级', gradeBonus: 8, looks: 6, morality: 2, aggro: 4,
       skills: ['黑闪', '简易领域'],
-      tools: [{ shape: '手摇铁片（Vibraslap型）', effect: '可抵消敌方招式减伤护盾', bonus: 5 }],
-      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 7, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 8, iq: 10, talent: 8 },
-      canonNote: '只要有搭档便能把任何绝境化为狂风骤雨的双打舞台'
+      tools: [{ shape: '三节棍（游云借用）', effect: '伤害增幅（游云）', bonus: 5, damageMult: 1.25, tier: '特级' }],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 7, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 8, iq: 9, talent: 8 },
+      canonNote: '曾单人祓除五只一级与一只特级咒灵，进入死灭/新宿阶段换装高频手摇铁片义手'
     },
     {
       id: 'hakari', name: '秤金次', title: '停学赌徒 · 四分十一秒不死', weight: 5, cost: 4,
@@ -1001,7 +1008,7 @@
       faction: 'neutral', eraId: 'edo400', techniqueId: 'mythBeast', technique: '幻兽琥珀（电气属性）',
       officialGrade: '特级', gradeBonus: 13, looks: 7, morality: 0, aggro: 8,
       skills: ['弥虚葛笼'],
-      tools: [{ shape: '手杖', effect: '命中附带诅咒侵蚀与灼伤', bonus: 5 }],
+      tools: [{ shape: '导电如意棒', effect: '释放咒术（电荷回传雷击）', bonus: 6, thunderCast: true, tier: '一级' }],
       attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 7, iq: 7, talent: 8 },
       canonNote: '四百年专心寻求一战的求道者，带电咒力与必中之雷极具威胁'
     },
@@ -1019,8 +1026,8 @@
       faction: 'good', eraId: 'culling', techniqueId: 'higurumaLaw', technique: '诛伏赐死（审判领域）',
       officialGrade: '一级', gradeBonus: 10, looks: 8, morality: 2, aggro: 4,
       skills: ['领域展开', '领域展延', '反转术式'],
-      tools: [{ shape: '重锤', effect: '可抵消敌方招式减伤护盾', bonus: 6 }],
-      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 8, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 9, versatility: 7, iq: 10, talent: 11 },
+      tools: [{ shape: '审判木槌 / 处刑人之剑', effect: '无效化术式（没收）与无坚不摧（处刑人之剑）', bonus: 7, nullify: true, canCancelMove: true, indestructible: true, damageMult: 1.25, tier: '特级' }],
+      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 8, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 9, versatility: 7, iq: 9, talent: 10 },
       canonNote: '十二天独自推演出完整领域的法学天才，战场现学反转术式与领域展延'
     },
     {
@@ -1028,7 +1035,7 @@
       faction: 'good', eraId: 'hiddenInv', techniqueId: 'starRage', technique: '星之怒（质量赋予）',
       officialGrade: '特级', gradeBonus: 15, looks: 9, morality: 2, aggro: 6,
       skills: ['反转术式', '领域展开', '简易领域'],
-      tools: [{ shape: '凰轮式神环', effect: '沉重刚烈叠加破坏力（游云系）', bonus: 6 }],
+      tools: [{ shape: '凰轮（式神咒具化）', effect: '伤害增幅（星之怒质量叠加）', bonus: 7, damageMult: 1.25, tier: '特级' }],
       attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 10, bodyResist: 8, soulResist: 9, barrier: 8, versatility: 8, iq: 9, talent: 9 },
       canonNote: '研究灵魂之书的特级术师，虚拟质量一击可重创特级概念，改写薨星宫走向的关键'
     },
@@ -1038,7 +1045,7 @@
       officialGrade: '特级', gradeBonus: 15, looks: 7, morality: -5, aggro: 9,
       skills: ['完整咏唱', '反转术式', '领域展开', '领域展延'],
       tools: [],
-      attrs: { ceTotal: 9, ceControl: 9, ceEfficiency: 9, taijutsu: 8, bodyResist: 7, soulResist: 9, barrier: 12, versatility: 11, iq: 11, talent: 9 },
+      attrs: { ceTotal: 9, ceControl: 9, ceEfficiency: 9, taijutsu: 8, bodyResist: 7, soulResist: 9, barrier: 11, versatility: 10, iq: 10, talent: 9 },
       canonNote: '除天元外结界术造诣最深的百年黑手，掌握多种冷门术式与束缚'
     },
     {
@@ -1047,8 +1054,8 @@
       officialGrade: '特级', gradeBonus: 14, looks: 7, morality: -5, aggro: 8,
       skills: ['领域展开', '黑闪'],
       tools: [],
-      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 7, bodyResist: 8, soulResist: 11, barrier: 8, versatility: 10, iq: 8, talent: 10 },
-      canonNote: '不损伤灵魂便几乎不灭的成长型噩梦，灵魂抗性与塑性站在咒灵顶点'
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 7, bodyResist: 8, soulResist: 10, barrier: 8, versatility: 9, iq: 8, talent: 10 },
+      canonNote: '不损伤灵魂便几乎不灭的成长型咒灵，灵魂抗性与塑性处在特级顶点'
     },
     {
       id: 'jogo', name: '漏瑚', title: '大地畏惧 · 陨石灾炎', weight: 4, cost: 3,
@@ -1073,9 +1080,9 @@
       faction: 'neutral', eraId: 'heian', techniqueId: 'construct', technique: '构筑术式',
       officialGrade: '特级', gradeBonus: 13, looks: 8, morality: -1, aggro: 6,
       skills: ['领域展开', '弥虚葛笼'],
-      tools: [{ shape: '液态金属（构筑神武解模板）', effect: '咒力传导增幅（输出+20%）', bonus: 6 }],
+      tools: [{ shape: '液态金属（构筑神武解模板）', effect: '伤害增幅（昆虫铠/液态金属）', bonus: 6, damageMult: 1.25, tier: '特级' }],
       attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 8, versatility: 9, iq: 7, talent: 8 },
-      canonNote: '开发出昆虫铠与零接触压力无限大「真球」的天才，只败于魔虚罗相性'
+      canonNote: '开发出昆虫铠与零接触压力「真球」的平安术师，只败于魔虚罗相性'
     },
     {
       id: 'takaba', name: '高羽史彦', title: '半吊子搞笑艺人 · 超人术式', weight: 4, cost: 4,
@@ -1083,8 +1090,8 @@
       officialGrade: '一级', gradeBonus: 11, looks: 6, morality: 4, aggro: 2,
       skills: [],
       tools: [],
-      attrs: { ceTotal: 6, ceControl: 4, ceEfficiency: 6, taijutsu: 5, bodyResist: 8, soulResist: 8, barrier: 3, versatility: 12, iq: 5, talent: 8 },
-      canonNote: '只要我觉得好笑就能压制甚至拖垮千年羂索的因果律外挂，唯一死穴是不杀人'
+      attrs: { ceTotal: 6, ceControl: 4, ceEfficiency: 6, taijutsu: 5, bodyResist: 8, soulResist: 8, barrier: 3, versatility: 10, iq: 5, talent: 8 },
+      canonNote: '只要觉得好笑就能改写现象的特殊术式，唯一底线是不夺人性命'
     }
   ];
 

@@ -31,6 +31,162 @@
     });
   }
 
+  function getEraIndex(eraId) {
+    for (var i = 0; i < DATA.ERAS.length; i++) {
+      if (DATA.ERAS[i].id === eraId) return i;
+    }
+    return 4;
+  }
+
+  function ensureCharSkill(char, sk) {
+    if (!char.skills) char.skills = [];
+    if (char.skills.indexOf(sk) === -1) char.skills.push(sk);
+  }
+
+  function ensureCharTool(char, toolObj) {
+    if (!char.tools) char.tools = [];
+    var exists = char.tools.some(function (t) { return t.shape === toolObj.shape; });
+    if (!exists) char.tools.unshift(cloneState(toolObj));
+  }
+
+  function syncCanonProgressionForEra(char, eraId, isInit) {
+    if (!char || char.identityId !== 'canon' || !char.canonCharId) return '';
+    var id = char.canonCharId;
+    var eraIdx = getEraIndex(eraId || char.currentEraId || 'canonStart');
+    var note = '';
+
+    if (id === 'gojo') {
+      if (eraId === 'hiddenInv' && isInit) {
+        char.canonTitle = '高专二年级 · 六眼无下限';
+        char.skills = ['反转术式', '黑闪', '落之雪（落花之情）'];
+        char.attrs.ceControl = 9;
+        char.attrs.ceEfficiency = 11;
+        char.attrs.taijutsu = 9;
+        char.attrs.barrier = 8;
+        char.attrs.versatility = 9;
+      } else if (eraIdx >= 3 || eraIdx <= 1) {
+        char.canonTitle = '现代最强 · 六眼无下限';
+        ['反转术式', '领域展开', '黑闪', '简易领域', '落之雪（落花之情）'].forEach(function (s) { ensureCharSkill(char, s); });
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 10);
+        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 11);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 10);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 10);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 10);
+        if (!isInit) note = '五条悟步入全盛期：无量空处与全套高阶技巧完备';
+      }
+    } else if (id === 'geto') {
+      if (eraId === 'hiddenInv' && isInit) {
+        char.canonTitle = '高专双璧 · 咒灵操使';
+        char.faction = 'good';
+        char.factionLabel = '高专/正道阵营（怀玉时期）';
+        char.moralityLevel = 7;
+        char.moralityText = '守护弱者正道（苦夏前）';
+        char.tools = [];
+      } else if (eraIdx >= 3) {
+        char.canonTitle = '盘星教主 · 极之番漩涡';
+        if (isInit) {
+          char.faction = 'evil';
+          char.factionLabel = '诅咒/暗面阵营（百鬼夜行）';
+          char.moralityLevel = 3;
+          char.moralityText = '大义叛离高专';
+        }
+        ensureCharTool(char, { shape: '三节棍（游云）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' });
+        char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 9);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 9);
+      }
+    } else if (id === 'yuta') {
+      if (eraId === 'vol0' && isInit) {
+        char.canonTitle = '特级被咒者 · 祈本里香之主';
+        char.skills = ['反转术式', '黑闪'];
+        char.attrs.ceControl = 7;
+        char.attrs.barrier = 7;
+        char.attrs.versatility = 9;
+      } else if (eraIdx >= 4) {
+        char.canonTitle = '现代特级 · 模倣术式与里香外置术式库';
+        ['反转术式', '领域展开', '黑闪'].forEach(function (s) { ensureCharSkill(char, s); });
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 8);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 9);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 10);
+        if (!isInit) note = '乙骨忧太完全掌握领域展开「真赝相爱」';
+      }
+    } else if (id === 'itadori') {
+      if (eraIdx >= 5) {
+        char.officialGrade = '一级';
+        char.gradeBonus = Math.max(char.gradeBonus || 4, 8);
+        char.technique = '黑闪连打 / 宿傩受肉体';
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 7);
+        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 7);
+        char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 10);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 6);
+      }
+      if (eraIdx >= 6) {
+        ensureCharSkill(char, '简易领域');
+        char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 7);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 5);
+      }
+      if (eraIdx >= 7) {
+        char.canonTitle = '人外魔境 · 觉醒黑闪与双术式';
+        char.officialGrade = '特级战力（一级评定）';
+        char.gradeBonus = Math.max(char.gradeBonus || 8, 13);
+        char.technique = '赤血操术 / 御厨子（现代式）';
+        ['黑闪', '反转术式', '简易领域', '领域展开'].forEach(function (s) { ensureCharSkill(char, s); });
+        ensureCharTool(char, { shape: '刚笼手（咒具臂铠）', effect: '伤害增幅（游云系）', bonus: 6, damageMult: 1.25, tier: '特级' });
+        char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 8);
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 8);
+        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 8);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 7);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 8);
+        if (!isInit) note = '虎杖悠仁觉醒赤血操术、现代御厨子、反转术式与领域展开';
+      }
+    } else if (id === 'megumi') {
+      if (eraIdx >= 5) {
+        char.officialGrade = '一级';
+        char.gradeBonus = Math.max(char.gradeBonus || 5, 8);
+        ensureCharSkill(char, '领域展开');
+        char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 7);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 7);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 9);
+        if (!isInit) note = '伏黑惠习得领域展开「嵌合暗翳庭」并升至一级水准';
+      }
+    } else if (id === 'maki') {
+      if (eraIdx === 5) {
+        char.officialGrade = '二级（一级战力）';
+        char.gradeBonus = Math.max(char.gradeBonus || 6, 8);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 9);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 9);
+      } else if (eraIdx >= 6 || eraIdx <= 1) {
+        char.canonTitle = '鬼人觉醒 · 天与全盛体';
+        char.officialGrade = '特级';
+        char.gradeBonus = 14;
+        char.technique = '天与咒缚（零咒力）';
+        char.attrs.ceTotal = 0;
+        char.attrs.ceControl = 0;
+        char.attrs.ceEfficiency = 0;
+        char.attrs.barrier = 0;
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 11);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 10);
+        char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 9);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 8);
+        ensureCharTool(char, { shape: '释魂刀（大太刀）', effect: '无坚不摧（释魂刀）', bonus: 8, indestructible: true, damageMult: 1.25, tier: '特级' });
+        if (!isInit) note = '禅院真希完全体觉醒为零咒力天与暴君，执掌释魂刀';
+      }
+    } else if (id === 'nobara') {
+      if (eraIdx >= 5) {
+        char.officialGrade = '二级（一级候补）';
+        char.gradeBonus = Math.max(char.gradeBonus || 3, 6);
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 7);
+        char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 8);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 7);
+      }
+    } else if (id === 'todo') {
+      if (eraIdx >= 6) {
+        ensureCharTool(char, { shape: '手摇铁片（Vibraslap义手）', effect: '可抵消敌方招式减伤护盾（不义游戏·改）', bonus: 6, canCancelMove: true, tier: '一级' });
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 9);
+      }
+    }
+    return note;
+  }
+
   function applyCanonTemplate(char, canonObj, preset) {
     char.canonCharId = canonObj.id;
     char.canonCharName = canonObj.name;
@@ -41,13 +197,12 @@
     char.faction = canonObj.faction;
     char.factionLabel = canonObj.faction === 'good' ? '高专/正道阵营（原著）' : canonObj.faction === 'evil' ? '诅咒/暗面阵营（原著）' : '自由独行派（原著）';
     char.nativeEraId = canonObj.eraId;
-    var eraMeta = DATA.ERAS.find(function (e) { return e.id === canonObj.eraId; }) || DATA.ERAS[4];
-    if (!preset || !preset.eraId || preset.eraId === 'random') {
-      char.birthEraId = eraMeta.id;
-      char.birthEraLabel = eraMeta.label;
-      char.currentEraId = eraMeta.id;
-      char.currentEraLabel = eraMeta.short;
-    }
+    var targetEraId = (preset && preset.eraId && preset.eraId !== 'random') ? preset.eraId : canonObj.eraId;
+    var eraMeta = DATA.ERAS.find(function (e) { return e.id === targetEraId; }) || DATA.ERAS[4];
+    char.birthEraId = eraMeta.id;
+    char.birthEraLabel = eraMeta.label;
+    char.currentEraId = eraMeta.id;
+    char.currentEraLabel = eraMeta.short;
     var techMeta = DATA.TECHNIQUES_ALL.find(function (t) { return t.id === canonObj.techniqueId; });
     char.techniqueId = canonObj.techniqueId || null;
     char.technique = canonObj.technique;
@@ -56,14 +211,7 @@
     char.officialGrade = canonObj.officialGrade;
     char.gradeBonus = canonObj.gradeBonus || 10;
     char.attrs = cloneState(canonObj.attrs);
-    if (preset && preset.talentLv && preset.talentLv !== 'random') {
-      char.attrs.talent = Math.max(char.attrs.talent || 4, parseInt(preset.talentLv, 10) || 8);
-    }
-    var mergedSkills = canonObj.skills.slice();
-    (char.skills || []).forEach(function (s) {
-      if (mergedSkills.indexOf(s) === -1) mergedSkills.push(s);
-    });
-    char.skills = mergedSkills;
+    char.skills = canonObj.skills.slice();
     char.tools = cloneState(canonObj.tools || []);
     char.gender = (canonObj.id === 'nobara' || canonObj.id === 'maki' || canonObj.id === 'yuki' || canonObj.id === 'yorozu' || canonObj.id === 'uraume') ? '女' : '男';
     char.looksLevel = canonObj.looks || 7;
@@ -71,6 +219,30 @@
     char.moralityLevel = canonObj.morality >= 3 ? 8 : canonObj.morality <= -3 ? 2 : 6;
     char.moralityText = canonObj.morality >= 3 ? '坚守良知正道' : canonObj.morality <= -3 ? '冷酷反派立场' : '亦正亦邪果决';
     char.aggroText = canonObj.aggro >= 8 ? '主动求战型' : canonObj.aggro >= 5 ? '积极迎战型' : '冷静克制务实';
+    syncCanonProgressionForEra(char, eraMeta.id, true);
+    char.canonBaseAttrs = cloneState(char.attrs);
+    if (preset && preset.talentLv && preset.talentLv !== 'random') {
+      char.attrs.talent = Math.max(char.attrs.talent || 4, parseInt(preset.talentLv, 10) || 8);
+    }
+    if (preset && preset.statOverrides && typeof preset.statOverrides === 'object') {
+      Object.keys(preset.statOverrides).forEach(function (k) {
+        var valStr = preset.statOverrides[k];
+        if (valStr && valStr !== 'random' && char.attrs.hasOwnProperty(k)) {
+          char.attrs[k] = clamp(parseInt(valStr, 10) || 4, 0, 12);
+        }
+      });
+    }
+    if (preset && preset.perk && preset.perk !== 'random') {
+      if (preset.perk === 'rct') ensureCharSkill(char, '反转术式');
+      else if (preset.perk === 'domain') ensureCharSkill(char, '领域展开');
+      else if (preset.perk === 'both') {
+        ['反转术式', '领域展开', '黑闪'].forEach(function (sk) { ensureCharSkill(char, sk); });
+      }
+    }
+    if (preset && preset.extraHighTechId && preset.extraHighTechId !== 'random') {
+      var htObj = DATA.HIGH_TECHNIQUES.find(function (h) { return h.id === preset.extraHighTechId || h.label === preset.extraHighTechId; });
+      if (htObj) ensureCharSkill(char, htObj.label);
+    }
     if (!char.visitedEras) char.visitedEras = [];
     if (char.birthEraId && char.visitedEras.indexOf(char.birthEraId) === -1) {
       char.visitedEras.push(char.birthEraId);
@@ -295,6 +467,7 @@
       canRerollLast: false,
       prevSnapshot: null,
       usedEventIds: [],
+      customPreset: preset,
       customAttrTier: preset && preset.attrTier ? preset.attrTier : 'random',
       presetToolEffectId: preset && preset.toolEffectId ? preset.toolEffectId : 'random',
       presetShinjukuOrderId: preset && preset.shinjukuOrderId ? preset.shinjukuOrderId : 'random',
@@ -1104,44 +1277,57 @@
 
     } else if (step.type === 'canon_character') {
       var targetCanon = slice.canonObj || DATA.CANON_CHARACTERS.find(function (c) { return c.id === slice.id; }) || DATA.CANON_CHARACTERS[0];
-      applyCanonTemplate(char, targetCanon, null);
+      applyCanonTemplate(char, targetCanon, state.customPreset || null);
       if (state.customAttrTier && state.customAttrTier !== 'random') {
         applyAttrTierFloor(char, state.customAttrTier);
       }
-      effectText = '已选定魂穿对象：【' + targetCanon.name + '】（' + targetCanon.title + ' · ' + targetCanon.officialGrade + '）';
+      effectText = '已选定魂穿对象：【' + targetCanon.name + '】（' + char.canonTitle + ' · ' + char.officialGrade + '）';
 
     } else if (step.type === 'canon_timepoint') {
       var chosenEraId = slice.id === 'native' ? (char.nativeEraId || char.birthEraId || 'canonStart') : slice.eraId;
       var cEraObj = DATA.ERAS.find(function (e) { return e.id === chosenEraId; }) || DATA.ERAS[4];
-      char.birthEraId = cEraObj.id;
-      char.birthEraLabel = cEraObj.label;
-      char.currentEraId = cEraObj.id;
-      char.currentEraLabel = cEraObj.short;
+      var baseCanonObj = DATA.CANON_CHARACTERS.find(function (c) { return c.id === char.canonCharId; });
+      if (baseCanonObj) {
+        var mergedPreset = Object.assign({}, state.customPreset || {}, { eraId: cEraObj.id });
+        applyCanonTemplate(char, baseCanonObj, mergedPreset);
+        if (state.customAttrTier && state.customAttrTier !== 'random') {
+          applyAttrTierFloor(char, state.customAttrTier);
+        }
+      } else {
+        char.birthEraId = cEraObj.id;
+        char.birthEraLabel = cEraObj.label;
+        char.currentEraId = cEraObj.id;
+        char.currentEraLabel = cEraObj.short;
+      }
       markVisitedEra(char, cEraObj.id);
-      effectText = slice.note + ' → 从「' + cEraObj.label + '」开始剧情路线';
+      effectText = slice.note + ' → 从「' + cEraObj.label + '」切入（当前状态：' + char.canonTitle + ' · ' + char.officialGrade + '）';
       state.stepQueue = state.stepQueue.concat(buildEraQueue(chosenEraId));
 
     } else if (step.type === 'canon_sync') {
       char.canonSyncLabel = slice.label;
       char.flags.canonSyncMode = slice.mode;
+      var isZeroCe = (char.technique || '').indexOf('零咒力') >= 0;
+      var capCanonStat = function (k, delta, allowPeak) {
+        if (isZeroCe && (k === 'ceTotal' || k === 'ceControl' || k === 'ceEfficiency' || k === 'barrier')) return;
+        var baseV = (char.canonBaseAttrs && char.canonBaseAttrs[k] != null) ? char.canonBaseAttrs[k] : (char.attrs[k] || 0);
+        var maxV = delta > 0 ? (allowPeak ? Math.max(10, Math.min(11, baseV + 1)) : Math.max(10, baseV)) : 12;
+        char.attrs[k] = clamp((char.attrs[k] || 0) + delta, 0, maxV);
+      };
       if (slice.mode === 'perfect') {
-        ['ceTotal', 'ceControl', 'taijutsu', 'talent'].forEach(function (k) {
-          if (char.technique !== '天与咒缚（零咒力）' || k === 'taijutsu' || k === 'talent') {
-            applyStatDelta(char, k, 1);
-          }
+        ['ceTotal', 'ceControl', 'taijutsu', 'talent', 'bodyResist'].forEach(function (k) {
+          capCanonStat(k, 1, true);
         });
-        char.attrs.bodyResist = clamp(char.attrs.bodyResist + 1, 0, 13);
-        effectText = '灵魂100%共鸣，超出原主原有上限！多项核心能力 +1';
+        effectText = '灵魂100%共鸣，核心能力突破 +1';
       } else if (slice.mode === 'high') {
-        var boostKeys = char.technique === '天与咒缚（零咒力）' ? ['taijutsu', 'bodyResist'] : ['ceControl', 'versatility'];
-        boostKeys.forEach(function (k) { applyStatDelta(char, k, 1); });
+        var boostKeys = isZeroCe ? ['taijutsu', 'bodyResist'] : ['ceControl', 'versatility'];
+        boostKeys.forEach(function (k) { capCanonStat(k, 1, false); });
         effectText = '85% 高度融魂，操纵与适应性提升 +1';
       } else if (slice.mode === 'reject') {
-        var nerfs = char.technique === '天与咒缚（零咒力）' ? ['taijutsu', 'versatility'] : ['ceControl', 'barrier'];
-        nerfs.forEach(function (k) { applyStatDelta(char, k, -1); });
+        var nerfs = isZeroCe ? ['taijutsu', 'versatility'] : ['ceControl', 'barrier'];
+        nerfs.forEach(function (k) { capCanonStat(k, -1, false); });
         effectText = '灵魂产生短暂排异，部分发挥微降 -1，需在后续战斗磨合弥补';
       } else {
-        effectText = '顺利融合原著躯壳，完整继承原主属性与术式';
+        effectText = '顺利融合原著躯壳，完整继承原主当前时期面板与术式';
       }
       if (state.customAttrTier && state.customAttrTier !== 'random') {
         applyAttrTierFloor(char, state.customAttrTier);
@@ -1150,9 +1336,12 @@
     } else if (step.type === 'canon_memory') {
       char.canonMemoryLabel = slice.label;
       char.flags.scriptLevel = slice.scriptLevel;
-      if (slice.iqBoost) applyStatDelta(char, 'iq', slice.iqBoost);
+      if (slice.iqBoost) {
+        var baseIq = (char.canonBaseAttrs && char.canonBaseAttrs.iq != null) ? char.canonBaseAttrs.iq : (char.attrs.iq || 0);
+        char.attrs.iq = clamp((char.attrs.iq || 0) + slice.iqBoost, 0, Math.max(10, baseIq));
+      }
       effectText = slice.scriptLevel >= 2
-        ? '完整全知剧本在握！智力 +' + slice.iqBoost + '，临场避险与战力判断全方面占据先手'
+        ? '完整先知剧本在握！智力提升（最高至EX），临场避险与战力判断占据先手'
         : slice.scriptLevel === 1
           ? '保留关键剧情节点记忆，智力 +1，足以避开多数阴谋伏击'
           : slice.scriptLevel === -1
@@ -1162,20 +1351,29 @@
     } else if (step.type === 'canon_divergence') {
       char.canonDivergenceLabel = slice.label;
       char.flags.canonDivergence = slice.effect;
+      var isZeroCeDiv = (char.technique || '').indexOf('零咒力') >= 0;
       if (slice.effect === 'save_all') {
         char.flags.rewroteFate = true;
         effectText = '立下救人改命宏愿！大战死局回避率与攻坚胜率提升！';
       } else if (slice.effect === 'extra_tech') {
-        applyStatDelta(char, 'talent', 1);
-        effectText = '借先知优势提前深研咒术极限！天赋 +1，即将额外抽取 1 项高级技巧！';
+        var baseTal = (char.canonBaseAttrs && char.canonBaseAttrs.talent != null) ? char.canonBaseAttrs.talent : (char.attrs.talent || 0);
+        char.attrs.talent = clamp((char.attrs.talent || 0) + 1, 0, Math.max(10, baseTal));
+        effectText = '借先知优势提前深研咒术！天赋提升，即将额外抽取 1 项高级技巧！';
         state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
       } else if (slice.effect === 'ally_shield') {
         char.flags.hasSecretAlly = true;
         effectText = '秘密缔结跨阵营盟约！决战每回合将获得隐藏盟友支援战值！';
       } else {
-        applyStatDelta(char, 'taijutsu', 1);
-        applyStatDelta(char, 'barrier', 1);
-        effectText = '低调隐忍潜修基本功：体术 +1、结界术 +1！';
+        var baseTai = (char.canonBaseAttrs && char.canonBaseAttrs.taijutsu != null) ? char.canonBaseAttrs.taijutsu : (char.attrs.taijutsu || 0);
+        char.attrs.taijutsu = clamp((char.attrs.taijutsu || 0) + 1, 0, Math.max(10, baseTai));
+        if (!isZeroCeDiv) {
+          var baseBar = (char.canonBaseAttrs && char.canonBaseAttrs.barrier != null) ? char.canonBaseAttrs.barrier : (char.attrs.barrier || 0);
+          char.attrs.barrier = clamp((char.attrs.barrier || 0) + 1, 0, Math.max(10, baseBar));
+        } else {
+          var baseBody = (char.canonBaseAttrs && char.canonBaseAttrs.bodyResist != null) ? char.canonBaseAttrs.bodyResist : (char.attrs.bodyResist || 0);
+          char.attrs.bodyResist = clamp((char.attrs.bodyResist || 0) + 1, 0, Math.max(10, baseBody));
+        }
+        effectText = isZeroCeDiv ? '低调隐忍潜修肉体：体术与身体抗性提升！' : '低调隐忍潜修基本功：体术与结界术提升！';
       }
       if (state.customAttrTier && state.customAttrTier !== 'random') {
         applyAttrTierFloor(char, state.customAttrTier);
@@ -1370,17 +1568,19 @@
 
     } else if (step.type === 'era_pick') {
       var eraMeta = DATA.ERAS.find(function (e) { return e.id === step.eraId; });
+      var eraProgNote = '';
       if (eraMeta) {
         char.currentEraId = eraMeta.id;
         char.currentEraLabel = eraMeta.short;
         markVisitedEra(char, eraMeta.id);
+        eraProgNote = syncCanonProgressionForEra(char, eraMeta.id, false);
       }
       if (slice.action === 'fight') {
-        effectText = '强敌现身！即将交手「' + slice.enemyName + '」';
+        effectText = '强敌现身！即将交手「' + slice.enemyName + '」' + (eraProgNote ? '｜' + eraProgNote : '');
         state.stepQueue.unshift({ type: 'fight_outcome', eraLabel: char.currentEraLabel, encounter: slice });
       } else {
         if (slice.statUp) applyStatDelta(char, slice.statUp, 1);
-        effectText = slice.effectText || '平稳度过时代节点';
+        effectText = (slice.effectText || '平稳度过时代节点') + (eraProgNote ? '｜' + eraProgNote : '');
       }
 
     } else if (step.type === 'cross_era') {
@@ -1399,11 +1599,12 @@
       char.currentEraId = 'shibuya';
       char.currentEraLabel = '涩谷事变';
       markVisitedEra(char, 'shibuya');
+      var shibuyaProgNote = syncCanonProgressionForEra(char, 'shibuya', false);
       if (char.flags.gojoSealed) {
         char.flags.nanamiDead = true;
-        effectText = '96% 收束！五条悟被狱门疆封印，涩谷陷入混乱！';
+        effectText = '96% 收束！五条悟被狱门疆封印，涩谷陷入混乱！' + (shibuyaProgNote ? '｜' + shibuyaProgNote : '');
       } else {
-        effectText = '4% 低概率事件！五条悟未被封印，正面击溃诅咒阵营防线！';
+        effectText = '4% 低概率事件！五条悟未被封印，正面击溃诅咒阵营防线！' + (shibuyaProgNote ? '｜' + shibuyaProgNote : '');
       }
 
     } else if (step.type === 'sukuna_vessel') {
@@ -1411,7 +1612,8 @@
       char.currentEraId = 'culling';
       char.currentEraLabel = '死灭回游';
       markVisitedEra(char, 'culling');
-      effectText = '宿傩转移受肉至：' + slice.label;
+      var cullingProgNote = syncCanonProgressionForEra(char, 'culling', false);
+      effectText = '宿傩转移受肉至：' + slice.label + (cullingProgNote ? '｜' + cullingProgNote : '');
 
     } else if (step.type === 'fight_outcome') {
       var won = slice.id === 'win';
@@ -1519,6 +1721,7 @@
       char.currentEraId = 'shinjuku';
       char.currentEraLabel = '新宿决战';
       markVisitedEra(char, 'shinjuku');
+      var shinjukuProgNote = syncCanonProgressionForEra(char, 'shinjuku', false);
       char.statsLog.growthCount += 1;
       if (slice.id === 'taiBody') {
         effectText = '体术 -> ' + applyStatDelta(char, 'taijutsu', 1) + '，身体抗性 -> ' + applyStatDelta(char, 'bodyResist', 1);
@@ -1536,6 +1739,7 @@
           effectText = '实战思路彻底贯通，智力 +1';
         }
       }
+      if (shinjukuProgNote) effectText += '｜' + shinjukuProgNote;
 
     } else if (step.type === 'shinjuku_motive') {
       effectText = slice.buffNote;

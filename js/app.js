@@ -375,7 +375,8 @@
       $('wheelTitleText').textContent = rMeta.title;
       $('wheelSubtag').textContent = run.char.identityName + ' · ' + run.char.currentEraLabel;
       $('resultMainText').textContent = rMeta.title;
-      $('resultEffectText').textContent = '综合战力指数：' + ENGINE.getPowerBreakdown(run.char);
+      $('resultEffectText').textContent = '综合战力指数：' + ENGINE.getPowerBreakdown(run.char) +
+        (run.char.identityId === 'canon' && run.char.canonTitle ? ' ｜ 时期定位：' + run.char.canonTitle + '（' + run.char.officialGrade + '）' : '');
 
       $('radarTitleBadge').textContent = rMeta.title;
       $('radarGradeChip').textContent = run.char.officialGrade + ' · ' + run.char.hpStatus;
@@ -539,18 +540,19 @@
     var char = run.char;
     var power = ENGINE.getPowerBreakdown(char);
 
-    $('charModalTitle').textContent = char.identityName;
+    var isPendingCanon = char.identityId === 'canon' && !char.canonCharId;
+    $('charModalTitle').textContent = isPendingCanon ? '魂穿原著角色（待抽取人物模板）' : char.identityName;
     var statusTag = $('charStatusTag');
     statusTag.textContent = char.hpStatus;
     statusTag.className = 'char-status-tag' + (char.hpStatus === '已故' ? ' is-dead' : char.hpStatus !== '健康' ? ' is-injured' : '');
-    $('charGradeTag').textContent = char.officialGrade;
+    $('charGradeTag').textContent = isPendingCanon ? '待抽取人物' : char.officialGrade;
 
     var subParts = ['出生地：' + char.birthplace, '时期：' + char.currentEraLabel, '颜值：' + char.looksText];
     if (char.gender) subParts.unshift('性别：' + char.gender);
     if (char.canonTitle) subParts.unshift('原著定位：' + char.canonTitle);
     if (char.elderClan) subParts.push('门第：' + char.elderClan);
     if (char.master) subParts.push('御主：' + char.master);
-    $('charSubline').textContent = subParts.join(' · ');
+    $('charSubline').textContent = isPendingCanon ? '请先旋转「魂穿原著角色」轮盘锁定原著人物，随后自动载入对应人物初始面板' : subParts.join(' · ');
 
     var hasDomain = (char.skills || []).indexOf('领域展开') >= 0;
     var quickPills = [
@@ -573,15 +575,23 @@
       return '<span class="dark-mini-pill">' + escapeHtml(t) + '</span>';
     }).join('');
 
-    $('charPowerScore').textContent = String(power);
+    $('charPowerScore').textContent = isPendingCanon ? '待定' : String(power);
 
     $('charAttrGrid').innerHTML = DATA.ATTRIBUTE_DEFS.map(function (def) {
       var val = char.attrs[def.key] || 0;
       var rank = ENGINE.getRankMeta(val);
+      var baseDeltaText = '';
+      if (!isPendingCanon && char.canonBaseAttrs && char.canonBaseAttrs[def.key] != null) {
+        var bVal = char.canonBaseAttrs[def.key];
+        if (bVal !== val) {
+          var diff = val - bVal;
+          baseDeltaText = '（原著 ' + ENGINE.getRankMeta(bVal).code + (diff > 0 ? '+' + diff : diff) + '）';
+        }
+      }
       return '<div class="attr-card">' +
         '<div class="attr-card-top">' +
         '<span class="attr-name">' + escapeHtml(def.name) + '</span>' +
-        '<span class="attr-rank ' + rank.badgeClass + '">' + rank.code + ' · ' + val + '</span>' +
+        '<span class="attr-rank ' + (isPendingCanon ? 'rank-c' : rank.badgeClass) + '">' + (isPendingCanon ? '待抽取' : (rank.code + ' · ' + val + baseDeltaText)) + '</span>' +
         '</div>' +
         '<div class="attr-note">' + escapeHtml(def.desc) + '</div>' +
         '</div>';
