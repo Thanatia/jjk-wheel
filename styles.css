@@ -1346,6 +1346,154 @@ button:disabled {
   color: #6b7280;
 }
 
+.formula-banner {
+  margin: 4px 0 2px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.dark-skill-tag.is-clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+.dark-skill-tag.is-clickable:hover,
+.dark-skill-tag.is-selected {
+  border-color: #facc15;
+  color: #fef08a;
+}
+
+.char-skill-explain {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: #272730;
+  border: 1px solid #4b5563;
+  color: #e4e4e7;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.replay-step-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--bg-soft);
+}
+
+.replay-step-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.replay-step-counter {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--crimson);
+}
+
+.replay-spotlight-card {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--crimson);
+  background: var(--crimson-soft);
+  margin-bottom: 12px;
+}
+
+.replay-spotlight-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.replay-spotlight-result {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--crimson);
+  margin-bottom: 3px;
+}
+
+.replay-spotlight-effect {
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+/* ==================== 夜间模式主题 ==================== */
+body.dark-theme {
+  --bg-outer: #09090b;
+  --bg-card: #18181b;
+  --bg-soft: #27272a;
+  --bg-soft-hover: #3f3f46;
+  --text-main: #f4f4f5;
+  --text-sub: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --crimson-soft: #450a0a;
+  --border-light: #2e2e36;
+  --shadow-shell: 0 12px 36px rgba(0, 0, 0, 0.55);
+  --shadow-wheel: 0 10px 28px rgba(0, 0, 0, 0.5);
+  --shadow-pill: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-theme .wheel-outer-shadow,
+body.dark-theme .wheel-center-hub {
+  background: #27272a;
+}
+
+body.dark-theme .hub-pointer {
+  border-bottom-color: #27272a;
+}
+
+body.dark-theme .radar-card,
+body.dark-theme .settlement-card,
+body.dark-theme .trait-catalog-summary,
+body.dark-theme .trait-catalog-item,
+body.dark-theme .saved-card-item,
+body.dark-theme .timeline-item,
+body.dark-theme .odds-row,
+body.dark-theme .light-modal-panel,
+body.dark-theme .select-input,
+body.dark-theme .text-input,
+body.dark-theme .mode-choice {
+  background: #1f1f25;
+  color: var(--text-main);
+  border-color: var(--border-light);
+}
+
+body.dark-theme .trait-catalog-item.is-locked {
+  background: #18181d;
+}
+
+body.dark-theme .custom-field.is-highlight {
+  background: #3b0d0d;
+  border-color: #991b1b;
+}
+
+body.dark-theme .formula-banner {
+  background: #422006;
+  border-color: #854d0e;
+  color: #fde68a;
+}
+
+body.dark-theme .light-close-btn,
+body.dark-theme .pill-chip {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
 @media (max-width: 480px) {
   .viewport-bg { padding: 0; }
   .app-shell { max-width: 100%; min-height: 100dvh; border-radius: 0; box-shadow: none; }

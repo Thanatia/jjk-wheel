@@ -211,11 +211,13 @@
   ];
 
   var AGGRO_WHEEL = [
-    { label: '！？磁场颠佬？！（逢敌必死斗）', level: 10, weight: 8 },
-    { label: 'SS（好战狂热分子）', level: 8, weight: 16 },
-    { label: 'A（遇到挑衅绝不退缩）', level: 6, weight: 28 },
-    { label: 'B（看性价比与胜算再动手）', level: 5, weight: 28 },
-    { label: 'D（厌战摸鱼保命第一）', level: 2, weight: 20 }
+    { label: '！？磁场颠佬？！（逢敌必死斗）', level: 10, weight: 5 },
+    { label: '200%（鹿紫云一/石流龙）', level: 9, weight: 9 },
+    { label: '100%（强孤爱）', level: 8, weight: 13 },
+    { label: '75%（主动求战）', level: 7, weight: 17 },
+    { label: '50%（视局势而定）', level: 5, weight: 22 },
+    { label: '25%（冷静克制）', level: 3, weight: 20 },
+    { label: '0%（乙骨型温柔理智）', level: 1, weight: 14 }
   ];
 
   // 十维属性轮盘配置
@@ -961,8 +963,341 @@
     { id: 't_civilian_peace', title: '平平安安是福（普通人安稳度日）', category: '佛系结局', tier: 'n', points: 10, desc: '远离绝大部分致命厮杀平顺走完一世' },
     { id: 't_shibuya_fall', title: '陨落于10月31日的无名英魂', category: '悲壮遗憾', tier: 'n', points: -6, desc: '未能走出百鬼横行与群魔围攻的涩谷地狱夜' },
     { id: 't_sukuna_slain', title: '倒在宿傩「解」与「世界斩」下', category: '悲壮遗憾', tier: 'n', points: -8, desc: '虽挺进新宿终局却还是饮恨在诅咒之王刀锋下' },
-    { id: 't_glass_cannon', title: '魂穿水土不服 · 逆境陨落', category: '遗憾结局', tier: 'n', points: -5, desc: '灵魂排异未稳便仓促赴死，空留外挂面板' }
+    { id: 't_glass_cannon', title: '魂穿水土不服 · 逆境陨落', category: '遗憾结局', tier: 'n', points: -5, desc: '灵魂排异未稳便仓促赴死，空留外挂面板' },
+    { id: 't_overcome', title: '以下克上', category: '战绩评价', tier: 'sr', points: 5, desc: '正面击败战力明显强于自己的劲敌' },
+    { id: 't_fossil', title: '活化石 · 古今跨代见证', category: '历史长河', tier: 'sr', points: 8, desc: '生于平安或江户时期却跨越时代活至宿傩落后世代' },
+    { id: 't_warlord', title: '乱世枭雄', category: '阵营之路', tier: 'sr', points: 6, desc: '坚守暗面诅咒阵营立场连战四胜并站到终局' },
+    { id: 't_first_win', title: '旗开得胜', category: '战绩评价', tier: 'n', points: 1, desc: '在漫长人生中斩获属于自己的首场胜利' },
+    { id: 't_dual_ex', title: '双绝以上', category: '实力认证', tier: 'r', points: 5, desc: '最终十维面板至少两项属性登临 EX 规格外' },
+    { id: 't_sealed_future', title: '封存到未来', category: '历史长河', tier: 'r', points: 5, desc: '经封印沉睡或肉体受肉契约苏醒于未来现代' },
+    { id: 't_adamant', title: '金刚不坏', category: '实力认证', tier: 'r', points: 4, desc: '身体抗性达到 EX 境界稳若磐石' },
+    { id: 't_drip_less', title: '滴水不漏', category: '实力认证', tier: 'r', points: 4, desc: '咒力效率达到 EX 级别比肩六眼微操' },
+    { id: 't_corpse_master', title: '百鬼造骸大匠', category: '傀儡咒术', tier: 'r', points: 10, desc: '习得傀儡咒术学并在实战前完成自律咒骸编队' },
+    { id: 't_neg_no_bf', title: '黑闪绝缘体', category: '搞笑词条', tier: 'n', points: -3, desc: '打满五场以上高强度死斗却未打出一记黑闪' },
+    { id: 't_neg_extreme', title: '极端加点', category: '搞笑词条', tier: 'n', points: -5, desc: '十维属性最高与最低跨度达到 8 个阶级以上' },
+    { id: 't_neg_overtime', title: '最后的加班', category: '悲壮遗憾', tier: 'n', points: -3, desc: '目睹涩谷七海建人告别一线壮烈牺牲' }
   ];
+
+  // 原版精确 9 大咒具特效体系 + 新增傀儡咒术学
+  TOOL_EFFECTS = [
+    { id: 'storage_ce', label: '储存咒力（里香戒指）', tier: '特级', bonus: 7, extraCe: true, weight: 10 },
+    { id: 'dmg_amp', label: '伤害增幅（游云）', tier: '特级', bonus: 8, damageMult: 1.25, weight: 11 },
+    { id: 'flight', label: '飞天（飞天）', tier: '一级', bonus: 5, canCancelMove: true, weight: 11 },
+    { id: 'extend', label: '无限延长（万里锁）', tier: '一级', bonus: 5, weight: 12 },
+    { id: 'nullify', label: '无效化术式（黑绳/天逆鉾）', tier: '特级', bonus: 9, canCancelMove: true, nullify: true, weight: 9 },
+    { id: 'dmg_store', label: '伤害储存（龙骨）', tier: '一级', bonus: 6, weight: 11 },
+    { id: 'cast_tech', label: '释放咒术（神武解）', tier: '特级', bonus: 8, thunderCast: true, weight: 10 },
+    { id: 'unbreakable', label: '无坚不摧（绝对刚体绝对锋利）', tier: '特级', bonus: 9, indestructible: true, weight: 10 },
+    { id: 'plain_weapon', label: '纯武器（精钢白板）', tier: '二级', bonus: 3, weight: 16 }
+  ];
+
+  if (!TECHNIQUES_ALL.some(function (t) { return t.id === 'puppetMaster'; })) {
+    TECHNIQUES_ALL.push({ id: 'puppetMaster', label: '傀儡咒术学（咒骸制作）', weight: 6, power: 14, cost: 4, desc: '可自主研发核心自律咒骸并率领傀儡群协同作战' });
+  }
+  ['傀儡咒术学（咒骸制作）', '术式多重启动', '自动迎击术式', '咒术科学'].forEach(function (htName) {
+    if (!HIGH_TECHNIQUES.some(function (x) { return x.label === htName; })) {
+      HIGH_TECHNIQUES.push({ id: 'ht_' + htName, label: htName, weight: 9 });
+    }
+  });
+
+  var GENDER_WHEEL = [
+    { id: 'male', label: '男', weight: 42 },
+    { id: 'female', label: '女', weight: 42 },
+    { id: 'heli', label: '武装直升机', weight: 8 },
+    { id: 'nb', label: '不男不女', weight: 8 }
+  ];
+
+  var ELDER_CLAN_DECIDE = [
+    { id: true, label: '出身御三家嫡系元老', weight: 68 },
+    { id: false, label: '寒门实权元老派系', weight: 32 }
+  ];
+
+  var ELDER_CLANS = [
+    { id: 'gojo_clan', label: '五条家（相传：无下限咒术）', techId: 'limitless', techLabel: '无下限咒术', power: 18, weight: 34 },
+    { id: 'zenin_clan', label: '禅院家（相传：十种影法术）', techId: 'tenShadows', techLabel: '十种影法术', power: 16, weight: 34 },
+    { id: 'kamo_clan', label: '加茂家（相传：赤血操术）', techId: 'bloodManip', techLabel: '赤血操术', power: 12, weight: 32 }
+  ];
+
+  var INHERIT_CLAN_TECH = [
+    { id: true, label: '成功继承本家祖传术式！', weight: 65 },
+    { id: false, label: '未觉醒祖传术式（另行抽选命运）', weight: 35 }
+  ];
+
+  var CORPSE_CRAFT_DATA = {
+    decide: [
+      { id: true, label: '是！立即注入咒核制作咒骸', weight: 74 },
+      { id: false, label: '否（暂不新建咒骸）', weight: 26 }
+    ],
+    counts: [
+      { id: 1, count: 1, label: '精工制作 1 具自律咒骸', weight: 64 },
+      { id: 2, count: 2, label: '双核并行制作 2 具咒骸', weight: 36 }
+    ],
+    bodyTypes: [
+      { id: 'animal', label: '动物咒骸', weight: 48 },
+      { id: 'humanoid', label: '人形咒骸', weight: 30 },
+      { id: 'phantom', label: '幻兽咒骸', weight: 22 }
+    ],
+    animalForms: [
+      '熊猫', '棕熊', '猛虎', '雄狮', '雪豹', '灰狼', '鬣狗', '狐狸',
+      '大猩猩', '狒狒', '野猪', '犀牛', '野牛', '大象', '驼鹿', '袋鼠',
+      '鳄鱼', '巨蟒', '眼镜蛇', '巨蜥', '陆龟', '巨蛙', '蝾螈', '变色龙',
+      '雄鹰', '猫头鹰', '乌鸦', '鹤', '螳螂', '独角仙', '蝎子', '蜘蛛'
+    ],
+    humanoidForms: ['钢铁武者咒骸', '阴阳光翼侍童', '隐秘影卫傀儡', '多臂机关禅师'],
+    phantomForms: ['麒麟咒骸', '饕餮咒骸', '白泽咒骸', '重明鸟咒骸', '夜叉咒骸'],
+    autonomy: [
+      { id: true, label: '可完全自主行动（独立战力+4，灵活协防）', weight: 65 },
+      { id: false, label: '需咒丝远程操纵（同步主身输出+2）', weight: 35 }
+    ],
+    statRanks: [
+      { label: 'EX（规格外超绝造物）', val: 10, weight: 6 },
+      { label: 'SSS（特级核心巅峰）', val: 9, weight: 10 },
+      { label: 'SS（准特级王牌）', val: 8, weight: 15 },
+      { label: 'S（一级主力水准）', val: 7, weight: 22 },
+      { label: 'A（精良实用）', val: 6, weight: 25 },
+      { label: 'B（稳妥基础）', val: 5, weight: 15 },
+      { label: 'C（常规试作型）', val: 4, weight: 7 }
+    ],
+    coreCounts: [
+      { id: 0, count: 0, label: '0 个特殊核心（纯粹体格驱动）', weight: 18 },
+      { id: 1, count: 1, label: '1 个核心能力', weight: 40 },
+      { id: 2, count: 2, label: '2 个核心能力', weight: 28 },
+      { id: 3, count: 3, label: '3 个三核互辅巅峰构造！', weight: 14 }
+    ],
+    coreAbilities: [
+      { id: 'echo_cannon', label: '回响炮（隔山打牛贯穿轰击）', atkBonus: 4, weight: 16 },
+      { id: 'puppet_silk', label: '傀儡丝（缠绕封锁敌方先手）', cancelBonus: 1, weight: 15 },
+      { id: 'mirror_armor', label: '镜面装甲（偏折术式伤害）', defBonus: 4, weight: 14 },
+      { id: 'shock_core', label: '震荡核心（冲击震碎敌方防御）', atkBonus: 3, weight: 14 },
+      { id: 'charge_core', label: '蓄能核心（每轮额外储存战值）', atkBonus: 3, weight: 14 },
+      { id: 'drain_core', label: '噬能核心（削弱敌方持续出力）', defBonus: 3, weight: 14 },
+      { id: 'decoy_remnant', label: '替身残骸（抵挡一次致命伤势）', decoy: true, weight: 13 }
+    ]
+  };
+
+  var EXORCISM_COMMISSIONS = [
+    { id: 'comm_hospital', label: '祓除委托：医院二级灵害异常（悬赏酬劳）', enemyName: '医院集合体二级咒灵', enemyPower: 22, statUp: 'ceEfficiency', weight: 32 },
+    { id: 'comm_factory', label: '祓除委托：废厂一级狂暴咒灵（高危单刷）', enemyName: '废厂金属怨灵', enemyPower: 38, statUp: 'barrier', weight: 32 },
+    { id: 'comm_bounty', label: '祓除委托：特级假想怨灵联合悬赏（重金回报）', enemyName: '都市怪谈假想特级咒灵', enemyPower: 54, statUp: 'versatility', weight: 20 },
+    { id: 'comm_rest', label: '暂未接取常规委托（整备调息休养）', skip: true, weight: 16 }
+  ];
+
+  var SEANCE_MATERIAL_POOL = [
+    { id: 'bone_ash', label: '古剑豪骨灰媒质', weight: 28 },
+    { id: 'toji_dna', label: '天与暴君残留肉体信息', weight: 24 },
+    { id: 'cursed_womb', label: '高纯度咒胎残骸核心', weight: 24 },
+    { id: 'talisman_seal', label: '古老神道降灵符录', weight: 24 }
+  ];
+
+  var SEANCE_SUMMON_RESULTS = [
+    { id: 'seance_toji', label: '降灵成功！！唤出全盛·伏黑甚尔肉身（战前助战+16，持续压制）', powerBonus: 16, statUp: 'taijutsu', weight: 35 },
+    { id: 'seance_sword', label: '降灵成功：唤出古代特级剑客助战（战前助战+10，效率+1）', powerBonus: 10, statUp: 'ceEfficiency', weight: 45 },
+    { id: 'seance_rebel', label: '降灵暴走反噬！被受肉灵魂抢占主动（战力损伤但魂抗+1）', powerBonus: 0, statUp: 'soulResist', weight: 20 }
+  ];
+
+  // 新宿决战参战动机与宿傩顺序表
+  SHINJUKU_MOTIVES = [
+    { id: 'prove_self', label: '证明自己，独自挑战宿傩', buffNote: '孤狼死战信念：战斗首轮额外伤害 +8，独立决战气息拉满', firstRoundBonus: 8, weight: 34 },
+    { id: 'bounty', label: '接受政府悬赏，参与讨伐宿傩', buffNote: '悬赏小队军备支援：开战自带 1 层战术备品与效率加成', firstRoundBonus: 5, weight: 30 },
+    { id: 'protect', label: '为保护他人/阻止更大伤亡', buffNote: '守护信念共鸣：重伤兜底抗压 +10%，全军配合度↑', protectBonus: 10, firstRoundBonus: 6, weight: 36 }
+  ];
+
+  SHINJUKU_SUKUNA_ORDERS = [
+    { id: 'before_gojo', label: '五条前挑战完整十影宿傩', enemyTitle: '完全体·十影两面宿傩', baseAtk: 42, agito: true, mahoraga: true, startWithGojo: false, canGojoJoin: true, weight: 26 },
+    { id: 'with_gojo', label: '与五条悟共同迎战宿傩', enemyTitle: '全盛·十影两面宿傩', baseAtk: 44, agito: true, mahoraga: true, startWithGojo: true, canGojoJoin: false, weight: 28 },
+    { id: 'after_gojo', label: '五条战后挑战残血十影宿傩', enemyTitle: '残血·十影宿傩（无魔虚罗/颚吐）', baseAtk: 31, agito: false, mahoraga: false, startWithGojo: false, canGojoJoin: false, weight: 26 },
+    { id: 'higuruma_squad', label: '鹿紫云之后与日车宽见、虎杖悠仁、胀相对战一削原身宿傩', enemyTitle: '四臂完全体·原身宿傩（围攻篇）', baseAtk: 36, agito: false, mahoraga: false, startWithGojo: false, canGojoJoin: false, squadAlly: true, weight: 20 }
+  ];
+
+  var BOSS_COUNT_SLICES = {
+    player: [
+      { id: 3, count: 3, label: '本轮出招数：3 招', weight: 24 },
+      { id: 4, count: 4, label: '本轮出招数：4 招', weight: 36 },
+      { id: 5, count: 5, label: '本轮出招数：5 招', weight: 26 },
+      { id: 6, count: 6, label: '本轮出招数：6 招！！', weight: 14 }
+    ],
+    gojo: [
+      { id: 3, count: 3, label: '五条悟本轮出招：3 次', weight: 20 },
+      { id: 4, count: 4, label: '五条悟本轮出招：4 次', weight: 32 },
+      { id: 5, count: 5, label: '五条悟本轮出招：5 次', weight: 26 },
+      { id: 6, count: 6, label: '五条悟本轮出招：6 次！', weight: 14 },
+      { id: 9, count: 9, label: '五条悟全力暴走：9 次！！', weight: 8 }
+    ],
+    sukuna: [
+      { id: 3, count: 3, label: '宿傩本轮出招：3 招', weight: 22 },
+      { id: 4, count: 4, label: '宿傩本轮出招：4 招', weight: 36 },
+      { id: 5, count: 5, label: '宿傩本轮出招：5 招', weight: 28 },
+      { id: 6, count: 6, label: '宿傩狂攻：6 招！', weight: 14 }
+    ]
+  };
+
+  var SIGNATURE_MOVES_BY_TECH = {
+    starRage: [
+      { id: 'star_max', label: '星之怒·极之番（黑洞压迫雏形）', power: 12, weight: 18 },
+      { id: 'star_punch', label: '虚拟质量重击（特级崩毁铁拳）', power: 21, weight: 24 },
+      { id: 'garuda_kick', label: '凰轮·足球踢（超质量炮弹）', power: 18, weight: 22 },
+      { id: 'garuda_whip', label: '凰轮·质量鞭（+15，抵消敌方1次攻击）', power: 15, cancels: 1, weight: 18 },
+      { id: 'star_suppress', label: '虚拟质量压制（+3，抵消敌方1次攻击）', power: 3, cancels: 1, weight: 16 }
+    ],
+    limitless: [
+      { id: 'lim_blue', label: '术式顺转·最大输出「苍」（抵消1次攻击）', power: 18, cancels: 1, weight: 24 },
+      { id: 'lim_red', label: '术式反转·猛烈贯穿「赫」', power: 22, weight: 24 },
+      { id: 'lim_purple', label: '虚式「茈」·空间抹除炮击', power: 28, weight: 18 },
+      { id: 'lim_tp', label: '苍拳·瞬移压制连打（抵消1次攻击）', power: 15, cancels: 1, weight: 22 }
+    ],
+    tenShadows: [
+      { id: 'ts_dogs', label: '玉犬·浑与嵌合黑影高速突袭', power: 15, weight: 24 },
+      { id: 'ts_bull', label: '贯牛·极限直线爆冲破甲', power: 19, weight: 22 },
+      { id: 'ts_elephant', label: '满象倾瀑重压（抵消敌方1次攻击）', power: 14, cancels: 1, weight: 20 },
+      { id: 'ts_deer', label: '圆鹿反转场（治疗伤势，抵消1次攻击）', power: 6, isHeal: true, cancels: 1, weight: 18 },
+      { id: 'ts_maho', label: '魔虚罗协同冲阵狂劈', power: 23, weight: 16 }
+    ],
+    shrine: [
+      { id: 'sh_dismantle', label: '高速「解」斩击风暴', power: 18, weight: 26 },
+      { id: 'sh_cleave', label: '零距离「捌」贴身切裂', power: 21, weight: 24 },
+      { id: 'sh_net', label: '网格斩大范围覆灭', power: 23, weight: 20 },
+      { id: 'sh_fuga', label: '■「开」·灶之烈焰极速贯通', power: 28, weight: 14 }
+    ],
+    curseManip: [
+      { id: 'cm_uzumaki', label: '极之番「漩涡」·咒灵超压轰击', power: 26, weight: 22 },
+      { id: 'cm_swarm', label: '百鬼合围掩杀（抵消敌方1次攻击）', power: 14, cancels: 1, weight: 26 },
+      { id: 'cm_special', label: '特级假想咒灵直击爆破', power: 19, weight: 24 }
+    ],
+    copy: [
+      { id: 'cp_love', label: '里香完全显现·纯爱光炮', power: 26, weight: 22 },
+      { id: 'cp_speech', label: '模倣·咒言「停止」（抵消1次攻击）', power: 13, cancels: 1, weight: 24 },
+      { id: 'cp_jacob', label: '模倣·天使「邪去侮之梯」（抵消1次攻击）', power: 21, cancels: 1, weight: 22 },
+      { id: 'cp_thin_ice', label: '模倣·宇瑞斯「薄冰破碎」', power: 18, weight: 22 }
+    ],
+    bloodManip: [
+      { id: 'bm_pierce', label: '穿血·音速赤血射线', power: 20, weight: 28 },
+      { id: 'bm_nova', label: '超新星·压缩血爆', power: 17, weight: 26 },
+      { id: 'bm_scale', label: '赤鳞跃动·极速护体（抵消1次攻击）', power: 13, cancels: 1, weight: 24 }
+    ],
+    boogieWoogie: [
+      { id: 'bw_swap', label: '不义游戏·超频换位拆招（抵消1次攻击）', power: 14, cancels: 1, weight: 30 },
+      { id: 'bw_combo', label: '幻影双打极速铁拳', power: 20, weight: 28 },
+      { id: 'bw_vibraslap', label: '高周波手摇铁片连换突袭', power: 17, weight: 24 }
+    ],
+    gamble: [
+      { id: 'gm_jackpot', label: '大当！4分11秒无限咒力猛攻（顺便治疗）', power: 24, isHeal: true, weight: 26 },
+      { id: 'gm_train', label: '坐杀博徒·列车连环撞击', power: 18, weight: 28 },
+      { id: 'gm_door', label: '咒力铁门夹锁（抵消敌方1次攻击）', power: 14, cancels: 1, weight: 24 }
+    ],
+    higurumaLaw: [
+      { id: 'hg_sword', label: '死刑执行·处刑人之剑必杀劈砍', power: 26, weight: 24 },
+      { id: 'hg_hammer', label: '法槌巨型延展横扫', power: 18, weight: 28 },
+      { id: 'hg_block', label: '审判规则封锁（抵消敌方1次攻击）', power: 13, cancels: 1, weight: 26 }
+    ],
+    idleTransfig: [
+      { id: 'it_instant', label: '遍杀即灵体·自闭完美形态狂殴', power: 24, weight: 26 },
+      { id: 'it_body', label: '多重魂拨体冲击波', power: 19, weight: 26 },
+      { id: 'it_decoy', label: '灵魂分身替死规避（抵消1次攻击）', power: 11, cancels: 1, weight: 26 }
+    ],
+    ratio: [
+      { id: 'rt_73', label: '十划·七三强制弱点一刀两断', power: 20, weight: 30 },
+      { id: 'rt_collapse', label: '瓦拉拉·坍塌碎岩轰爆', power: 21, weight: 24 },
+      { id: 'rt_guard', label: '钝刀切线架格（抵消1次攻击）', power: 14, cancels: 1, weight: 24 }
+    ],
+    mythBeast: [
+      { id: 'mb_lightning', label: '幻兽琥珀·必中之雷轰穿！', power: 25, weight: 26 },
+      { id: 'mb_em', label: '电磁波汽化连射', power: 21, weight: 26 },
+      { id: 'mb_sonic', label: '高频音波震荡（抵消敌方1次攻击）', power: 14, cancels: 1, weight: 24 }
+    ],
+    projection: [
+      { id: 'pj_24fps', label: '24帧超高速切入连踢', power: 19, weight: 28 },
+      { id: 'pj_freeze', label: '触摸定帧一秒冻结（抵消1次攻击）', power: 15, cancels: 1, weight: 26 },
+      { id: 'pj_mach', label: '音速冲撞粉碎铁拳', power: 22, weight: 24 }
+    ],
+    iceForm: [
+      { id: 'if_frost', label: '霜凪·极寒大范围冰封（抵消1次攻击）', power: 19, cancels: 1, weight: 28 },
+      { id: 'if_fall', label: '冰瀑直泻贯穿冰柱', power: 21, weight: 26 },
+      { id: 'if_lance', label: '绝对零度冰枪连刺', power: 16, weight: 24 }
+    ],
+    construct: [
+      { id: 'cn_sphere', label: '真球构筑·无限压力碾碎', power: 26, weight: 24 },
+      { id: 'cn_armor', label: '昆虫铠高速俯冲撞击', power: 20, weight: 28 },
+      { id: 'cn_liquid', label: '液态金属墙防反（抵消1次攻击）', power: 15, cancels: 1, weight: 26 }
+    ],
+    disasterFlames: [
+      { id: 'df_meteor', label: '极之番·陨石坠落天火！', power: 25, weight: 24 },
+      { id: 'df_bugs', label: '火砾虫音爆自爆阵', power: 18, weight: 28 },
+      { id: 'df_flame', label: '地核熔炎直射喷涌', power: 20, weight: 26 }
+    ],
+    comedian: [
+      { id: 'cm_truck', label: '超人·泥头车突然撞飞！', power: 22, weight: 28 },
+      { id: 'cm_gag', label: '无厘头冷笑话消解攻击（抵消1次攻击）', power: 13, cancels: 1, weight: 28 },
+      { id: 'cm_stage', label: '强制拉入二人转爆笑剧场', power: 19, weight: 24 }
+    ],
+    heavenZero: [
+      { id: 'hz_blitz', label: '天与零帧消失·瞬步超速痛击', power: 22, weight: 30 },
+      { id: 'hz_arsenal', label: '多咒具轮切连斩', power: 24, weight: 26 },
+      { id: 'hz_parry', label: '凭超常动态视力架开术式（抵消1次攻击）', power: 15, cancels: 1, weight: 26 }
+    ],
+    puppetMaster: [
+      { id: 'pm_cannon', label: '究极机械丸·多年库存炮轰击', power: 25, weight: 26 },
+      { id: 'pm_swarm', label: '多具咒骸协同冲阵（抵消1次攻击）', power: 16, cancels: 1, weight: 28 },
+      { id: 'pm_blade', label: '傀儡管炮·超频近身穿刺', power: 19, weight: 24 }
+    ],
+    default: [
+      { id: 'def_innate', label: '生得术式·全力出力猛攻', power: 17, weight: 34 },
+      { id: 'def_rush', label: '贴身连携压迫打击', power: 14, weight: 34 },
+      { id: 'def_guard', label: '术式凝盾急防反（抵消敌方1次攻击）', power: 11, cancels: 1, weight: 24 }
+    ]
+  };
+
+  GOJO_BOSS_MOVES = [
+    { id: 'blackFlash', label: '黑闪！！！（五条悟进入无我境界，额外行动2次！）', power: 24, isBlackFlash: true, extraActions: 2, weight: 10 },
+    { id: 'unlimited_purple', label: '无限制·虚式「茈」！！', power: 38, weight: 8 },
+    { id: 'purple', label: '虚式「茈」·全境崩毁', power: 32, weight: 12 },
+    { id: 'uv', label: '领域展开·无量空处！', power: 24, isUnlimitedVoid: true, isDomain: true, weight: 14 },
+    { id: 'blue_fist', label: '苍拳重击（抵消对手1次有效攻击）', power: 16, cancels: 1, weight: 12 },
+    { id: 'blue_tp', label: '苍·瞬移奇袭（抵消对手1次有效攻击）', power: 12, cancels: 1, weight: 11 },
+    { id: 'point_red', label: '零距离「赫」·贴脸引爆', power: 25, weight: 11 },
+    { id: 'blue', label: '术式顺转·「苍」（抵消敌方1次有效攻击）', power: 18, cancels: 1, weight: 10 },
+    { id: 'red', label: '术式反转·「赫」', power: 22, weight: 8 },
+    { id: 'elbow', label: '肘击（六眼精准贴打）', power: 10, weight: 4 }
+  ];
+
+  SUKUNA_MOVES = [
+    { id: 'blackFlash', label: '黑闪！！！（宿傩额外行动2次，后续×1.2！）', dmg: 22, isBlackFlash: true, extraActions: 2, weight: 8 },
+    { id: 'malevolentShrine', label: '领域展开·伏魔御厨子', dmg: 28, isDomain: true, weight: 8 },
+    { id: 'dismantle', label: '「解」·高速斩击', dmg: 14, weight: 16 },
+    { id: 'cleave', label: '「捌」·零距离贴身切裂', dmg: 18, weight: 14 },
+    { id: 'netSlash', label: '网格斩·全方位切割阵', dmg: 22, weight: 10 },
+    { id: 'elbow', label: '肘击（领域展延近身突击）', dmg: 11, weight: 9 },
+    { id: 'loan', label: '贷款（下一次有效攻击×2，下回合出招-1，再抽1次）', dmg: 0, isLoan: true, extraActions: 1, weight: 9 },
+    { id: 'agitoHit', label: '嵌合兽颚吐（战值+0，恢复伤势，再抽1次）', dmg: 0, requiresAgito: true, isAgitoHeal: true, extraActions: 1, weight: 8 },
+    { id: 'summonMahoraga', label: '召唤魔虚罗（额外行动1次，轮末存活判定适应）', dmg: 5, canSummonMahoraga: true, isSummonMahoraga: true, extraActions: 1, weight: 7 },
+    { id: 'mahoragaSword', label: '魔虚罗·退魔之剑顺劈', dmg: 17, requiresMahoraga: true, weight: 8 },
+    { id: 'mahoragaActiveAdapt', label: '魔虚罗·主动旋转适应（轮末额外适应1次）', dmg: 0, requiresMahoraga: true, isActiveAdapt: true, weight: 6 },
+    { id: 'fuga', label: '■「灶·开」·炽焰龙卷贯穿', dmg: 26, weight: 6 },
+    { id: 'worldSlash', label: '扩展目标·断界「世界斩」', dmg: 35, weight: 5 }
+  ];
+
+  var MAHORAGA_ADAPT_COUNTS = [
+    { id: 1, count: 1, label: '本轮适应 1 次', weight: 36 },
+    { id: 2, count: 2, label: '本轮适应 2 次', weight: 28 },
+    { id: 3, count: 3, label: '本轮适应 3 次！', weight: 18 },
+    { id: 4, count: 4, label: '本轮适应 4 次！！', weight: 10 },
+    { id: 5, count: 5, label: '本轮适应 5 次！！！', weight: 5 },
+    { id: 6, count: 6, label: '法轮飞转 · 适应 6 次！！！！', weight: 3 }
+  ];
+
+  var SKILL_DESCRIPTIONS = {
+    '完整咏唱': '决战中触发后使「下一次有效术式攻击伤害 ×2」（可叠加并跨轮保留；治疗、领域展开、肘击不消耗咏唱）。',
+    '反转术式': '用正能量修复自身肉体创伤；新宿决战伤势盘亦有概率靠「抓准咒力核心」当场觉醒。',
+    '领域展开': '展开必中生得领域压制战场，与伏魔御厨子同时展开时爆发领域对决。',
+    '简易领域': '张开中和必中效果的小型结界，极大提高抵消敌方招式的概率。',
+    '领域展延': '以水膜般的领域包裹全身，强行中和对方术式并在近身战占据优势。',
+    '弥虚葛笼': '古代对抗领域必中的秘传结界，稳定提高危局生存率。',
+    '黑闪': '击中前 0.000001 秒内凝聚咒力的空间扭曲；决战触发额外行动 2 次，进入本轮数值 ×1.2 的无我境界。',
+    '百兵演武': '引爆手中咒具释放绝杀输出，需承受咒具破碎风险换取破局伤害。',
+    '术式多重启动': '同时并联激活多重术式回路，攻击小幅加值并额外行动 1 次。',
+    '自动迎击术式': '预先设定的护身反击模块，出招时附带 1 次敌方招式抵消。',
+    '咒术科学': '通过精密逻辑拆解对手术式机理，出招同时可抵消敌方 1 次有效攻击。',
+    '傀儡咒术学（咒骸制作）': '可亲手制作具备独立核心能力的自律咒骸协同上阵助战。'
+  };
 
   global.JJK_OMEGA_DATA = {
     SLICE_COLORS: SLICE_COLORS,
@@ -980,6 +1315,14 @@
     LOOKS_WHEEL: LOOKS_WHEEL,
     MORALITY_WHEEL: MORALITY_WHEEL,
     AGGRO_WHEEL: AGGRO_WHEEL,
+    GENDER_WHEEL: GENDER_WHEEL,
+    ELDER_CLAN_DECIDE: ELDER_CLAN_DECIDE,
+    ELDER_CLANS: ELDER_CLANS,
+    INHERIT_CLAN_TECH: INHERIT_CLAN_TECH,
+    CORPSE_CRAFT_DATA: CORPSE_CRAFT_DATA,
+    EXORCISM_COMMISSIONS: EXORCISM_COMMISSIONS,
+    SEANCE_MATERIAL_POOL: SEANCE_MATERIAL_POOL,
+    SEANCE_SUMMON_RESULTS: SEANCE_SUMMON_RESULTS,
     ATTRIBUTE_WHEELS: ATTRIBUTE_WHEELS,
     SHIKIGAMI_SUB_BRANCHES: SHIKIGAMI_SUB_BRANCHES,
     GRADE_WHEELS: GRADE_WHEELS,
@@ -987,10 +1330,14 @@
     SHINJUKU_PREP_GROWTH: SHINJUKU_PREP_GROWTH,
     SHINJUKU_MOTIVES: SHINJUKU_MOTIVES,
     SHINJUKU_SUKUNA_ORDERS: SHINJUKU_SUKUNA_ORDERS,
+    BOSS_COUNT_SLICES: BOSS_COUNT_SLICES,
+    SIGNATURE_MOVES_BY_TECH: SIGNATURE_MOVES_BY_TECH,
     PLAYER_BOSS_MOVES: PLAYER_BOSS_MOVES,
     SUKUNA_MOVES: SUKUNA_MOVES,
     GOJO_BOSS_MOVES: GOJO_BOSS_MOVES,
     GOJO_UV_EFFECTS: GOJO_UV_EFFECTS,
+    MAHORAGA_ADAPT_COUNTS: MAHORAGA_ADAPT_COUNTS,
+    SKILL_DESCRIPTIONS: SKILL_DESCRIPTIONS,
     CROSS_ERA_WHEEL: CROSS_ERA_WHEEL,
     REPUTATION_BY_FACTION: REPUTATION_BY_FACTION,
     ARENA_CHAMPIONS: ARENA_CHAMPIONS,

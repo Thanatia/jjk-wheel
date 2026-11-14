@@ -32,6 +32,9 @@
     spinDuration: 1.5,
     autoSpin: false,
     autoInterval: 0.8,
+    nightMode: false,
+    showFormula: false,
+    pointerCount: 1,
     fatePoints: 30,
     savedCards: [],
     arenaLogs: [],
@@ -41,13 +44,21 @@
     currentWheelDesc: null,
     settlementEvaluated: null,
     settlementSaved: false,
-    autoTimerId: null
+    autoTimerId: null,
+    replayState: { card: null, stepIdx: 0, timerId: null, showAll: false }
   };
 
   function clearAutoTimer() {
     if (appState.autoTimerId !== null) {
       clearTimeout(appState.autoTimerId);
       appState.autoTimerId = null;
+    }
+  }
+
+  function clearReplayTimer() {
+    if (appState.replayState && appState.replayState.timerId !== null) {
+      clearInterval(appState.replayState.timerId);
+      appState.replayState.timerId = null;
     }
   }
 
@@ -60,6 +71,11 @@
         if (p.spinDuration) appState.spinDuration = Math.max(0.2, Math.min(8.0, Number(p.spinDuration) || 1.5));
         if (p.autoInterval) appState.autoInterval = Math.max(0.2, Math.min(8.0, Number(p.autoInterval) || 0.8));
         appState.autoSpin = Boolean(p.autoSpin);
+        appState.nightMode = Boolean(p.nightMode);
+        appState.showFormula = Boolean(p.showFormula);
+        if (p.pointerCount === 1 || p.pointerCount === 2 || p.pointerCount === 3) {
+          appState.pointerCount = p.pointerCount;
+        }
       }
 
       var fateRaw = localStorage.getItem(STORAGE_FATE);
@@ -112,7 +128,10 @@
         runType: appState.runType,
         spinDuration: appState.spinDuration,
         autoInterval: appState.autoInterval,
-        autoSpin: appState.autoSpin
+        autoSpin: appState.autoSpin,
+        nightMode: appState.nightMode,
+        showFormula: appState.showFormula,
+        pointerCount: appState.pointerCount
       }));
     } catch (err) { /* ignore */ }
   }
@@ -155,14 +174,35 @@
     function onTick(liveLabel) {
       $('resultMainText').textContent = liveLabel;
     },
-    function onFinish(landedRawSlice) {
-      handleSpinComplete(landedRawSlice);
+    function onFinish(landedRawSlice, allLandedSlices) {
+      handleSpinComplete(allLandedSlices || [landedRawSlice]);
     }
   );
+
+  function updateFormulaBanner() {
+    var el = $('formulaBanner');
+    if (!el) return;
+    var run = appState.run;
+    if (!appState.showFormula || !run || run.currentView === 'settlement') {
+      el.classList.add('is-hidden');
+      return;
+    }
+    el.classList.remove('is-hidden');
+    el.textContent = ENGINE.getCombatFormulaSummary(run);
+  }
 
   function syncSpeedAndPrefsUI() {
     var durStr = appState.spinDuration.toFixed(1) + 's';
     var autoStr = appState.autoInterval.toFixed(1) + 's';
+
+    document.body.classList.toggle('dark-theme', appState.nightMode);
+    if ($('chkNightMode')) $('chkNightMode').checked = appState.nightMode;
+    if ($('chkShowFormula')) $('chkShowFormula').checked = appState.showFormula;
+
+    document.querySelectorAll('#pointerModeRow .preset-chip').forEach(function (chip) {
+      var p = parseInt(chip.getAttribute('data-pointers'), 10);
+      chip.classList.toggle('is-active', p === appState.pointerCount);
+    });
 
     $('startSpeedBadge').textContent = durStr;
     $('quickSpeedLabel').textContent = durStr;
@@ -187,6 +227,14 @@
     document.querySelectorAll('#menuRunTypeGrid .mode-choice').forEach(function (btn) {
       btn.classList.toggle('is-active', btn.getAttribute('data-runtype') === appState.runType);
     });
+
+    if (appState.run && appState.run.currentView === 'wheel') {
+      var pCount = ENGINE.getStepPointerCount(appState.run, appState.pointerCount);
+      wheelCtrl.setPointerCount(pCount);
+    } else {
+      wheelCtrl.setPointerCount(appState.pointerCount);
+    }
+    updateFormulaBanner();
   }
 
   function updateGlobalCounters() {
@@ -222,22 +270,36 @@
     }
 
     var b = run.boss;
+    var char = run.char;
     hud.classList.remove('is-hidden');
-    $('hudPlayerName').textContent = '我方 · ' + run.char.identityName + '（' + run.char.hpStatus + '）';
+    $('hudPlayerName').textContent = '我方 · ' + char.identityName + '（' + char.hpStatus + '）';
     $('hudPlayerStat').textContent = '战值 ' + b.playerRoundPower + ' · 胜场 ' + b.playerWins;
     $('hudRoundBadge').textContent = '第 ' + b.round + '/' + b.maxRounds + ' 回合';
     $('hudEnemyName').textContent = b.enemyTitle;
     $('hudEnemyStat').textContent = '战值 ' + b.enemyRoundPower + ' · 胜场 ' + b.enemyWins;
 
     var tags = [];
-    if (b.gojoJoined) {
-      tags.push('<span class="hud-tag is-good">五条悟助战 · 不可侵剩 ' + b.infinityBlocks + ' 次</span>');
+    if ((b.playerChantStacks || 0) > 0) {
+      tags.push('<span class="hud-tag is-good">完整咏唱×' + Math.pow(2, b.playerChantStacks) + '待用</span>');
     }
-    if (b.sukunaStun > 0) {
-      tags.push('<span class="hud-tag is-good">无量空处眩晕 -' + b.sukunaStun + ' 招</span>');
+    if ((b.heavyDebuffStacks || 0) > 0) {
+      tags.push('<span class="hud-tag is-warn">重创减益×' + b.heavyDebuffStacks + '(-' + Math.round((1 - Math.pow(0.7, b.heavyDebuffStacks)) * 100) + '%)</span>');
+    }
+    var activeTools = (char.tools || []).filter(function (t) { return !t.destroyed; });
+    if (activeTools.length > 0) {
+      tags.push('<span class="hud-tag is-good">参战咒具：' + escapeHtml(activeTools.map(function (t) { return t.shape; }).join('、')) + '</span>');
+    }
+    if ((char.cursedCorpses || []).length > 0) {
+      tags.push('<span class="hud-tag is-good">自律咒骸×' + char.cursedCorpses.length + '助战</span>');
+    }
+    if (b.gojoJoined) {
+      tags.push('<span class="hud-tag is-good">五条悟助战 · 不可侵 ' + b.infinityBlocks + ' 次 · 领域×' + (b.gojoDomainCount || 0) + '</span>');
+    }
+    if ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0) > 0) {
+      tags.push('<span class="hud-tag is-good">宿傩下轮受限 -' + ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0)) + ' 招</span>');
     }
     tags.push('<span class="hud-tag">' + (b.agitoAlive ? '嵌合兽·颚吐存活' : '颚吐已破') + '</span>');
-    tags.push('<span class="hud-tag">' + (b.mahoragaAlive ? '魔虚罗在场' : '魔虚罗已灭') + '</span>');
+    tags.push('<span class="hud-tag">' + (b.mahoragaAlive ? '魔虚罗在场 (' + (b.totalAdaptations || 0) + '/13)' : '魔虚罗已灭') + '</span>');
 
     Object.keys(b.adaptations || {}).forEach(function (moveName) {
       var lv = b.adaptations[moveName];
@@ -286,12 +348,16 @@
 
     if (run.currentView === 'wheel') {
       var desc = ENGINE.describeWheelForStep(run);
+      var activePtrs = ENGINE.getStepPointerCount(run, appState.pointerCount);
       appState.currentWheelDesc = desc;
       $('wheelTitleText').textContent = desc.title;
-      $('wheelSubtag').textContent = (run.runType === 'custom' ? '天命自定 · ' : '浮生若梦 · ') + desc.subtag + '（第 ' + (run.stepCount + 1) + ' 轮）';
+      $('wheelSubtag').textContent = (run.runType === 'custom' ? '天命自定 · ' : '浮生若梦 · ') + desc.subtag +
+        (activePtrs > 1 ? '【' + activePtrs + '指针并行】' : '') + '（第 ' + (run.stepCount + 1) + ' 轮）';
       $('resultMainText').textContent = run.lastResultText || '准备就绪';
       $('resultEffectText').textContent = run.lastEffectText || '';
+      wheelCtrl.setPointerCount(activePtrs);
       wheelCtrl.setSlices(desc.slices);
+      updateFormulaBanner();
 
       mainBtn.textContent = '点击旋转';
       mainBtn.classList.remove('is-continue', 'is-spinning');
@@ -303,6 +369,7 @@
 
     } else if (run.currentView === 'radar') {
       clearAutoTimer();
+      updateFormulaBanner();
       rerollBtn.disabled = true;
       var rMeta = run.pendingRadar || { stage: 'initial', title: '能力面板' };
       $('wheelTitleText').textContent = rMeta.title;
@@ -415,21 +482,28 @@
     }
   }
 
-  function handleSpinComplete(landedRawSlice) {
+  function handleSpinComplete(landedSlices) {
     var run = appState.run;
     if (!run) return;
-    var prevResult = ENGINE.applySpinOutcome(run, landedRawSlice);
+    var slicesArr = Array.isArray(landedSlices) ? landedSlices : [landedSlices];
+    var prevResult = ENGINE.applyMultiSpinOutcome
+      ? ENGINE.applyMultiSpinOutcome(run, slicesArr)
+      : ENGINE.applySpinOutcome(run, slicesArr[0]);
     saveActiveRun();
 
     if (run.currentView === 'wheel') {
       var nextDesc = ENGINE.describeWheelForStep(run);
+      var activePtrs = ENGINE.getStepPointerCount(run, appState.pointerCount);
       appState.currentWheelDesc = nextDesc;
       $('wheelTitleText').textContent = nextDesc.title;
-      $('wheelSubtag').textContent = (run.runType === 'custom' ? '天命自定 · ' : '浮生若梦 · ') + nextDesc.subtag + '（第 ' + (run.stepCount + 1) + ' 轮）';
+      $('wheelSubtag').textContent = (run.runType === 'custom' ? '天命自定 · ' : '浮生若梦 · ') + nextDesc.subtag +
+        (activePtrs > 1 ? '【' + activePtrs + '指针并行】' : '') + '（第 ' + (run.stepCount + 1) + ' 轮）';
       $('resultMainText').textContent = prevResult.resultLabel;
       $('resultEffectText').textContent = prevResult.effectText;
+      wheelCtrl.setPointerCount(activePtrs);
       wheelCtrl.setSlices(nextDesc.slices);
       renderBattleHud();
+      updateFormulaBanner();
 
       var mainBtn = $('btnMainAction');
       mainBtn.textContent = '点击旋转';
@@ -439,6 +513,7 @@
       $('btnFateReroll').disabled = !(run.canRerollLast && appState.fatePoints >= 1);
       scheduleAutoSpinIfNeeded();
     } else {
+      updateFormulaBanner();
       renderMainView();
     }
   }
@@ -450,6 +525,7 @@
   }
 
   function closeModal(id) {
+    if (id === 'replayModal') clearReplayTimer();
     $(id).classList.add('is-hidden');
     if (appState.run && !$('gameScreen').classList.contains('is-hidden')) {
       scheduleAutoSpinIfNeeded();
@@ -470,12 +546,17 @@
     $('charGradeTag').textContent = char.officialGrade;
 
     var subParts = ['出生地：' + char.birthplace, '时期：' + char.currentEraLabel, '颜值：' + char.looksText];
+    if (char.gender) subParts.unshift('性别：' + char.gender);
     if (char.canonTitle) subParts.unshift('原著定位：' + char.canonTitle);
+    if (char.elderClan) subParts.push('门第：' + char.elderClan);
     if (char.master) subParts.push('御主：' + char.master);
     $('charSubline').textContent = subParts.join(' · ');
 
+    var hasDomain = (char.skills || []).indexOf('领域展开') >= 0;
     var quickPills = [
       '阵营：' + char.factionLabel,
+      '声望：' + (char.reputationText || '渐露锋芒'),
+      '领域：' + (hasDomain ? '已掌握生得领域' : '未觉醒'),
       '道德：' + char.moralityText,
       '好战：' + char.aggroText,
       '胜 ' + char.statsLog.wins + ' / 负 ' + char.statsLog.losses + ' / 黑闪 ' + char.statsLog.blackFlashes
@@ -505,21 +586,36 @@
 
     $('charTechCard').textContent = char.technique + ' — ' + (char.techniqueDesc || '尚待摸索发挥上限');
 
+    var detailBox = $('charSkillDetailBox');
+    if (detailBox) {
+      detailBox.classList.add('is-hidden');
+      detailBox.textContent = '';
+    }
     $('charSkillsList').innerHTML = char.skills.length
-      ? char.skills.map(function (s) { return '<span class="dark-skill-tag">' + escapeHtml(s) + '</span>'; }).join('')
+      ? char.skills.map(function (s) {
+          return '<button type="button" class="dark-skill-tag is-clickable" data-explain-skill="' + escapeHtml(s) + '">' + escapeHtml(s) + ' ▾</button>';
+        }).join('')
       : '<span class="dark-skill-tag">暂未习得额外高级技巧</span>';
 
-    $('charToolsList').innerHTML = char.tools.length
-      ? char.tools.map(function (t) {
-          return '<div class="dark-info-card">【' + escapeHtml(t.shape) + '】· ' + escapeHtml(t.effect) + '（' + escapeHtml(t.tier || '常规') + '）</div>';
-        }).join('')
-      : '<div class="dark-info-card">暂未持有专属咒具</div>';
+    var gearHtml = [];
+    (char.tools || []).forEach(function (t) {
+      var stateNote = t.destroyed ? '【已损毁】' : '【可参战】';
+      gearHtml.push('<div class="dark-info-card">' + stateNote + ' 【' + escapeHtml(t.shape) + '】· ' + escapeHtml(t.effect) + '（' + escapeHtml(t.tier || '常规') + '，加成 +' + (t.bonus || 3) + '）</div>');
+    });
+    (char.cursedCorpses || []).forEach(function (c, ci) {
+      var autoStr = c.autonomous ? '完全自主行动' : '咒丝遥控协同';
+      var coresStr = (c.cores && c.cores.length) ? c.cores.map(function (cr) { return cr.label; }).join('、') : '纯体格驱动';
+      gearHtml.push('<div class="dark-info-card">【自律咒骸 #' + (ci + 1) + ' · ' + escapeHtml(c.form) + '】· ' + autoStr + ' · 破坏' + escapeHtml(c.atkRank || 'A') + '/防御' + escapeHtml(c.defRank || 'A') + '/生命' + escapeHtml(c.hpRank || 'A') + ' · 核心：' + escapeHtml(coresStr) + (c.decoyUsed ? '（替身核心已耗）' : '') + '</div>');
+    });
+    $('charToolsList').innerHTML = gearHtml.length
+      ? gearHtml.join('')
+      : '<div class="dark-info-card">暂未持有专属咒具或自律咒骸</div>';
 
     var a = char.attrs;
     var melee = Math.round(a.taijutsu * 2.4 + a.bodyResist * 1.5);
     var spell = Math.round(a.ceTotal * 2.1 + a.ceControl * 1.8 + (char.techniquePower || 4));
     $('charFormulaCard').textContent = '基础近战基准 ' + melee + ' · 术式爆发基准 ' + spell +
-      ' · 结界/灵魂综合防御 ' + Math.round(a.barrier * 1.6 + a.soulResist * 1.6);
+      ' · 结界/灵魂综合防御 ' + Math.round(a.barrier * 1.6 + a.soulResist * 1.6) + ' · 当前公式：' + ENGINE.getCombatFormulaSummary(run);
 
     openModal('charModal');
   }
@@ -730,51 +826,96 @@
     }
 
     if (toolbarEl) toolbarEl.classList.remove('is-hidden');
+    var isLoserBoard = appState.activeCardsTab === 'loser';
     var filtered = appState.savedCards
       .map(function (card, rawIdx) { return { card: card, rawIdx: rawIdx }; })
       .filter(function (wrap) {
+        if (isLoserBoard) return true;
         return (wrap.card.runType || 'dream') === appState.activeCardsTab;
       })
-      .sort(function (a, b) { return b.card.score - a.card.score; });
+      .sort(function (a, b) {
+        return isLoserBoard ? (a.card.score - b.card.score) : (b.card.score - a.card.score);
+      });
 
     if (!filtered.length) {
       listEl.innerHTML = '<div class="odds-explain">该榜单暂无记录。走完一局对应模式的「人生结算」后即可收录冲击排名！</div>';
       return;
     }
 
-    listEl.innerHTML = filtered.map(function (wrap, rank) {
-      var c = wrap.card;
-      return '<div class="saved-card-item">' +
-        '<div class="saved-card-top">' +
-        '<span class="saved-card-name">No.' + (rank + 1) + ' ' + escapeHtml(c.name) + ' · ' + escapeHtml(c.identityName) + '</span>' +
-        '<span class="saved-card-score">' + (c.score >= 0 ? '+' : '') + c.score + ' (' + escapeHtml(c.quality) + ')</span>' +
-        '</div>' +
-        '<div class="saved-card-meta">' + escapeHtml(c.officialGrade) + ' · ' + escapeHtml(c.technique) + ' · 胜' + c.wins + '/负' + c.losses + ' · ' + escapeHtml(c.createdAt) + '</div>' +
-        '<div class="saved-card-actions">' +
-        '<button type="button" class="pill-chip" data-replay-card="' + wrap.rawIdx + '">📖 回放人生与雷达</button>' +
-        '<button type="button" class="pill-chip" data-del-card="' + wrap.rawIdx + '">🗑 删除</button>' +
-        '</div>' +
-        '</div>';
-    }).join('');
+    listEl.innerHTML = (isLoserBoard ? '<div class="odds-explain" style="margin-bottom:6px;">😈 区区榜按结算总分从低到高排序：专收“黑闪绝缘体/极端加点/被弱者击溃”传奇搞笑档！</div>' : '') +
+      filtered.map(function (wrap, rank) {
+        var c = wrap.card;
+        return '<div class="saved-card-item">' +
+          '<div class="saved-card-top">' +
+          '<span class="saved-card-name">' + (isLoserBoard ? '区.' : 'No.') + (rank + 1) + ' ' + escapeHtml(c.name) + ' · ' + escapeHtml(c.identityName) + '</span>' +
+          '<span class="saved-card-score">' + (c.score >= 0 ? '+' : '') + c.score + ' (' + escapeHtml(c.quality) + ')</span>' +
+          '</div>' +
+          '<div class="saved-card-meta">' + escapeHtml(c.officialGrade) + ' · ' + escapeHtml(c.technique) + ' · 胜' + c.wins + '/负' + c.losses + ' · ' + escapeHtml(c.createdAt) + '</div>' +
+          '<div class="saved-card-actions">' +
+          '<button type="button" class="pill-chip" data-replay-card="' + wrap.rawIdx + '">📖 逐盘回放人生与雷达</button>' +
+          '<button type="button" class="pill-chip" data-del-card="' + wrap.rawIdx + '">🗑 删除</button>' +
+          '</div>' +
+          '</div>';
+      }).join('');
   }
 
-  function openReplayModalForCard(cardIdx) {
-    var c = appState.savedCards[cardIdx];
+  function renderReplayBody() {
+    var rs = appState.replayState;
+    var c = rs.card;
     if (!c) return;
+    var steps = c.timeline || [];
+    var total = steps.length;
+    if (rs.stepIdx >= total) rs.stepIdx = Math.max(0, total - 1);
+    var cur = steps[rs.stepIdx];
+
     var radarHtml = c.attrs ? RADAR.buildRadarSvg(c) : '';
     var traitsHtml = (c.traits || []).map(function (t) {
       var isPos = t.score >= 0;
       return '<div class="trait-item"><div><div class="trait-title-row">' + escapeHtml(t.name) + '</div><div class="trait-desc">' + escapeHtml(t.desc) + '</div></div><span class="trait-score ' + (isPos ? 'is-pos' : 'is-neg') + '">' + (isPos ? '+' : '') + t.score + '</span></div>';
     }).join('');
-    var logsHtml = (c.timeline || []).map(function (item) {
-      return '<div class="timeline-item"><div class="timeline-item-head"><span>第' + item.step + '轮 · ' + escapeHtml(item.wheelTitle) + '</span><span>' + escapeHtml(item.era) + '</span></div><div class="timeline-item-result">' + escapeHtml(item.result) + '</div><div class="timeline-item-effect">' + escapeHtml(item.effect) + '</div></div>';
-    }).join('');
+
+    var spotlightHtml = '';
+    if (total > 0 && cur) {
+      spotlightHtml =
+        '<div class="replay-step-controls">' +
+        '<div class="replay-step-btns">' +
+        '<button type="button" class="pill-chip" id="btnReplayPrev"' + (rs.stepIdx <= 0 ? ' disabled' : '') + '>⏮ 上一盘</button>' +
+        '<button type="button" class="pill-chip" id="btnReplayTogglePlay">' + (rs.timerId !== null ? '⏸ 暂停' : '▶ 自动回放') + '</button>' +
+        '<button type="button" class="pill-chip" id="btnReplayNext"' + (rs.stepIdx >= total - 1 ? ' disabled' : '') + '>⏭ 下一盘</button>' +
+        '<button type="button" class="pill-chip" id="btnReplayToggleAll">' + (rs.showAll ? '收起完整日志' : '展开全部') + '</button>' +
+        '</div>' +
+        '<span class="replay-step-counter">第 ' + (rs.stepIdx + 1) + ' / ' + total + ' 盘</span>' +
+        '</div>' +
+        '<div class="replay-spotlight-card">' +
+        '<div class="replay-spotlight-head"><span>第 ' + cur.step + ' 轮 · ' + escapeHtml(cur.wheelTitle) + '</span><span>' + escapeHtml(cur.era) + '</span></div>' +
+        '<div class="replay-spotlight-result">' + escapeHtml(cur.result) + '</div>' +
+        '<div class="replay-spotlight-effect">' + escapeHtml(cur.effect || '阶段推进') + '</div>' +
+        '</div>';
+    } else {
+      spotlightHtml = '<div class="odds-explain">无保存的分步时间线日志。</div>';
+    }
+
+    var logsHtml = rs.showAll
+      ? '<h3 class="setting-label">全部生平回放日志</h3><div class="timeline-list">' +
+        steps.map(function (item, idx) {
+          return '<div class="timeline-item" style="' + (idx === rs.stepIdx ? 'border-color:var(--crimson);' : '') + '"><div class="timeline-item-head"><span>第' + item.step + '轮 · ' + escapeHtml(item.wheelTitle) + '</span><span>' + escapeHtml(item.era) + '</span></div><div class="timeline-item-result">' + escapeHtml(item.result) + '</div><div class="timeline-item-effect">' + escapeHtml(item.effect) + '</div></div>';
+        }).join('') + '</div>'
+      : '';
 
     $('replayModalBody').innerHTML =
       '<div class="settlement-summary-line">' + escapeHtml(c.name) + ' · ' + escapeHtml(c.identityName) + ' · ' + escapeHtml(c.officialGrade) + ' · ' + escapeHtml(c.technique) + '</div>' +
+      spotlightHtml +
       (radarHtml ? '<div class="radar-svg-wrap">' + radarHtml + '</div>' : '') +
       '<h3 class="setting-label">最终正负词条与成就</h3><div class="settlement-traits-list" style="margin-bottom:12px;">' + traitsHtml + '</div>' +
-      '<h3 class="setting-label">全生平回放记录</h3><div class="timeline-list">' + logsHtml + '</div>';
+      logsHtml;
+  }
+
+  function openReplayModalForCard(cardIdx) {
+    var c = appState.savedCards[cardIdx];
+    if (!c) return;
+    clearReplayTimer();
+    appState.replayState = { card: c, stepIdx: 0, timerId: null, showAll: false };
+    renderReplayBody();
     openModal('replayModal');
   }
 
@@ -922,7 +1063,49 @@
     $('btnStartTraits').addEventListener('click', function () { openCardsModalOnTab('traits'); });
     $('btnHubBoards').addEventListener('click', function () { closeModal('menuModal'); openCardsModalOnTab(appState.activeCardsTab || 'dream'); });
     $('btnCloseCardsModal').addEventListener('click', function () { closeModal('cardsModal'); });
-    $('btnCloseReplayModal').addEventListener('click', function () { closeModal('replayModal'); });
+    $('btnCloseReplayModal').addEventListener('click', function () { clearReplayTimer(); closeModal('replayModal'); });
+
+    $('charSkillsList').addEventListener('click', function (e) {
+      var tag = e.target.closest('[data-explain-skill]');
+      if (!tag) return;
+      var sk = tag.getAttribute('data-explain-skill');
+      var descMap = DATA.SKILL_DESCRIPTIONS || {};
+      var text = descMap[sk] || ('「' + sk + '」：关键高阶秘技，在实战与新宿决战盘中有机会触发专属对抗或加权效应。');
+      var box = $('charSkillDetailBox');
+      document.querySelectorAll('#charSkillsList .dark-skill-tag').forEach(function (el) { el.classList.toggle('is-selected', el === tag); });
+      box.textContent = text;
+      box.classList.remove('is-hidden');
+    });
+
+    $('replayModalBody').addEventListener('click', function (e) {
+      var rs = appState.replayState;
+      if (!rs || !rs.card) return;
+      var steps = rs.card.timeline || [];
+      if (e.target.closest('#btnReplayPrev')) {
+        if (rs.stepIdx > 0) { rs.stepIdx -= 1; renderReplayBody(); }
+      } else if (e.target.closest('#btnReplayNext')) {
+        if (rs.stepIdx < steps.length - 1) { rs.stepIdx += 1; renderReplayBody(); }
+      } else if (e.target.closest('#btnReplayToggleAll')) {
+        rs.showAll = !rs.showAll;
+        renderReplayBody();
+      } else if (e.target.closest('#btnReplayTogglePlay')) {
+        if (rs.timerId !== null) {
+          clearReplayTimer();
+        } else {
+          if (rs.stepIdx >= steps.length - 1) rs.stepIdx = 0;
+          rs.timerId = setInterval(function () {
+            if (rs.stepIdx < steps.length - 1) {
+              rs.stepIdx += 1;
+              renderReplayBody();
+            } else {
+              clearReplayTimer();
+              renderReplayBody();
+            }
+          }, 900);
+        }
+        renderReplayBody();
+      }
+    });
 
     $('btnStartArena').addEventListener('click', openArenaModal);
     $('btnHubArena').addEventListener('click', function () { closeModal('menuModal'); openArenaModal(); });
@@ -1068,6 +1251,33 @@
       savePrefs();
       syncSpeedAndPrefsUI();
     });
+
+    if ($('chkNightMode')) {
+      $('chkNightMode').addEventListener('change', function (e) {
+        appState.nightMode = Boolean(e.target.checked);
+        savePrefs();
+        syncSpeedAndPrefsUI();
+      });
+    }
+
+    if ($('chkShowFormula')) {
+      $('chkShowFormula').addEventListener('change', function (e) {
+        appState.showFormula = Boolean(e.target.checked);
+        savePrefs();
+        syncSpeedAndPrefsUI();
+      });
+    }
+
+    if ($('pointerModeRow')) {
+      $('pointerModeRow').addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-pointers]');
+        if (!chip) return;
+        appState.pointerCount = parseInt(chip.getAttribute('data-pointers'), 10) || 1;
+        savePrefs();
+        syncSpeedAndPrefsUI();
+        renderMainView();
+      });
+    }
 
     $('btnMenuBackStart').addEventListener('click', function () {
       clearAutoTimer();

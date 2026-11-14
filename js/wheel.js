@@ -19,11 +19,26 @@
     var currentRotation = 0;
     var spinning = false;
     var rafId = null;
-    var winnerIndex = null;
+    var winnerIndices = [];
     var activeSpinState = null;
+    var pointerCount = 1;
+
+    function getPointerAngles(count) {
+      var n = Math.max(1, Math.min(3, count || 1));
+      var res = [POINTER_ANGLE];
+      for (var i = 1; i < n; i++) {
+        res.push(POINTER_ANGLE + (i * TWO_PI) / n);
+      }
+      return res;
+    }
+
+    function setPointerCount(n) {
+      pointerCount = Math.max(1, Math.min(3, parseInt(n, 10) || 1));
+      draw();
+    }
 
     function setSlices(rawSlices) {
-      winnerIndex = null;
+      winnerIndices = [];
       var totalWeight = rawSlices.reduce(function (sum, s) {
         return sum + Math.max(0.5, Number(s.weight) || 1);
       }, 0);
@@ -49,9 +64,9 @@
       draw();
     }
 
-    function getSliceAtRotation(rot) {
+    function getSliceAtAngle(rot, angle) {
       if (!layoutSlices.length) return null;
-      var rel = normalizeAngle(POINTER_ANGLE - rot);
+      var rel = normalizeAngle(angle - rot);
       for (var i = 0; i < layoutSlices.length; i++) {
         var s = layoutSlices[i];
         if (rel >= s.startAngle && rel < s.endAngle) {
@@ -59,6 +74,37 @@
         }
       }
       return layoutSlices[layoutSlices.length - 1];
+    }
+
+    function getSliceAtRotation(rot) {
+      return getSliceAtAngle(rot, POINTER_ANGLE);
+    }
+
+    function getAllSlicesAtRotation(rot) {
+      var angles = getPointerAngles(pointerCount);
+      return angles.map(function (ang) { return getSliceAtAngle(rot, ang); }).filter(Boolean);
+    }
+
+    function drawExtraPointers(cx, cy, hubRadius) {
+      if (pointerCount <= 1) return;
+      var angles = getPointerAngles(pointerCount);
+      for (var k = 1; k < angles.length; k++) {
+        var ang = angles[k];
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(ang + Math.PI / 2);
+        ctx.beginPath();
+        ctx.moveTo(0, -(hubRadius + 16));
+        ctx.lineTo(-9, -(hubRadius - 2));
+        ctx.lineTo(9, -(hubRadius - 2));
+        ctx.closePath();
+        ctx.fillStyle = '#facc15';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     function draw() {
@@ -79,7 +125,7 @@
         var mid = (start + end) / 2;
 
         ctx.save();
-        if (winnerIndex !== null && winnerIndex !== i) {
+        if (winnerIndices.length > 0 && winnerIndices.indexOf(i) === -1) {
           ctx.globalAlpha = 0.36;
         }
         ctx.beginPath();
@@ -128,6 +174,8 @@
         ctx.fillText(label, tx, 0);
         ctx.restore();
       }
+
+      drawExtraPointers(cx, cy, hubRadius);
     }
 
     function pickWeightedSliceIndex() {
@@ -148,23 +196,26 @@
         rafId = null;
       }
       currentRotation = activeSpinState.endRot;
-      var landed = getSliceAtRotation(currentRotation) || activeSpinState.targetSlice;
-      winnerIndex = landed.index;
+      var landedAll = getAllSlicesAtRotation(currentRotation);
+      var primary = landedAll[0] || activeSpinState.targetSlice;
+      winnerIndices = landedAll.map(function (s) { return s.index; });
       spinning = false;
       activeSpinState = null;
       draw();
       if (typeof onTickLabel === 'function') {
-        onTickLabel(landed.label);
+        onTickLabel(landedAll.length > 1
+          ? landedAll.map(function (x) { return x.label; }).join(' ＋ ')
+          : primary.label);
       }
       if (typeof onSpinFinish === 'function') {
-        onSpinFinish(landed.raw);
+        onSpinFinish(primary.raw, landedAll.map(function (x) { return x.raw; }));
       }
     }
 
     function spin(durationSec) {
       if (spinning || !layoutSlices.length) return false;
       spinning = true;
-      winnerIndex = null;
+      winnerIndices = [];
 
       var sec = Math.max(0.1, Number(durationSec) || 1.5);
       var targetIdx = pickWeightedSliceIndex();
@@ -232,7 +283,7 @@
       }
       spinning = false;
       activeSpinState = null;
-      winnerIndex = null;
+      winnerIndices = [];
     }
 
     function isSpinning() {
@@ -241,6 +292,7 @@
 
     return {
       setSlices: setSlices,
+      setPointerCount: setPointerCount,
       spin: spin,
       snapToFinish: snapToFinish,
       cancel: cancel,

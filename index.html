@@ -102,6 +102,9 @@
           <div class="battle-tags-row" id="hudTagsRow"></div>
         </section>
 
+        <!-- 实时战斗公式与概率公式栏（在设置中开启「显示战斗公式」后呈现） -->
+        <div class="formula-banner is-hidden" id="formulaBanner">数值公式加载中...</div>
+
         <!-- 结果大字展示区 -->
         <div class="result-stage" id="resultStage">
           <div class="result-main-text" id="resultMainText">准备就绪</div>
@@ -200,10 +203,11 @@
         <h3 class="dark-section-title">生得术式与觉醒状态</h3>
         <div class="dark-info-card" id="charTechCard"></div>
 
-        <h3 class="dark-section-title">高级技巧与战斗秘技</h3>
+        <h3 class="dark-section-title">高级技巧与战斗秘技 <span class="dark-section-hint">点击词条展开详解</span></h3>
         <div class="dark-tag-list" id="charSkillsList"></div>
+        <div class="char-skill-explain is-hidden" id="charSkillDetailBox"></div>
 
-        <h3 class="dark-section-title">咒具库存详情（器形与特效）</h3>
+        <h3 class="dark-section-title">咒具与咒骸清单（参战装备 &amp; 自律核心）</h3>
         <div class="dark-info-list" id="charToolsList"></div>
 
         <h3 class="dark-section-title">基础招式伤害与抗性参考公式</h3>
@@ -270,6 +274,23 @@
           <label class="toggle-row">
             <input type="checkbox" id="chkAutoSpin" />
             <span>开启自动连抽（出结果后按以上间隔自动转下一轮）</span>
+          </label>
+        </div>
+
+        <div class="setting-block">
+          <div class="setting-label">转盘指针模式（多指针可同步取最高/连携结果）</div>
+          <div class="preset-speed-row" id="pointerModeRow">
+            <button type="button" class="preset-chip is-active" data-pointers="1">1 单指针</button>
+            <button type="button" class="preset-chip" data-pointers="2">2 双指针</button>
+            <button type="button" class="preset-chip" data-pointers="3">3 三指针</button>
+          </div>
+          <label class="toggle-row" style="margin-top: 10px;">
+            <input type="checkbox" id="chkNightMode" />
+            <span>🌙 夜间模式（暗色护眼主题）</span>
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="chkShowFormula" />
+            <span>🧮 显示战斗公式（实时展示胜率与输出倍率公式）</span>
           </label>
         </div>
 
@@ -442,7 +463,8 @@
         <div class="tab-strip" id="cardsTabStrip">
           <button type="button" class="tab-btn is-active" data-cardtab="dream">🌌 浮生若梦榜</button>
           <button type="button" class="tab-btn" data-cardtab="custom">✨ 天命自定榜</button>
-          <button type="button" class="tab-btn" data-cardtab="traits">🏅 成就图鉴 (<span id="traitsUnlockCount">0</span>/<span id="traitsTotalCount">26</span>)</button>
+          <button type="button" class="tab-btn" data-cardtab="loser">😈 区区榜</button>
+          <button type="button" class="tab-btn" data-cardtab="traits">🏅 成就图鉴 (<span id="traitsUnlockCount">0</span>/<span id="traitsTotalCount">38</span>)</button>
         </div>
         <div class="cards-toolbar" id="cardsToolbar">
           <button type="button" class="pill-chip" id="btnExportCards">导出全部 JSON</button>
