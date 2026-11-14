@@ -362,14 +362,15 @@
       if (!char.canonCharId) {
         setup.push({ type: 'canon_character' });
       }
-      if (!preset || !preset.eraId || preset.eraId === 'random') {
+      var fixedSingleTp = Boolean(char.canonCharId) && (!preset || !preset.eraId || preset.eraId === 'random') && getCanonTimepointSlices(char).length <= 1;
+      if ((!preset || !preset.eraId || preset.eraId === 'random') && !fixedSingleTp) {
         setup.push({ type: 'canon_timepoint' });
       }
       setup.push({ type: 'canon_sync' });
       setup.push({ type: 'canon_memory' });
       setup.push({ type: 'canon_divergence' });
       setup.push({ type: 'radar', stage: 'initial', title: '魂穿原著初始面板' });
-      if (preset && preset.eraId && preset.eraId !== 'random') {
+      if ((preset && preset.eraId && preset.eraId !== 'random') || fixedSingleTp) {
         setup = setup.concat(buildEraQueue(char.birthEraId));
       }
       return setup;
@@ -903,7 +904,7 @@
       return { title: '魂穿对象 · 选择原著角色', subtag: '收录22位原著核心角色', explain: '继承原主十维面板、生得术式、技巧与专属咒具。', slices: getSliceColors(cSlices) };
     }
     if (step.type === 'canon_timepoint') {
-      return { title: '魂穿「' + (char.canonCharName || '原著人物') + '」· 苏醒时间线', subtag: '切入原著节点的时刻', explain: '越早苏醒越有机会改变怀玉或涩谷关键事件。', slices: getSliceColors(DATA.CANON_TIMEPOINTS) };
+      return { title: '魂穿「' + (char.canonCharName || '原著人物') + '」· 苏醒时间线', subtag: '切入原著节点的时刻', explain: '仅列出该角色在原著中已登场且具备战力的时期；越早苏醒越有机会改变怀玉或涩谷关键事件。', slices: getSliceColors(getCanonTimepointSlices(char)) };
     }
     if (step.type === 'canon_sync') {
       return { title: '灵魂契合度判定', subtag: char.canonCharName + ' · 契合度测试', explain: '100%共鸣可使核心属性小幅突破原著上限；排异低契则需逐步磨合。', slices: getSliceColors(DATA.CANON_SYNC_SLICES) };
@@ -1247,6 +1248,42 @@
     });
   }
 
+  function getCanonTimepointSlices(char) {
+    var nativeId = (char && char.nativeEraId) || 'canonStart';
+    var nativeEra = DATA.ERAS.find(function (e) { return e.id === nativeId; }) || DATA.ERAS[4];
+    var avail = (DATA.CANON_TIMEPOINT_AVAIL && char && DATA.CANON_TIMEPOINT_AVAIL[char.canonCharId]) || null;
+    var list = DATA.CANON_TIMEPOINTS.filter(function (tp) {
+      if (tp.id === 'native') return true;
+      if (tp.eraId === nativeId) return false; // 与原主登场时期重复
+      return !avail || avail.indexOf(tp.id) >= 0;
+    });
+    return list.map(function (tp) {
+      if (tp.id !== 'native') return tp;
+      return Object.assign({}, tp, { eraId: nativeId, label: '原主登场时期（' + nativeEra.short + '）' });
+    });
+  }
+
+  function applyCanonTimepoint(state, eraId, noteText) {
+    var char = state.char;
+    var cEraObj = DATA.ERAS.find(function (e) { return e.id === eraId; }) || DATA.ERAS[4];
+    var baseCanonObj = DATA.CANON_CHARACTERS.find(function (c) { return c.id === char.canonCharId; });
+    if (baseCanonObj) {
+      var mergedPreset = Object.assign({}, state.customPreset || {}, { eraId: cEraObj.id });
+      applyCanonTemplate(char, baseCanonObj, mergedPreset);
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+    } else {
+      char.birthEraId = cEraObj.id;
+      char.birthEraLabel = cEraObj.label;
+      char.currentEraId = cEraObj.id;
+      char.currentEraLabel = cEraObj.short;
+    }
+    markVisitedEra(char, cEraObj.id);
+    state.stepQueue = state.stepQueue.concat(buildEraQueue(cEraObj.id));
+    return (noteText ? noteText + ' → ' : '') + '从「' + cEraObj.label + '」切入（当前状态：' + char.canonTitle + ' · ' + char.officialGrade + '）';
+  }
+
   function applySpinOutcome(state, slice) {
     state.prevSnapshot = cloneState({
       stepCount: state.stepCount,
@@ -1282,26 +1319,18 @@
         applyAttrTierFloor(char, state.customAttrTier);
       }
       effectText = '已选定魂穿对象：【' + targetCanon.name + '】（' + char.canonTitle + ' · ' + char.officialGrade + '）';
+      var tpIdx = -1;
+      for (var tpi = 0; tpi < state.stepQueue.length; tpi++) {
+        if (state.stepQueue[tpi].type === 'canon_timepoint') { tpIdx = tpi; break; }
+      }
+      if (tpIdx >= 0 && getCanonTimepointSlices(char).length <= 1) {
+        state.stepQueue.splice(tpIdx, 1);
+        effectText += '｜该角色仅在原著登场时期具备战力，' + applyCanonTimepoint(state, char.nativeEraId || 'canonStart', '');
+      }
 
     } else if (step.type === 'canon_timepoint') {
       var chosenEraId = slice.id === 'native' ? (char.nativeEraId || char.birthEraId || 'canonStart') : slice.eraId;
-      var cEraObj = DATA.ERAS.find(function (e) { return e.id === chosenEraId; }) || DATA.ERAS[4];
-      var baseCanonObj = DATA.CANON_CHARACTERS.find(function (c) { return c.id === char.canonCharId; });
-      if (baseCanonObj) {
-        var mergedPreset = Object.assign({}, state.customPreset || {}, { eraId: cEraObj.id });
-        applyCanonTemplate(char, baseCanonObj, mergedPreset);
-        if (state.customAttrTier && state.customAttrTier !== 'random') {
-          applyAttrTierFloor(char, state.customAttrTier);
-        }
-      } else {
-        char.birthEraId = cEraObj.id;
-        char.birthEraLabel = cEraObj.label;
-        char.currentEraId = cEraObj.id;
-        char.currentEraLabel = cEraObj.short;
-      }
-      markVisitedEra(char, cEraObj.id);
-      effectText = slice.note + ' → 从「' + cEraObj.label + '」切入（当前状态：' + char.canonTitle + ' · ' + char.officialGrade + '）';
-      state.stepQueue = state.stepQueue.concat(buildEraQueue(chosenEraId));
+      effectText = applyCanonTimepoint(state, chosenEraId, slice.note);
 
     } else if (step.type === 'canon_sync') {
       char.canonSyncLabel = slice.label;

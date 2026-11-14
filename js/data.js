@@ -1080,7 +1080,7 @@
       faction: 'neutral', eraId: 'heian', techniqueId: 'construct', technique: '构筑术式',
       officialGrade: '特级', gradeBonus: 13, looks: 8, morality: -1, aggro: 6,
       skills: ['领域展开', '弥虚葛笼'],
-      tools: [{ shape: '液态金属（构筑神武解模板）', effect: '伤害增幅（昆虫铠/液态金属）', bonus: 6, damageMult: 1.25, tier: '特级' }],
+      tools: [{ shape: '液态金属（构筑武具）', effect: '伤害增幅（昆虫铠/液态金属）', bonus: 6, damageMult: 1.25, tier: '特级' }],
       attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 8, versatility: 9, iq: 7, talent: 8 },
       canonNote: '开发出昆虫铠与零接触压力「真球」的平安术师，只败于魔虚罗相性'
     },
@@ -1104,12 +1104,38 @@
     { id: 'shibuya', label: '空降10月31日涩谷事变中心', eraId: 'shibuya', weight: 12, note: '直面狱门疆封印与群魔乱舞，一战定乾坤' }
   ];
 
+  // 各原著角色可切入的时间节点（排除原主尚未出生、年幼、已故或尚未受肉/觉醒的时期）
+  var CANON_TIMEPOINT_AVAIL = {
+    gojo: ['native', 'vol0', 'canonStart', 'shibuya'],
+    sukuna: ['native'],
+    itadori: ['native', 'shibuya'],
+    megumi: ['native', 'shibuya'],
+    yuta: ['native', 'canonStart', 'shibuya'],
+    geto: ['native', 'vol0'],
+    toji: ['native'],
+    nanami: ['vol0', 'native', 'shibuya'],
+    maki: ['vol0', 'native', 'shibuya'],
+    nobara: ['native', 'shibuya'],
+    todo: ['vol0', 'native', 'shibuya'],
+    hakari: ['canonStart', 'shibuya', 'native'],
+    kashimo: ['native'],
+    choso: ['native', 'shibuya'],
+    higuruma: ['native'],
+    yuki: ['native', 'vol0', 'canonStart', 'shibuya'],
+    kenjaku: ['native', 'canonStart', 'shibuya'],
+    mahito: ['native', 'shibuya'],
+    jogo: ['native', 'shibuya'],
+    uraume: ['native', 'shibuya'],
+    yorozu: ['native'],
+    takaba: ['native']
+  };
+
   // 魂穿灵魂契合度盘
   var CANON_SYNC_SLICES = [
-    { id: 'perfect', label: '100% 灵魂共振超越原主（核心三维+1，黑闪率+8%）', weight: 18, delta: 1, mode: 'perfect' },
-    { id: 'high', label: '85% 高度契合如臂使指（主力两维+1，稳定驾驭术式）', weight: 32, delta: 1, mode: 'high' },
+    { id: 'perfect', label: '100% 灵魂共振超越原主（五项核心能力+1）', weight: 18, delta: 1, mode: 'perfect' },
+    { id: 'high', label: '85% 高度契合如臂使指（主力两项+1，稳定驾驭术式）', weight: 32, delta: 1, mode: 'high' },
     { id: 'normal', label: '65% 顺利融合（完整继承原主面板）', weight: 34, delta: 0, mode: 'normal' },
-    { id: 'reject', label: '40% 灵魂排异略微生疏（核心维-1，需战后慢慢磨合）', weight: 16, delta: -1, mode: 'reject' }
+    { id: 'reject', label: '40% 灵魂排异略微生疏（两项能力-1，需战后慢慢磨合）', weight: 16, delta: -1, mode: 'reject' }
   ];
 
   // 魂穿剧本先知记忆盘
@@ -1125,7 +1151,7 @@
     { id: 'rewriteFate', label: '彻底改写原著意难平便当线（全书关键救援触发率↑）', weight: 32, tag: '改命破局', effect: 'save_all' },
     { id: 'breakCeiling', label: '趁先知期勤修悟道（天赋+1，额外抽取1项高级技巧）', weight: 28, tag: '勤修进阶', effect: 'extra_tech' },
     { id: 'secretAlliance', label: '暗中与跨阵营强者结盟（决战额外获得强力协防增益）', weight: 24, tag: '合纵连横', effect: 'ally_shield' },
-    { id: 'lowKey', label: '隐忍藏拙不轻动大势（体术/结界+1，保留隐藏杀手锏）', weight: 16, tag: '深藏不露', effect: 'stat_hidden' }
+    { id: 'lowKey', label: '隐忍藏拙不轻动大势（体术+1，结界或身体抗性+1）', weight: 16, tag: '深藏不露', effect: 'stat_hidden' }
   ];
 
   // 束缚契约转盘（大战前立誓机制）
@@ -1652,6 +1678,7 @@
     ARENA_CHAMPIONS: ARENA_CHAMPIONS,
     CANON_CHARACTERS: CANON_CHARACTERS,
     CANON_TIMEPOINTS: CANON_TIMEPOINTS,
+    CANON_TIMEPOINT_AVAIL: CANON_TIMEPOINT_AVAIL,
     CANON_SYNC_SLICES: CANON_SYNC_SLICES,
     CANON_MEMORY_SLICES: CANON_MEMORY_SLICES,
     CANON_DIVERGENCE_SLICES: CANON_DIVERGENCE_SLICES,
