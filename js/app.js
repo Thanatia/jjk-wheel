@@ -1506,7 +1506,7 @@
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
-      a.download = 'jjk-omega-cards.json';
+      a.download = 'jjk-cards.json';
       a.click();
       URL.revokeObjectURL(url);
     });
