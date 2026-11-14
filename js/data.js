@@ -338,7 +338,18 @@
           { label: '迎战并阻拦她', weight: 44, action: 'fight', enemyName: '万', enemyPower: 54, rewardSkill: '领域展延' },
           { label: '切磋验证彼此术式', weight: 34, action: 'fight', enemyName: '万', enemyPower: 48, statUp: 'versatility' },
           { label: '避战观察构筑原理', weight: 22, action: 'safe', effectText: '观摩物质构筑细节，术式泛用 +1', statUp: 'versatility' }
-        ]
+        ],
+        povByChar: {
+          yorozu: {
+            title: '千年前·精研昆虫铠与真球构筑',
+            intro: '你独自在平安京边缘锤炼液态金属与高出力构筑术式，各路强者闻风而来',
+            choiceTitle: '平安京强者登门约战时的应对',
+            choices: [
+              { label: '迎战藤原家五大虚将精锐', weight: 52, action: 'fight', enemyName: '藤原氏五大虚将精锐', enemyPower: 52, statUp: 'versatility' },
+              { label: '闭关推演零接触压力「真球」构筑', weight: 48, action: 'safe', effectText: '完成真球与昆虫铠架构雏形，结界术 +1', statUp: 'barrier' }
+            ]
+          }
+        }
       },
       {
         id: 'heian_sukuna_feast',
@@ -349,7 +360,27 @@
           { label: '与冰凝术师里梅交锋', weight: 40, action: 'fight', enemyName: '平安时代·里梅', enemyPower: 52 },
           { label: '顺手清理失控的安倍阴术式神群', weight: 38, action: 'fight', enemyName: '安倍阴术式神群', enemyPower: 40, statUp: 'barrier' },
           { label: '收敛气息暗中参悟结界变化', weight: 22, action: 'safe', effectText: '稳固心神，灵魂抗性 +1', statUp: 'soulResist' }
-        ]
+        ],
+        povByChar: {
+          sukuna: {
+            title: '千年前·堕天威压藤原祭典',
+            intro: '藤原氏率日月星进队与五大虚将在祭典设伏围剿，你与里梅并肩立于场中',
+            choiceTitle: '面对藤原氏精锐围剿的出手',
+            choices: [
+              { label: '正面肃清日月星进队与五大虚将', weight: 54, action: 'fight', enemyName: '藤原氏日月星进队＆五大虚将', enemyPower: 56, statUp: 'ceTotal' },
+              { label: '展露伏魔御厨子斩碎祭典结界镇慑京都', weight: 46, action: 'safe', effectText: '祭典百鬼尽伏，朝野尊奉恐惧，结界术 +1', statUp: 'barrier' }
+            ]
+          },
+          uraume: {
+            title: '千年前·随侍宿傩清扫平安祭典',
+            intro: '你随两面宿傩现身藤原氏祭典，以冰凝咒法冻结围攻而来的平安京术师',
+            choiceTitle: '清场护卫时的行动',
+            choices: [
+              { label: '以霜凪封杀前来突袭的安倍宗家精锐', weight: 54, action: 'fight', enemyName: '安倍宗家精锐术师', enemyPower: 46, statUp: 'ceControl' },
+              { label: '回返灶台筹备祭典后宴与调理冰阵', weight: 46, action: 'safe', effectText: '圆满完成清场与后勤备膳，效率 +1', statUp: 'ceEfficiency' }
+            ]
+          }
+        }
       },
       {
         id: 'heian_sugawara_stir',
@@ -369,7 +400,18 @@
         choices: [
           { label: '识破其算计并正面出手击退', weight: 45, action: 'fight', enemyName: '千年羂索（载体）', enemyPower: 50, statUp: 'iq' },
           { label: '交换古咒术秘闻并留下研究契约', weight: 55, action: 'safe', effectText: '洞悉咒物受肉基本规律，灵魂抗性 +1', statUp: 'soulResist' }
-        ]
+        ],
+        povByChar: {
+          kenjaku: {
+            title: '千年前·向各地强豪缔结千年缚约',
+            intro: '你以缝线之姿周游平安时代强敌之间，推演千年后的死灭回游布局',
+            choiceTitle: '在平安京挑选受肉契约试探对象',
+            choices: [
+              { label: '出手降伏拒不签约的千年古怨灵', weight: 50, action: 'fight', enemyName: '拒绝受肉的千年怨灵', enemyPower: 50, statUp: 'barrier' },
+              { label: '暗中封存特级咒物并校准百鬼名录', weight: 50, action: 'safe', effectText: '千年布局落子妥当，智力 +1', statUp: 'iq' }
+            ]
+          }
+        }
       },
       {
         id: 'heian_sun_squad',
@@ -392,7 +434,18 @@
           { label: '痛快死战一场', weight: 50, action: 'fight', enemyName: '鹿紫云一', enemyPower: 56 },
           { label: '以结界巧招试探雷电特性', weight: 30, action: 'fight', enemyName: '鹿紫云一', enemyPower: 49, statUp: 'barrier' },
           { label: '劝其等待四百年后宿傩现世', weight: 20, action: 'safe', effectText: '说服对方避免消耗，智力 +1', statUp: 'iq' }
-        ]
+        ],
+        povByChar: {
+          kashimo: {
+            title: '400年前·寻遍诸藩对手的求道之旅',
+            intro: '身负带电咒力的你连败关东诸藩术师，始终难觅足以全力一战的宿敌',
+            choiceTitle: '面对前来试剑的诸藩名宿',
+            choices: [
+              { label: '一招必中落雷考验关东遗老成色', weight: 58, action: 'fight', enemyName: '关东名门联手老宿', enemyPower: 50, statUp: 'taijutsu' },
+              { label: '与游方僧侣羂索立下百年后战宿傩之约', weight: 42, action: 'safe', effectText: '封存全力静待后世一战，智力 +1', statUp: 'iq' }
+            ]
+          }
+        }
       },
       {
         id: 'edo_clan_duel',
@@ -422,7 +475,18 @@
         choices: [
           { label: '识破骗局并交手拆穿伪装', weight: 42, action: 'fight', enemyName: '江户羂索分体', enemyPower: 48 },
           { label: '自行封存力量或研习古流刀术', weight: 58, action: 'safe', effectText: '静心修习刀术体技，体术 +1', statUp: 'taijutsu' }
-        ]
+        ],
+        povByChar: {
+          kenjaku: {
+            title: '400年前·奥羽关东受肉契约收网',
+            intro: '你在庆长年间伪装游方僧侣巡行奥羽关东，游说鹿紫云一、石流龙签下封存契约',
+            choiceTitle: '推进伊达与关东受肉布置',
+            choices: [
+              { label: '亲手镇压不肯就范的奥羽古咒灵', weight: 46, action: 'fight', enemyName: '奥羽古灵咒群', enemyPower: 46 },
+              { label: '为鹿紫云一等人完成咒物封存仪式', weight: 54, action: 'safe', effectText: '四百年后回游棋子就位，结界术 +1', statUp: 'barrier' }
+            ]
+          }
+        }
       },
       {
         id: 'edo_mountain_curse',
@@ -445,7 +509,18 @@
           { label: '正面交锋伏黑甚尔', weight: 40, action: 'fight', enemyName: '伏黑甚尔', enemyPower: 60, defeatsKey: 'toji' },
           { label: '截杀暗杀悬赏外围诅咒师', weight: 40, action: 'fight', enemyName: '盘星教雇佣暗杀团', enemyPower: 35 },
           { label: '护送星浆体后翼迅速撤离', weight: 20, action: 'safe', effectText: '临危不乱护送撤离，身体抗性 +1', statUp: 'bodyResist' }
-        ]
+        ],
+        povByChar: {
+          toji: {
+            title: '怀玉·玉折 · 薨星宫突袭刺杀悬赏',
+            intro: '盘星教开出三千万天价悬赏，你携带库存咒灵与天逆鉾潜入高专防线直取星浆体',
+            choiceTitle: '踏入高专防线后的刺杀路线',
+            choices: [
+              { label: '正面斩开高专防卫阵与六眼拦截', weight: 56, action: 'fight', enemyName: '高专防卫强敌（六眼＆操使）', enemyPower: 62, statUp: 'taijutsu' },
+              { label: '借天逆鉾与蝇头群奇袭得手迅速撤离', weight: 44, action: 'safe', effectText: '干净利落完成暗杀悬赏并全身撤出，身体抗性 +1', statUp: 'bodyResist' }
+            ]
+          }
+        }
       },
       {
         id: 'hi_geto_rain',
@@ -455,7 +530,27 @@
         choices: [
           { label: '找觉醒后的五条悟切磋一局', weight: 45, action: 'fight', enemyName: '觉醒五条悟（切磋）', enemyPower: 64, canDie: false },
           { label: '在雨夜替夏油杰分担祓除任务', weight: 55, action: 'safe', effectText: '连战磨砺操纵细节，咒力操纵 +1', statUp: 'ceControl' }
-        ]
+        ],
+        povByChar: {
+          gojo: {
+            title: '怀玉之后 · 反转术式与全自动无下限成型',
+            intro: '生死一线参透苍赫茈并实现无下限全自动常驻，好友夏油杰却在雨夜陷入动摇',
+            choiceTitle: '觉醒后的抉择时刻',
+            choices: [
+              { label: '孤身肃清盘星教暗网残余诅咒师', weight: 52, action: 'fight', enemyName: '暗网滞留诅咒师头目', enemyPower: 50, statUp: 'ceControl' },
+              { label: '整理无下限常驻脑路与长距离瞬移坐标', weight: 48, action: 'safe', effectText: '术式全时常驻成型，咒力操纵 +1', statUp: 'ceControl' }
+            ]
+          },
+          geto: {
+            title: '怀玉·苦夏 · 连轴祓除与信念拷问',
+            intro: '五条悟一骑绝尘先行觉醒，你在连绵盛夏独吞咒灵味道，内心滑向临界点',
+            choiceTitle: '盛夏独行任务的抉择',
+            choices: [
+              { label: '连番独自祓除各地涌现的特级以下咒灵', weight: 55, action: 'fight', enemyName: '苦夏连战暴走咒灵', enemyPower: 48, statUp: 'ceTotal' },
+              { label: '雨夜与特级九十九由基长谈路线分歧', weight: 45, action: 'safe', effectText: '看清内心道路分岔，灵魂抗性 +1', statUp: 'soulResist' }
+            ]
+          }
+        }
       },
       {
         id: 'hi_bounty_days',
@@ -475,7 +570,18 @@
         choices: [
           { label: '与她的式神凰轮比划两招试探深浅', weight: 46, action: 'fight', enemyName: '九十九由基（试探切磋）', enemyPower: 57, canDie: false },
           { label: '深入交流灵魂与人类进化的课题', weight: 54, action: 'safe', effectText: '收获灵魂学术启发，灵魂抗性 +1', statUp: 'soulResist' }
-        ]
+        ],
+        povByChar: {
+          yuki: {
+            title: '怀玉 · 海外游历与灵魂学术调研',
+            intro: '你不接高层常规任务，在海外与高专边缘追寻「彻底消除咒灵」的根源答案',
+            choiceTitle: '理念考据与实地试验选择',
+            choices: [
+              { label: '与凰轮配合压制异域现身的特级咒灵', weight: 48, action: 'fight', enemyName: '海外游荡特级咒灵', enemyPower: 52, statUp: 'taijutsu' },
+              { label: '梳理天与零咒力样本与灵魂演化笔记', weight: 52, action: 'safe', effectText: '灵魂课题研究进展显著，灵魂抗性 +1', statUp: 'soulResist' }
+            ]
+          }
+        }
       }
     ],
     vol0: [
@@ -489,7 +595,27 @@
           { label: '阻击米格尔与黑绳阵线', weight: 24, action: 'fight', enemyName: '米格尔（黑绳）', enemyPower: 45 },
           { label: '清扫新宿街头咒灵群', weight: 24, action: 'fight', enemyName: '百鬼夜行特级咒灵', enemyPower: 40 },
           { label: '抢救伤员并构筑大范围「帐」', weight: 14, action: 'safe', effectText: '护下后方伤员，结界术 +1', statUp: 'barrier' }
-        ]
+        ],
+        povByChar: {
+          geto: {
+            title: '0卷·百鬼夜行亲率两千咒灵倾巢而出',
+            intro: '12月24日你分兵两千余咒灵牵制新宿与京都，自己潜入高专本部直取里香',
+            choiceTitle: '百鬼夜行中你的攻坚节奏',
+            choices: [
+              { label: '高专走廊正面对决特级被咒者·乙骨忧太', weight: 54, action: 'fight', enemyName: '乙骨忧太（0卷解咒一战）', enemyPower: 58, statUp: 'ceTotal' },
+              { label: '分散特级咒灵群巧妙牵制五条悟回援', weight: 46, action: 'safe', effectText: '精准调兵避开多余损耗，智力 +1', statUp: 'iq' }
+            ]
+          },
+          yuta: {
+            title: '0卷·独自镇守高专迎击夏油杰',
+            intro: '同窗负伤倒地，你在高专校内正面对上手持游云、企图夺取里香的夏油杰',
+            choiceTitle: '面对夏油杰「漩涡」前的回应',
+            choices: [
+              { label: '解咒解放纯爱全力迎击夏油杰本阵', weight: 62, action: 'fight', enemyName: '夏油杰（百鬼夜行）', enemyPower: 55, statUp: 'ceTotal' },
+              { label: '先行以反转术式稳住重伤同伴生命线', weight: 38, action: 'safe', effectText: '急战中练熟对外反转治疗，咒力操纵 +1', statUp: 'ceControl' }
+            ]
+          }
+        }
       },
       {
         id: 'vol0_kyoto_front',
@@ -509,7 +635,18 @@
         choices: [
           { label: '协助压制里香逸散咒力', weight: 52, action: 'fight', enemyName: '失控里香残影', enemyPower: 50, statUp: 'ceTotal' },
           { label: '指点乙骨稳定咒力输出技巧', weight: 48, action: 'safe', effectText: '彼此印证控咒法门，咒力操纵 +1', statUp: 'ceControl' }
-        ]
+        ],
+        povByChar: {
+          yuta: {
+            title: '0卷·磨合祈本里香与高专实战特训',
+            intro: '你随真希、狗卷与熊猫开展高专实战磨合，摸索驾驭祈本里香咒力的方法',
+            choiceTitle: '高专特训时的侧重方向',
+            choices: [
+              { label: '跟随高专师长对阵特级拟态咒灵练手', weight: 50, action: 'fight', enemyName: '特训拟态特级咒灵', enemyPower: 46, statUp: 'taijutsu' },
+              { label: '专注稳定戒指回路与细微咒力控温', weight: 50, action: 'safe', effectText: '初步压住过怨溢出，咒力操纵 +1', statUp: 'ceControl' }
+            ]
+          }
+        }
       },
       {
         id: 'vol0_geto_declare',
@@ -519,7 +656,18 @@
         choices: [
           { label: '提前潜伏盘星教外围搜集情报', weight: 46, action: 'fight', enemyName: '盘星教护法咒灵', enemyPower: 38, statUp: 'iq' },
           { label: '留在高专清点咒具库备战', weight: 54, action: 'safe', effectText: '充分备战稳妥度过前夜，身体抗性 +1', statUp: 'bodyResist' }
-        ]
+        ],
+        povByChar: {
+          geto: {
+            title: '0卷·亲赴高专下达百鬼夜行宣战书',
+            intro: '你率家人现身东京高专挑明12月24日百鬼夜行决战宣言，与五条悟正面交锋气势',
+            choiceTitle: '宣战之后的战前筹备',
+            choices: [
+              { label: '猎杀游荡高危一级咒灵扩充百鬼库存', weight: 54, action: 'fight', enemyName: '野生特级以下咒灵群', enemyPower: 40, statUp: 'ceTotal' },
+              { label: '回返盘星教梳理京都东京双线兵力', weight: 46, action: 'safe', effectText: '万全统筹百鬼阵脚，智力 +1', statUp: 'iq' }
+            ]
+          }
+        }
       }
     ],
     canonStart: [
@@ -531,7 +679,8 @@
         choices: [
           { label: '正面对抗特级咒灵·花御', weight: 46, action: 'fight', enemyName: '花御', enemyPower: 48 },
           { label: '在赛场内正面切磋压制对手', weight: 34, action: 'fight', enemyName: '交流会主力选手', enemyPower: 36, statUp: 'taijutsu' },
-          { label: '破解外侧限制五条悟进入的「帐」', weight: 20, action: 'safe', effectText: '解析特殊结界术式，结界术 +1', statUp: 'barrier' }
+          { label: '破解外侧限制五条悟进入的「帐」', weight: 20, action: 'safe', effectText: '解析特殊结界术式，结界术 +1', statUp: 'barrier', excludeIds: ['gojo'] },
+          { label: '一招强破针对自己的限制「帐」并追击花御', weight: 24, action: 'safe', effectText: '随手轰开特制结界并稳住全场，结界术 +1', statUp: 'barrier', onlyIds: ['gojo'] }
         ]
       },
       {
@@ -562,7 +711,18 @@
         choices: [
           { label: '拦截并正面试探真人的无为转变', weight: 58, action: 'fight', enemyName: '真人（早期）', enemyPower: 47, statUp: 'soulResist' },
           { label: '提前介入孤立顺平远离骗局', weight: 42, action: 'safe', effectText: '化解校园惨剧，灵魂抗性 +1', statUp: 'soulResist' }
-        ]
+        ],
+        povByChar: {
+          mahito: {
+            title: '叶樱高校·试验无为转变与人类灵魂塑形',
+            intro: '你在电影院与叶樱高校测试灵魂干涉界限，等待高专术师上门检验成果',
+            choiceTitle: '面临高专赶来清场时的试验方式',
+            choices: [
+              { label: '放出改造体试探高专一年级与一级术师', weight: 56, action: 'fight', enemyName: '叶樱高专调查小队', enemyPower: 44, statUp: 'soulResist' },
+              { label: '抽身隐入下水道记录灵魂塑形规律', weight: 44, action: 'safe', effectText: '深化对灵魂本质与形状的解析，灵魂抗性 +1', statUp: 'soulResist' }
+            ]
+          }
+        }
       },
       {
         id: 'cs_mechamaru_mole',
@@ -570,8 +730,9 @@
         intro: '交流会前后高专情报疑似外泄，追踪查至与幸吉的傀儡中继点',
         choiceTitle: '追查内鬼线索时的决断',
         choices: [
-          { label: '截击前来灭口的夏油假体与真人', weight: 50, action: 'fight', enemyName: '涉事诅咒师伏兵', enemyPower: 43, statUp: 'versatility' },
-          { label: '保下与幸吉的情报通道作为暗桩', weight: 50, action: 'safe', effectText: '保留珍贵敌后情报网，智力 +1', statUp: 'iq' }
+          { label: '截击前来灭口的夏油假体与真人', weight: 50, action: 'fight', enemyName: '涉事诅咒师伏兵', enemyPower: 43, statUp: 'versatility', excludeIds: ['kenjaku', 'mahito'] },
+          { label: '提前布控夺取情报样本（傀儡战力测试）', weight: 50, action: 'fight', enemyName: '与幸吉外围武装傀儡', enemyPower: 43, statUp: 'versatility', onlyIds: ['kenjaku', 'mahito'] },
+          { label: '保下与幸吉的情报通道作为暗桩', weight: 50, action: 'safe', effectText: '保留珍贵情报暗线，智力 +1', statUp: 'iq' }
         ]
       }
     ],
@@ -583,10 +744,22 @@
         choiceTitle: '涩谷夜晚你切入哪处战场',
         choices: [
           { label: '拖住灾害极炎·漏瑚', weight: 30, action: 'fight', enemyName: '漏瑚', enemyPower: 54 },
-          { label: '在地铁站血战九相图长兄·胀相', weight: 34, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso' },
-          { label: '冲向涩谷站台支援七海建人', weight: 24, action: 'fight', enemyName: '真人', enemyPower: 52, savesNanami: true },
-          { label: '抢在狱门疆闭合前接应B5F人员', weight: 12, action: 'safe', effectText: '稳住站内战线减少伤亡，咒力操纵 +1', statUp: 'ceControl' }
-        ]
+          { label: '在地铁站血战九相图长兄·胀相', weight: 34, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso', excludeIds: ['choso'] },
+          { label: '冲向涩谷站台支援七海建人', weight: 24, action: 'fight', enemyName: '真人', enemyPower: 52, savesNanami: true, excludeIds: ['nanami'] },
+          { label: '在站台正面对垒来袭真人本尊', weight: 30, action: 'fight', enemyName: '真人', enemyPower: 52, savesNanami: true, onlyIds: ['nanami', 'choso'] },
+          { label: '抢在狱门疆闭合前接应B5F人员', weight: 12, action: 'safe', effectText: '稳住站内战线减少伤亡，咒力操纵 +1', statUp: 'ceControl', excludeIds: ['gojo'] }
+        ],
+        povByChar: {
+          gojo: {
+            title: '涩谷事变·B5F 0.2秒无量空处强行破局',
+            intro: '漏瑚、花御、胀相与真人在 B5F 站台围堵而来，你需要在人群中速战速决',
+            choiceTitle: '面对围堵特级阵营的应对',
+            choices: [
+              { label: '直取灾害极炎·漏瑚与花御突破封锁', weight: 58, action: 'fight', enemyName: '漏瑚＆花御（B5F围堵）', enemyPower: 56 },
+              { label: '先击溃胀相压阵随即全力扫清站台改造人', weight: 42, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso' }
+            ]
+          }
+        }
       },
       {
         id: 'shi_g_dagon',
@@ -595,8 +768,19 @@
         choiceTitle: '面对海啸般涌来的式神群',
         choices: [
           { label: '与队友共同抵挡至领域崩溃', weight: 52, action: 'fight', enemyName: '陀艮', enemyPower: 48 },
-          { label: '联手禅院直毘人抢攻本体与乱入者', weight: 48, action: 'fight', enemyName: '降灵·伏黑甚尔 / 陀艮', enemyPower: 55 }
-        ]
+          { label: '联手禅院直毘人抢攻本体与乱入者', weight: 48, action: 'fight', enemyName: '降灵·伏黑甚尔 / 陀艮', enemyPower: 55, excludeIds: ['toji'] }
+        ],
+        povByChar: {
+          toji: {
+            title: '涩谷事变·降灵失控破入「荡蕴平线」',
+            intro: '降灵术失控唤醒了你的肉体杀戮本能，一脚踏入陀艮的海洋领域之中',
+            choiceTitle: '抢夺游云闯入领域后的出手目标',
+            choices: [
+              { label: '手握三节棍游云强杀特级咒灵陀艮', weight: 65, action: 'fight', enemyName: '陀艮', enemyPower: 48, statUp: 'taijutsu' },
+              { label: '转头逼退在场高专禅院术师后独行离场', weight: 35, action: 'safe', effectText: '借短暂清醒压住暴走直觉，灵魂抗性 +1', statUp: 'soulResist' }
+            ]
+          }
+        }
       },
       {
         id: 'shi_g_smallpox',
@@ -614,8 +798,8 @@
         intro: '虎杖体内宿傩夺回身体，与漏瑚在涩谷中央交手引发大范围破坏',
         choiceTitle: '在全区崩坏边缘的自保与支援',
         choices: [
-          { label: '迎击趁火打劫的诅咒师小队', weight: 50, action: 'fight', enemyName: '涩谷伏击诅咒师团', enemyPower: 42 },
-          { label: '抢在伏魔御厨子展开前疏散百米外伤员', weight: 50, action: 'safe', effectText: '避开140米斩击半径保住众多同伴，体术 +1', statUp: 'taijutsu' }
+          { label: '迎击趁火打劫的诅咒师小队', weight: 50, action: 'fight', enemyName: '涉谷伏击诅咒师团', enemyPower: 42 },
+          { label: '抢在伏魔御厨子展开前疏散百米外伤员', weight: 50, action: 'safe', effectText: '避开140米斩击半径保住众多同伴，体术 +1', statUp: 'taijutsu', excludeIds: ['sukuna'] }
         ]
       },
       {
@@ -625,7 +809,8 @@
         choiceTitle: '涩谷终盘夺还狱门疆的一搏',
         choices: [
           { label: '突围迎战里梅与羂索护卫诅咒', weight: 64, action: 'fight', enemyName: '里梅（涩谷终盘）', enemyPower: 54 },
-          { label: '协同胀相与九十九由基拖延吸收进度', weight: 36, action: 'safe', effectText: '护住残存主力撤退，智力 +1', statUp: 'iq' }
+          { label: '协同胀相与九十九由基拖延吸收进度', weight: 36, action: 'safe', effectText: '护住残存主力撤退，智力 +1', statUp: 'iq', excludeIds: ['choso', 'yuki'] },
+          { label: '死守站外退路掩护同袍突围保留火种', weight: 36, action: 'safe', effectText: '苦战稳住后路护全主力撤退，智力 +1', statUp: 'iq', onlyIds: ['choso', 'yuki'] }
         ]
       }
     ],
@@ -636,8 +821,9 @@
         intro: '虎杖与东堂联手推进反击，九十九由基随后在站外拦路',
         choiceTitle: '敌方阵营在涩谷夜战的抉择',
         choices: [
-          { label: '联手迎战虎杖与东堂双人组', weight: 42, action: 'fight', enemyName: '虎杖与东堂', enemyPower: 48 },
-          { label: '掩护羂索撤离并对峙九十九由基', weight: 36, action: 'fight', enemyName: '九十九由基', enemyPower: 58 },
+          { label: '正面迎战虎杖与东堂双人组', weight: 42, action: 'fight', enemyName: '虎杖与东堂', enemyPower: 48 },
+          { label: '掩护羂索撤离并对峙九十九由基', weight: 36, action: 'fight', enemyName: '九十九由基', enemyPower: 58, excludeIds: ['kenjaku'] },
+          { label: '催动千千咒灵旋涡正面逼退九十九由基', weight: 38, action: 'fight', enemyName: '九十九由基', enemyPower: 58, onlyIds: ['kenjaku'] },
           { label: '趁乱伏击独自脱离战线的胀相', weight: 22, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso' }
         ]
       },
@@ -669,7 +855,27 @@
         choices: [
           { label: '趁乱收割受伤高专散兵提升积累', weight: 46, action: 'fight', enemyName: '涉谷高专散兵小队', enemyPower: 40 },
           { label: '果断远遁百五十米外躲过伏魔御厨子', weight: 54, action: 'safe', effectText: '精准评估风险保住性命，身体抗性 +1', statUp: 'bodyResist' }
-        ]
+        ],
+        povByChar: {
+          sukuna: {
+            title: '涩谷事变·十五指苏醒临时掌管肉身',
+            intro: '伏黑惠战场上漏瑚一口气喂下十余根手指，你久违地抢占虎杖躯壳展开试斩',
+            choiceTitle: '十五指状态在涩谷片刻自由时的兴致',
+            choices: [
+              { label: '正面对阵乱入的十影最强式神「魔虚罗」试招', weight: 62, action: 'fight', enemyName: '魔虚罗（涩谷十影调伏体）', enemyPower: 62, statUp: 'ceControl' },
+              { label: '展开伏魔御厨子与「灶」清扫涩谷百米街区', weight: 38, action: 'safe', effectText: '一击清空涩谷核心区余烬，体术 +1', statUp: 'taijutsu' }
+            ]
+          },
+          jogo: {
+            title: '涩谷事变·亲自喂指唤醒十五指宿傩',
+            intro: '你冒险将十根手指灌入容器，苏醒的宿傩却淡漠提出：能接下一击便顺你意',
+            choiceTitle: '直面十五指宿傩的玩味试炼',
+            choices: [
+              { label: '全力释放火砾虫与极之番·陨接招试深浅', weight: 60, action: 'fight', enemyName: '十五指宿傩（试招压制）', enemyPower: 64, canDie: false, statUp: 'ceTotal' },
+              { label: '收敛锋芒稳固火山领域残火保留实力', weight: 40, action: 'safe', effectText: '虽见实力差距仍精进极炎控制，效率 +1', statUp: 'ceEfficiency' }
+            ]
+          }
+        }
       },
       {
         id: 'shi_e_uraume',
@@ -679,7 +885,18 @@
         choices: [
           { label: '配合作战直面日下部与熊猫防线', weight: 54, action: 'fight', enemyName: '日下部笃也＆熊猫', enemyPower: 45 },
           { label: '布下撤退结界护送狱门疆转移', weight: 46, action: 'safe', effectText: '圆满完成撤离协助，咒力操纵 +1', statUp: 'ceControl' }
-        ]
+        ],
+        povByChar: {
+          uraume: {
+            title: '涩谷终盘·冰凝咒法「霜凪」冻彻战场',
+            intro: '狱门疆封印落幕时刻，你现身催动极寒冻住高专全军反扑掩护撤离',
+            choiceTitle: '接应宿傩大人与羂索撤出涉谷',
+            choices: [
+              { label: '全力催动冰瀑压制来援的胀相与日下部', weight: 58, action: 'fight', enemyName: '胀相＆日下部援军组', enemyPower: 50, statUp: 'ceTotal' },
+              { label: '借冰雾结界迎候宿傩大人并平稳抽身', weight: 42, action: 'safe', effectText: '圆满完成涉谷冰封接应任务，效率 +1', statUp: 'ceEfficiency' }
+            ]
+          }
+        }
       }
     ],
     culling: [
@@ -690,7 +907,8 @@
         choiceTitle: '在仙台结界内选择交手对象',
         choices: [
           { label: '正面对阵仙台石流龙与乌鹭', weight: 40, action: 'fight', enemyName: '石流龙＆乌鹭亨子', enemyPower: 54 },
-          { label: '挑战刚入场的特级·乙骨忧太', weight: 26, action: 'fight', enemyName: '乙骨忧太（死灭回游）', enemyPower: 60 },
+          { label: '挑战刚入场的特级·乙骨忧太', weight: 26, action: 'fight', enemyName: '乙骨忧太（死灭回游）', enemyPower: 60, excludeIds: ['yuta'] },
+          { label: '独自迎战石流龙、乌鹭与黑沐死围攻', weight: 38, action: 'fight', enemyName: '仙台四天王混战本阵', enemyPower: 58, onlyIds: ['yuta'], statUp: 'ceTotal' },
           { label: '在仙台地下遇袭黑沐死蟑螂群', weight: 18, action: 'fight', enemyName: '黑沐死', enemyPower: 46 },
           { label: '暗中收集泳者积分完善结界术', weight: 16, action: 'safe', effectText: '斩获足量总则分数，结界术 +1', statUp: 'barrier' }
         ]
@@ -701,9 +919,10 @@
         intro: '日车宽见、秤金次与高羽史彦接连展开各自规则对局',
         choiceTitle: '在东京结界的关键一战',
         choices: [
-          { label: '对决律师·日车宽见（诛伏赐死）', weight: 28, action: 'fight', enemyName: '日车宽见', enemyPower: 46 },
-          { label: '迎战坐杀博徒·秤金次', weight: 30, action: 'fight', enemyName: '秤金次', enemyPower: 54 },
-          { label: '误入高羽「超人」搞笑演出舞台', weight: 20, action: 'safe', effectText: '配合演出后顺利脱身，术式泛用 +1', statUp: 'versatility' },
+          { label: '对决律师·日车宽见（诛伏赐死）', weight: 28, action: 'fight', enemyName: '日车宽见', enemyPower: 46, excludeIds: ['higuruma'] },
+          { label: '迎战坐杀博徒·秤金次', weight: 30, action: 'fight', enemyName: '秤金次', enemyPower: 54, excludeIds: ['hakari'] },
+          { label: '误入高羽「超人」搞笑演出舞台', weight: 20, action: 'safe', effectText: '配合演出后顺利脱身，术式泛用 +1', statUp: 'versatility', excludeIds: ['takaba'] },
+          { label: '镇守东京结界迎击闯入的强豪泳者', weight: 32, action: 'fight', enemyName: '东京结界强豪泳者', enemyPower: 53, onlyIds: ['higuruma', 'hakari', 'takaba'] },
           { label: '追击泳者集结突入薨星宫外围', weight: 22, action: 'fight', enemyName: '东京第二结界泳者', enemyPower: 48 }
         ]
       },
@@ -715,7 +934,18 @@
         choices: [
           { label: '协同破开直哉的高速投影轨道', weight: 62, action: 'fight', enemyName: '咒灵化·禅院直哉', enemyPower: 51, statUp: 'taijutsu' },
           { label: '随三代修练相扑简易领域心得', weight: 38, action: 'safe', effectText: '把握零帧感知与结界步法，身体抗性 +1', statUp: 'bodyResist' }
-        ]
+        ],
+        povByChar: {
+          maki: {
+            title: '死灭回游·樱岛彻底蜕变斩断禅院直哉',
+            intro: '与大道、三代切磋后你的五感彻底破壳，正面对上三倍音速的咒灵化直哉',
+            choiceTitle: '樱岛天与觉醒决战',
+            choices: [
+              { label: '执掌释魂刀以零帧直觉一刀斩破咒灵直哉', weight: 70, action: 'fight', enemyName: '咒灵化·禅院直哉', enemyPower: 51, statUp: 'taijutsu' },
+              { label: '借相扑领域磨砺空气踩踏与气味感知', weight: 30, action: 'safe', effectText: '达成与伏黑甚尔比肩的感官境界，身体抗性 +1', statUp: 'bodyResist' }
+            ]
+          }
+        }
       },
       {
         id: 'cg_tengen_guard',
@@ -725,7 +955,18 @@
         choices: [
           { label: '合力阻截全盛羂索反重力术式', weight: 58, action: 'fight', enemyName: '羂索（薨星宫）', enemyPower: 61 },
           { label: '守护天元结界节点确保同伴撤出', weight: 42, action: 'safe', effectText: '解析空旷大结界核心构造，结界术 +1', statUp: 'barrier' }
-        ]
+        ],
+        povByChar: {
+          kenjaku: {
+            title: '死灭回游·亲身踏入薨星宫压制天元护卫阵',
+            intro: '你带着千年结界造诣独闯薨星宫地下核心，面前站着特级九十九由基与胀相',
+            choiceTitle: '面对薨星宫护卫阵的破解手段',
+            choices: [
+              { label: '展开开放式领域「胎藏遍野」击破护卫阵线', weight: 62, action: 'fight', enemyName: '九十九由基＆胀相＆天元结界', enemyPower: 62, statUp: 'barrier' },
+              { label: '巧用反重力与结界微操速收天元撤离', weight: 38, action: 'safe', effectText: '顺利将天元纳入同化掌心，结界术 +1', statUp: 'barrier' }
+            ]
+          }
+        }
       },
       {
         id: 'cg_yorozu_bath',
@@ -735,7 +976,27 @@
         choices: [
           { label: '截击游荡泳者抢先积攒实战手感', weight: 52, action: 'fight', enemyName: '受肉强豪泳者', enemyPower: 49, statUp: 'ceControl' },
           { label: '协助回收狱门疆并整合全员情报', weight: 48, action: 'safe', effectText: '全军整编完成准备迎接新宿终局，智力 +1', statUp: 'iq' }
-        ]
+        ],
+        povByChar: {
+          sukuna: {
+            title: '死灭终盘·沐浴沉渊与仙台斩万试刀',
+            intro: '接掌新容器后你借助里梅备好的黑浴稳固魂魄掌控，随即独赴仙台一战了断万',
+            choiceTitle: '决战前夕的沐浴与试刀调律',
+            choices: [
+              { label: '独以十影与体术在仙台了断执念术师·万', weight: 68, action: 'fight', enemyName: '万（昆虫铠·真球）', enemyPower: 56, statUp: 'versatility' },
+              { label: '沉黑浴调理魂魄并静候神武解重铸齐备', weight: 32, action: 'safe', effectText: '容器契合拉满状态齐整，灵魂抗性 +1', statUp: 'soulResist' }
+            ]
+          },
+          yorozu: {
+            title: '死灭终盘·仙台重逢宿傩兑现执念一战',
+            intro: '得知宿傩转生现代，你锻造昆虫铠与「真球」约战仙台竞技场',
+            choiceTitle: '仙台重逢宿傩之时的决意',
+            choices: [
+              { label: '展开昆虫铠与领域「三重疾苦」倾力相搏', weight: 74, action: 'fight', enemyName: '十影宿傩（试招压制态）', enemyPower: 65, canDie: true, statUp: 'ceControl' },
+              { label: '亲手构筑特级遗物咒具神武解留存后世', weight: 26, action: 'safe', effectText: '遗物构筑铸就重器雏形，术式泛用 +1', statUp: 'versatility' }
+            ]
+          }
+        }
       }
     ],
     future68: [
@@ -747,9 +1008,9 @@
         choices: [
           { label: '切磋星外来客达布拉', weight: 22, action: 'fight', enemyName: '达布拉', enemyPower: 58, defeatsKey: 'dabura', canDie: false },
           { label: '交锋八握剑异戒神将魔虚罗', weight: 18, action: 'fight', enemyName: '完全体魔虚罗', enemyPower: 66, canDie: true },
-          { label: '切磋老将·68虎杖', weight: 18, action: 'fight', enemyName: '68虎杖', enemyPower: 56, canDie: false },
-          { label: '对峙「里梅附身真剑」与混沌调和·马鲁', weight: 14, action: 'fight', enemyName: '附身真剑＆马鲁', enemyPower: 60, canDie: false },
-          { label: '降伏卷土重来·灵魂形态真人', weight: 14, action: 'fight', enemyName: '灵魂形态·真人', enemyPower: 54, canDie: true },
+          { label: '切磋老将·68虎杖', weight: 18, action: 'fight', enemyName: '68虎杖', enemyPower: 56, canDie: false, excludeIds: ['itadori'] },
+          { label: '对峙「里梅附身真剑」与混沌调和·马鲁', weight: 14, action: 'fight', enemyName: '附身真剑＆马鲁', enemyPower: 60, canDie: false, excludeIds: ['uraume'] },
+          { label: '降伏卷土重来·灵魂形态真人', weight: 14, action: 'fight', enemyName: '灵魂形态·真人', enemyPower: 54, canDie: true, excludeIds: ['mahito'] },
           { label: '隐居传道静观后世（平稳养老）', weight: 14, action: 'safe', effectText: '安稳度过余生，智力 +1', statUp: 'iq' }
         ]
       }
@@ -764,10 +1025,10 @@
     opponents: [
       { id: 'dabura', label: '达布拉（星外来客）', enemyName: '达布拉', enemyPower: 58, defeatsKey: 'dabura', defaultCanDie: false, weight: 22 },
       { id: 'mahoraga68', label: '魔虚罗（完全调伏体）', enemyName: '完全体魔虚罗', enemyPower: 66, defaultCanDie: true, weight: 18 },
-      { id: 'yuji68', label: '68岁 · 虎杖悠仁', enemyName: '68虎杖', enemyPower: 56, defaultCanDie: false, weight: 20 },
+      { id: 'yuji68', label: '68岁 · 虎杖悠仁', enemyName: '68虎杖', enemyPower: 56, defaultCanDie: false, excludeIds: ['itadori'], weight: 20 },
       { id: 'malu', label: '混沌与调和 · 马鲁', enemyName: '马鲁', enemyPower: 55, defaultCanDie: false, weight: 14 },
-      { id: 'uraume_blade', label: '里梅附身 · 真剑', enemyName: '里梅附身真剑', enemyPower: 57, defaultCanDie: false, weight: 14 },
-      { id: 'mahito_soul', label: '灵魂形态 · 真人', enemyName: '灵魂形态·真人', enemyPower: 54, defaultCanDie: true, weight: 12 }
+      { id: 'uraume_blade', label: '里梅附身 · 真剑', enemyName: '里梅附身真剑', enemyPower: 57, defaultCanDie: false, excludeIds: ['uraume'], weight: 14 },
+      { id: 'mahito_soul', label: '灵魂形态 · 真人', enemyName: '灵魂形态·真人', enemyPower: 54, defaultCanDie: true, excludeIds: ['mahito'], weight: 12 }
     ],
     motives: [
       { id: 'friendly', label: '友好切磋（点到为止，双方无性命之忧）', canDie: false, powerDelta: -4, note: '友好的次世代切磋，以武会友', weight: 46 },
@@ -848,7 +1109,7 @@
       technique: '无下限咒术',
       skills: ['反转术式', '领域展开', '黑闪', '简易领域'],
       tools: [],
-      attrs: { ceTotal: 8, ceControl: 11, ceEfficiency: 12, taijutsu: 11, bodyResist: 10, soulResist: 9, barrier: 11, versatility: 11, iq: 10, talent: 11 }
+      attrs: { ceTotal: 9, ceControl: 12, ceEfficiency: 13, taijutsu: 11, bodyResist: 10, soulResist: 9, barrier: 11, versatility: 11, iq: 10, talent: 12 }
     },
     {
       name: '诅咒之王 · 两面宿傩（模板）',
@@ -857,7 +1118,7 @@
       technique: '御厨子',
       skills: ['完整咏唱', '反转术式', '领域展开', '黑闪', '领域展延'],
       tools: [{ shape: '降魔杵（神武解）', effect: '释放咒术（神武解）', bonus: 8, thunderCast: true }],
-      attrs: { ceTotal: 12, ceControl: 11, ceEfficiency: 11, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 11, versatility: 11, iq: 11, talent: 11 }
+      attrs: { ceTotal: 13, ceControl: 11, ceEfficiency: 11, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 12, versatility: 11, iq: 11, talent: 12 }
     },
     {
       name: '天与暴君 · 伏黑甚尔（模板）',
@@ -908,22 +1169,22 @@
     {
       id: 'gojo', name: '五条悟', title: '现代最强 · 六眼无下限', weight: 4, cost: 6,
       faction: 'good', eraId: 'hiddenInv', techniqueId: 'limitless', technique: '无下限咒术',
-      officialGrade: '特级', gradeBonus: 15, looks: 10, morality: 2, aggro: 9,
+      officialGrade: '特级', gradeBonus: 19, looks: 10, morality: 2, aggro: 9,
       skills: ['反转术式', '领域展开', '黑闪', '简易领域', '落之雪（落花之情）'],
       tools: [],
-      attrs: { ceTotal: 8, ceControl: 10, ceEfficiency: 11, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 10, versatility: 10, iq: 9, talent: 10 },
+      attrs: { ceTotal: 9, ceControl: 12, ceEfficiency: 13, taijutsu: 11, bodyResist: 10, soulResist: 8, barrier: 11, versatility: 11, iq: 10, talent: 12 },
       canonNote: '天生六眼与无下限并立，唯需戒备狱门疆与世界斩'
     },
     {
       id: 'sukuna', name: '两面宿傩', title: '诅咒之王 · 堕天御厨子', weight: 3, cost: 6,
       faction: 'evil', eraId: 'heian', techniqueId: 'shrine', technique: '御厨子',
-      officialGrade: '特级', gradeBonus: 15, looks: 6, morality: -5, aggro: 10,
+      officialGrade: '特级', gradeBonus: 18, looks: 6, morality: -5, aggro: 10,
       skills: ['完整咏唱', '反转术式', '领域展开', '黑闪', '领域展延', '弥虚葛笼'],
       tools: [
         { shape: '神武解（金刚杵）', effect: '释放咒术（神武解）', bonus: 8, thunderCast: true, tier: '特级' },
         { shape: '飞天（三叉戟）', effect: '伤害增幅（飞天）', bonus: 8, damageMult: 1.25, tier: '特级' }
       ],
-      attrs: { ceTotal: 11, ceControl: 10, ceEfficiency: 10, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 11, versatility: 10, iq: 10, talent: 10 },
+      attrs: { ceTotal: 13, ceControl: 11, ceEfficiency: 11, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 12, versatility: 11, iq: 11, talent: 12 },
       canonNote: '史上最强术师与开放式领域宗师，一切生灵俯首'
     },
     {
@@ -932,7 +1193,7 @@
       officialGrade: '三级', gradeBonus: 4, looks: 7, morality: 4, aggro: 5,
       skills: ['黑闪'],
       tools: [{ shape: '屠坐魔（短刀）', effect: '附魔利刃（输出+10%）', bonus: 3, tier: '二级' }],
-      attrs: { ceTotal: 6, ceControl: 6, ceEfficiency: 6, taijutsu: 10, bodyResist: 10, soulResist: 9, barrier: 3, versatility: 5, iq: 6, talent: 9 },
+      attrs: { ceTotal: 6, ceControl: 6, ceEfficiency: 6, taijutsu: 9, bodyResist: 9, soulResist: 9, barrier: 3, versatility: 5, iq: 6, talent: 9 },
       canonNote: '开篇具备超常肉体与黑闪直觉；随时间线推进至死灭/新宿将陆续觉醒一级评定、简易领域、反转术式、赤血操术与御厨子'
     },
     {
@@ -972,7 +1233,7 @@
         { shape: '释魂刀（大太刀）', effect: '无坚不摧（释魂刀）', bonus: 8, indestructible: true, damageMult: 1.25, tier: '特级' },
         { shape: '三节棍（游云）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' }
       ],
-      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 11, bodyResist: 10, soulResist: 9, barrier: 0, versatility: 8, iq: 8, talent: 8 },
+      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 12, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 9, talent: 8 },
       canonNote: '零咒力换取身体素质与免疫领域必中效果，身负库存咒灵携天逆鉾、释魂刀、游云作战'
     },
     {
@@ -1026,10 +1287,10 @@
     {
       id: 'kashimo', name: '鹿紫云一', title: '江户雷神 · 幻兽琥珀', weight: 4, cost: 4,
       faction: 'neutral', eraId: 'edo400', techniqueId: 'mythBeast', technique: '幻兽琥珀（电气属性）',
-      officialGrade: '特级', gradeBonus: 13, looks: 7, morality: 0, aggro: 8,
+      officialGrade: '特级', gradeBonus: 15, looks: 7, morality: 0, aggro: 8,
       skills: ['弥虚葛笼'],
-      tools: [{ shape: '导电如意棒', effect: '释放咒术（电荷回传雷击）', bonus: 6, thunderCast: true, tier: '一级' }],
-      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 7, iq: 7, talent: 8 },
+      tools: [{ shape: '导电如意棒', effect: '释放咒术（电荷回传雷击）', bonus: 6, thunderCast: true, tier: '特级' }],
+      attrs: { ceTotal: 8, ceControl: 9, ceEfficiency: 9, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 7, versatility: 8, iq: 8, talent: 9 },
       canonNote: '四百年专心寻求一战的求道者，带电咒力与必中之雷极具威胁'
     },
     {
@@ -1044,11 +1305,11 @@
     {
       id: 'higuruma', name: '日车宽见', title: '十二天修成领域 · 前律师', weight: 5, cost: 4,
       faction: 'good', eraId: 'culling', techniqueId: 'higurumaLaw', technique: '诛伏赐死（审判领域）',
-      officialGrade: '一级', gradeBonus: 10, looks: 8, morality: 2, aggro: 4,
-      skills: ['领域展开', '领域展延', '反转术式'],
-      tools: [{ shape: '审判木槌 / 处刑人之剑', effect: '无效化术式（没收）与无坚不摧（处刑人之剑）', bonus: 7, nullify: true, canCancelMove: true, indestructible: true, damageMult: 1.25, tier: '特级' }],
-      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 8, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 9, versatility: 7, iq: 9, talent: 10 },
-      canonNote: '十二天独自推演出完整领域的法学天才，战场现学反转术式与领域展延'
+      officialGrade: '一级', gradeBonus: 8, looks: 8, morality: 2, aggro: 4,
+      skills: ['领域展开'],
+      tools: [{ shape: '审判木槌', effect: '无效化术式（没收）', bonus: 5, nullify: true, canCancelMove: true, tier: '一级' }],
+      attrs: { ceTotal: 6, ceControl: 7, ceEfficiency: 7, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 9, versatility: 7, iq: 9, talent: 10 },
+      canonNote: '十二天独自推演出领域的法学天才；死灭初期尚未领悟反转与领域展延，新宿决战中现学高阶技巧并觉醒处刑人之剑'
     },
     {
       id: 'yuki', name: '九十九由基', title: '星之怒 · 游历四海的特级', weight: 4, cost: 5,
@@ -1408,12 +1669,31 @@
     { id: 'higuruma_squad', label: '鹿紫云之后与日车宽见、虎杖悠仁、胀相对战一削原身宿傩', enemyTitle: '四臂完全体·原身宿傩（围攻篇）', baseAtk: 38, agito: false, mahoraga: false, forbidMahoSummon: true, startWithGojo: false, canGojoJoin: false, squadAlly: true, weight: 20 }
   ];
 
+  var SUKUNA_SHINJUKU_MOTIVES = [
+    { id: 'sukuna_duel', label: '兴致大起 · 正面品鉴「六眼」与当代强者成色', buffNote: '咀嚼宿敌战意：首轮基础战值 +10，尽兴搏杀', firstRoundBonus: 10, weight: 38 },
+    { id: 'sukuna_preserve', label: '老辣节能控场 · 留存底牌应对车轮围攻', buffNote: '老辣控场：重伤兜底抗压 +10%，首轮基础战值 +6', protectBonus: 10, firstRoundBonus: 6, weight: 32 },
+    { id: 'sukuna_slaughter', label: '释放恶念凶威 · 立意斩尽新宿高专讨伐阵', buffNote: '恶念倾泻：首轮压迫输出 +12，全军寒颤', firstRoundBonus: 12, weight: 30 }
+  ];
+
+  var SUKUNA_SHINJUKU_ORDERS = [
+    { id: 'vs_gojo_solo', mapsFrom: 'with_gojo', label: '揭幕宿敌战 · 正面对决全盛五条悟（六眼无下限）', enemyTitle: '现代最强 · 五条悟（全盛六眼）', baseAtk: 42, enemyHasGojo: true, enemyHasCoalition: false, enemyInfinity: 4, hasTenShadows: true, weight: 32 },
+    { id: 'vs_gojo_then_all', mapsFrom: 'before_gojo', label: '新宿总决战 · 先斩五条悟再迎高专讨伐联军', enemyTitle: '五条悟＆高专讨伐联军', baseAtk: 48, enemyHasGojo: true, enemyHasCoalition: true, enemyInfinity: 4, hasTenShadows: true, weight: 30 },
+    { id: 'vs_higuruma_squad', mapsFrom: 'higuruma_squad', label: '四臂真身迎战日车宽见、乙骨忧太、虎杖与真希围攻阵', enemyTitle: '高专特级＆处刑剑围剿小队', baseAtk: 39, enemyHasGojo: false, enemyHasCoalition: true, enemyInfinity: 0, hasTenShadows: false, weight: 22 },
+    { id: 'vs_post_gojo_rush', mapsFrom: 'after_gojo', label: '重创耗损态连战车轮奇袭讨伐阵（无十影助战）', enemyTitle: '高专车轮奇袭讨伐阵', baseAtk: 34, enemyHasGojo: false, enemyHasCoalition: true, enemyInfinity: 0, hasTenShadows: false, weight: 16 }
+  ];
+
   var BOSS_COUNT_SLICES = {
     player: [
       { id: 3, count: 3, label: '本轮出招数：3 招', weight: 24 },
       { id: 4, count: 4, label: '本轮出招数：4 招', weight: 36 },
       { id: 5, count: 5, label: '本轮出招数：5 招', weight: 26 },
       { id: 6, count: 6, label: '本轮出招数：6 招！！', weight: 14 }
+    ],
+    sukunaPlayer: [
+      { id: 4, count: 4, label: '诅咒之王出招数：4 招', weight: 22 },
+      { id: 5, count: 5, label: '诅咒之王出招数：5 招', weight: 36 },
+      { id: 6, count: 6, label: '诅咒之王出招数：6 招', weight: 28 },
+      { id: 7, count: 7, label: '诅咒之王全开：7 招！！', weight: 14 }
     ],
     gojo: [
       { id: 3, count: 3, label: '五条悟本轮出招：3 次', weight: 20 },
@@ -1427,6 +1707,12 @@
       { id: 4, count: 4, label: '宿傩本轮出招：4 招', weight: 36 },
       { id: 5, count: 5, label: '宿傩本轮出招：5 招', weight: 28 },
       { id: 6, count: 6, label: '宿傩本轮出招：6 招', weight: 14 }
+    ],
+    antiSukuna: [
+      { id: 3, count: 3, label: '高专讨伐阵出招：3 招', weight: 22 },
+      { id: 4, count: 4, label: '高专讨伐阵出招：4 招', weight: 36 },
+      { id: 5, count: 5, label: '高专讨伐阵出招：5 招', weight: 28 },
+      { id: 6, count: 6, label: '高专讨伐阵全员压上：6 招', weight: 14 }
     ]
   };
 
@@ -1455,7 +1741,7 @@
       { id: 'sh_dismantle', label: '「解」连发斩击', power: 18, weight: 26 },
       { id: 'sh_cleave', label: '零距离「捌」贴身切裂', power: 21, weight: 24 },
       { id: 'sh_net', label: '网格斩大范围覆盖', power: 23, weight: 20 },
-      { id: 'sh_fuga', label: '■「开」·灶之烈焰贯通', power: 28, weight: 14 }
+      { id: 'sh_fuga', label: '■「开」·灶之烈焰贯通', power: 28, piercesInfinity: true, weight: 14 }
     ],
     curseManip: [
       { id: 'cm_uzumaki', label: '极之番「漩涡」·咒灵凝聚轰击', power: 26, weight: 22 },
@@ -1629,6 +1915,20 @@
     { id: 'worldSlash', label: '扩展目标·「世界斩」', dmg: 35, weight: 5 }
   ];
 
+  var ANTI_SUKUNA_MOVES = [
+    { id: 'anti_uv', label: '五条悟 · 领域展开「无量空处」', dmg: 25, isDomain: true, isGojoUv: true, requiresGojo: true, weight: 14 },
+    { id: 'anti_unlimited_purple', label: '五条悟 · 无限制虚式「茈」', dmg: 35, requiresGojo: true, weight: 9 },
+    { id: 'anti_red', label: '五条悟 · 术式反转「赫」近身轰击', dmg: 22, requiresGojo: true, weight: 13 },
+    { id: 'anti_blue_bf', label: '五条悟 · 苍拳黑闪！！（敌方额外行动2次）', dmg: 24, isBlackFlash: true, extraActions: 2, requiresGojo: true, weight: 9 },
+    { id: 'anti_yuta_ladder', label: '乙骨忧太 · 模倣天使「邪去侮之梯」', dmg: 23, requiresCoalition: true, weight: 12 },
+    { id: 'anti_higuruma_sword', label: '日车宽见 ·「处刑人之剑」逼命突刺', dmg: 24, requiresCoalition: true, weight: 11 },
+    { id: 'anti_yuji_soul_bf', label: '虎杖悠仁 · 灵魂边界黑闪连打（敌方额外行动1次）', dmg: 21, isBlackFlash: true, extraActions: 1, requiresCoalition: true, weight: 12 },
+    { id: 'anti_maki_ssk', label: '禅院真希 · 释魂刀零帧隐袭切裂', dmg: 21, requiresCoalition: true, weight: 11 },
+    { id: 'anti_todo_swap', label: '东堂葵＆全员 · 高周波换位合击', dmg: 18, requiresCoalition: true, weight: 11 },
+    { id: 'anti_kashimo_amber', label: '鹿紫云一 · 幻兽琥珀「必中雷电」', dmg: 23, requiresCoalition: true, weight: 9 },
+    { id: 'anti_simple_domain', label: '日下部＆高专全军 · 简易领域合围突击', dmg: 15, requiresCoalition: true, weight: 10 }
+  ];
+
   var MAHORAGA_ADAPT_COUNTS = [
     { id: 1, count: 1, label: '本轮适应 1 次', weight: 36 },
     { id: 2, count: 2, label: '本轮适应 2 次', weight: 28 },
@@ -1685,6 +1985,9 @@
     SHINJUKU_PREP_GROWTH: SHINJUKU_PREP_GROWTH,
     SHINJUKU_MOTIVES: SHINJUKU_MOTIVES,
     SHINJUKU_SUKUNA_ORDERS: SHINJUKU_SUKUNA_ORDERS,
+    SUKUNA_SHINJUKU_MOTIVES: SUKUNA_SHINJUKU_MOTIVES,
+    SUKUNA_SHINJUKU_ORDERS: SUKUNA_SHINJUKU_ORDERS,
+    ANTI_SUKUNA_MOVES: ANTI_SUKUNA_MOVES,
     BOSS_COUNT_SLICES: BOSS_COUNT_SLICES,
     SIGNATURE_MOVES_BY_TECH: SIGNATURE_MOVES_BY_TECH,
     FUTURE68_DATA: FUTURE68_DATA,

@@ -292,20 +292,30 @@
     if ((char.cursedCorpses || []).length > 0) {
       tags.push('<span class="hud-tag is-good">自律咒骸×' + char.cursedCorpses.length + '助战</span>');
     }
-    if (b.gojoJoined) {
-      tags.push('<span class="hud-tag is-good">五条悟助战 · 不可侵 ' + b.infinityBlocks + ' 次 · 领域×' + (b.gojoDomainCount || 0) + '</span>');
-    }
-    if ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0) > 0) {
-      tags.push('<span class="hud-tag is-good">宿傩下轮受限 -' + ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0)) + ' 招</span>');
-    }
-    tags.push('<span class="hud-tag">' + (b.agitoAlive ? '嵌合兽·颚吐存活' : '颚吐已破') + '</span>');
-    tags.push('<span class="hud-tag">' + (b.mahoragaAlive ? '魔虚罗在场 (' + (b.totalAdaptations || 0) + '/13)' : '魔虚罗已灭') + '</span>');
+    if (b.isSukunaPlayer) {
+      if (b.enemyHasGojo) {
+        tags.push('<span class="hud-tag is-warn">敌五条悟 · 不可侵 ' + (b.enemyInfinityBlocks || 0) + ' 层</span>');
+      }
+      tags.push('<span class="hud-tag is-good">' + (b.hasTenShadows ? '宿傩持有十影 · 魔虚罗可破盾' : '四臂真身完全体') + '</span>');
+      tags.push('<span class="hud-tag">' + (b.playerDomainActive ? '伏魔御厨子展开（透穿不可侵）' : '御厨子领域待展') + '</span>');
+    } else {
+      if (char.canonCharId === 'gojo' && (b.infinityBlocks || 0) > 0) {
+        tags.push('<span class="hud-tag is-good">本尊无下限 · 不可侵 ' + b.infinityBlocks + ' 次</span>');
+      } else if (b.gojoJoined) {
+        tags.push('<span class="hud-tag is-good">五条悟助战 · 不可侵 ' + b.infinityBlocks + ' 次 · 领域×' + (b.gojoDomainCount || 0) + '</span>');
+      }
+      if ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0) > 0) {
+        tags.push('<span class="hud-tag is-good">宿傩下轮受限 -' + ((b.sukunaStun || 0) + (b.sukunaNextPenalty || 0)) + ' 招</span>');
+      }
+      tags.push('<span class="hud-tag">' + (b.agitoAlive ? '嵌合兽·颚吐存活' : '颚吐已破') + '</span>');
+      tags.push('<span class="hud-tag">' + (b.mahoragaAlive ? '魔虚罗在场 (' + (b.totalAdaptations || 0) + '/13)' : '魔虚罗已灭') + '</span>');
 
-    Object.keys(b.adaptations || {}).forEach(function (moveName) {
-      var lv = b.adaptations[moveName];
-      var pct = Math.min(100, lv * 30);
-      tags.push('<span class="hud-tag is-warn">魔虚罗适应[' + escapeHtml(moveName.slice(0, 6)) + '] -' + pct + '%</span>');
-    });
+      Object.keys(b.adaptations || {}).forEach(function (moveName) {
+        var lv = b.adaptations[moveName];
+        var pct = Math.min(100, lv * 30);
+        tags.push('<span class="hud-tag is-warn">魔虚罗适应[' + escapeHtml(moveName.slice(0, 6)) + '] -' + pct + '%</span>');
+      });
+    }
 
     $('hudTagsRow').innerHTML = tags.join('');
   }

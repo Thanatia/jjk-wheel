@@ -58,20 +58,31 @@
     if (id === 'gojo') {
       if (eraId === 'hiddenInv' && isInit) {
         char.canonTitle = '高专二年级 · 六眼无下限';
+        char.gradeBonus = 15;
         char.skills = ['反转术式', '黑闪', '落之雪（落花之情）'];
-        char.attrs.ceControl = 9;
-        char.attrs.ceEfficiency = 11;
+        char.attrs.ceTotal = 8;
+        char.attrs.ceControl = 10;
+        char.attrs.ceEfficiency = 12;
         char.attrs.taijutsu = 9;
+        char.attrs.bodyResist = 9;
+        char.attrs.soulResist = 8;
         char.attrs.barrier = 8;
         char.attrs.versatility = 9;
+        char.attrs.iq = 9;
+        char.attrs.talent = 11;
       } else if (eraIdx >= 3 || eraIdx <= 1) {
         char.canonTitle = '现代最强 · 六眼无下限';
+        char.gradeBonus = Math.max(char.gradeBonus || 15, 19);
         ['反转术式', '领域展开', '黑闪', '简易领域', '落之雪（落花之情）'].forEach(function (s) { ensureCharSkill(char, s); });
-        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 10);
-        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 11);
-        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 10);
-        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 10);
-        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 10);
+        char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 9);
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 12);
+        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 13);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 11);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 10);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 11);
+        char.attrs.versatility = Math.max(char.attrs.versatility || 0, 11);
+        char.attrs.iq = Math.max(char.attrs.iq || 0, 10);
+        char.attrs.talent = Math.max(char.attrs.talent || 0, 12);
         if (!isInit) note = '五条悟步入全盛期：无量空处与全套高阶技巧完备';
       }
     } else if (id === 'geto') {
@@ -116,6 +127,8 @@
         char.technique = '黑闪连打 / 宿傩受肉体';
         char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 7);
         char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 7);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 10);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 10);
         char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 10);
         char.attrs.versatility = Math.max(char.attrs.versatility || 0, 6);
       }
@@ -132,8 +145,11 @@
         ['黑闪', '反转术式', '简易领域', '领域展开'].forEach(function (s) { ensureCharSkill(char, s); });
         ensureCharTool(char, { shape: '刚笼手（咒具臂铠）', effect: '伤害增幅（游云系）', bonus: 6, damageMult: 1.25, tier: '特级' });
         char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 8);
-        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 8);
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 9);
         char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 8);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 11);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 11);
+        char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 11);
         char.attrs.barrier = Math.max(char.attrs.barrier || 0, 7);
         char.attrs.versatility = Math.max(char.attrs.versatility || 0, 8);
         if (!isInit) note = '虎杖悠仁觉醒赤血操术、现代御厨子、反转术式与领域展开';
@@ -163,12 +179,25 @@
         char.attrs.ceControl = 0;
         char.attrs.ceEfficiency = 0;
         char.attrs.barrier = 0;
-        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 11);
-        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 10);
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 12);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 11);
         char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 9);
         char.attrs.versatility = Math.max(char.attrs.versatility || 0, 8);
+        char.attrs.iq = Math.max(char.attrs.iq || 0, 8);
         ensureCharTool(char, { shape: '释魂刀（大太刀）', effect: '无坚不摧（释魂刀）', bonus: 8, indestructible: true, damageMult: 1.25, tier: '特级' });
         if (!isInit) note = '禅院真希完全体觉醒为零咒力天与暴君，执掌释魂刀';
+      }
+    } else if (id === 'higuruma') {
+      if (eraIdx >= 7) {
+        char.canonTitle = '新宿决战 · 法庭天才临战突破';
+        char.gradeBonus = Math.max(char.gradeBonus || 8, 12);
+        ['领域展开', '领域展延', '反转术式'].forEach(function (s) { ensureCharSkill(char, s); });
+        ensureCharTool(char, { shape: '处刑人之剑（审判重塑）', effect: '无坚不摧（处刑人之剑）与无效化术式', bonus: 7, nullify: true, canCancelMove: true, indestructible: true, damageMult: 1.25, tier: '特级' });
+        char.attrs.ceControl = Math.max(char.attrs.ceControl || 0, 9);
+        char.attrs.ceEfficiency = Math.max(char.attrs.ceEfficiency || 0, 8);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 10);
+        char.attrs.talent = Math.max(char.attrs.talent || 0, 11);
+        if (!isInit) note = '日车宽见在绝境交锋中学会领域展延与反转术式，并亮出处刑人之剑';
       }
     } else if (id === 'nobara') {
       if (eraIdx >= 5) {
@@ -228,7 +257,7 @@
       Object.keys(preset.statOverrides).forEach(function (k) {
         var valStr = preset.statOverrides[k];
         if (valStr && valStr !== 'random' && char.attrs.hasOwnProperty(k)) {
-          char.attrs[k] = clamp(parseInt(valStr, 10) || 4, 0, 12);
+          char.attrs[k] = clamp(parseInt(valStr, 10) || 4, 0, DATA.RANK_SCALE.length - 1);
         }
       });
     }
@@ -361,6 +390,8 @@
     var bondBonus = (char.identityId === 'shikigami' && char.flags && typeof char.flags.masterBondScore === 'number')
       ? char.flags.masterBondScore * 2
       : 0;
+    var trueZeroCe = isHeavenZeroChar(char) && (a.ceTotal || 0) === 0;
+    var heavenZeroBonus = trueZeroCe ? (a.taijutsu >= 11 ? 14 : a.taijutsu >= 9 ? 10 : a.taijutsu >= 7 ? 6 : 0) : 0;
     var antiCurseBonus = (char.shikigamiMechId === 'sword_exorcism' && isCurseEnemyName(enemyName)) ? 8 : 0;
     var seanceBonus = (char.flags && char.flags.seanceAllyBonus) ? char.flags.seanceAllyBonus : 0;
     var flagPowerBonus = (char.flags && char.flags.powerBonusAcc) ? char.flags.powerBonusAcc : 0;
@@ -368,7 +399,7 @@
     var vowMult = (char.flags && char.flags.vowAtkMult) ? char.flags.vowAtkMult : 1;
     var scriptBonus = (char.flags && char.flags.scriptLevel > 0) ? char.flags.scriptLevel * 2 : 0;
     var injuryPenalty = char.hpStatus === '重伤' ? 9 : char.hpStatus === '轻伤' ? 3 : 0;
-    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + bondBonus + antiCurseBonus + seanceBonus + flagPowerBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
+    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + bondBonus + heavenZeroBonus + antiCurseBonus + seanceBonus + flagPowerBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
     return clamp(Math.round(raw), 1, 210);
   }
 
@@ -753,7 +784,7 @@
       Object.keys(preset.statOverrides).forEach(function (k) {
         var valStr = preset.statOverrides[k];
         if (valStr && valStr !== 'random' && state.char.attrs.hasOwnProperty(k)) {
-          state.char.attrs[k] = clamp(parseInt(valStr, 10) || 4, 0, 12);
+          state.char.attrs[k] = clamp(parseInt(valStr, 10) || 4, 0, DATA.RANK_SCALE.length - 1);
         }
       });
     }
@@ -1042,7 +1073,18 @@
     }
 
     if (!zeroCe && char.skills.indexOf('领域展开') >= 0) {
-      list.push({ id: 'domain', label: '领域展开·生得领域强压（不耗咏唱）', power: 19, isDomain: true, weight: 12 });
+      if (boss.isSukunaPlayer) {
+        list.push({ id: 'domain', label: '领域展开·伏魔御厨子（开放式必破无量空处，不耗咏唱）', power: 26, isDomain: true, piercesInfinity: true, weight: 14 });
+      } else {
+        list.push({ id: 'domain', label: '领域展开·生得领域强压（不耗咏唱）', power: 19, isDomain: true, weight: 12 });
+      }
+    }
+    if (boss.isSukunaPlayer) {
+      list.push({ id: 'sukuna_domain_amp', label: '领域展延体术 · 强破不可侵近身连击', power: 20, piercesInfinity: true, isTechAttack: true, cancels: 1, weight: 15 });
+      list.push({ id: 'sukuna_world_slash', label: '扩展目标 ·「世界斩」（无视不可侵破界一刀）', power: 34, piercesInfinity: true, bypassInfinityShield: true, isTechAttack: true, weight: 12 });
+      if (boss.hasTenShadows) {
+        list.push({ id: 'sukuna_maho_breach', label: '十影调伏 · 魔虚罗法轮强破无下限', power: 22, piercesInfinity: true, breaksInfinityLayers: 2, isTechAttack: true, weight: 12 });
+      }
     }
     if (char.skills.indexOf('百兵演武') >= 0 && activeTools.length > 0) {
       list.push({ id: 'hundredBreak', label: '百兵演武·碎刃一击（引爆咒具输出）', power: 29, isTechAttack: true, breaksTool: true, weight: 9 });
@@ -1069,6 +1111,48 @@
       var w = m.isBlackFlash ? Math.round(m.weight * bfMult) : m.weight;
       return Object.assign({}, m, { weight: w });
     });
+  }
+
+  /** Filter enemy Coalition + Gojo moves when playing Shinjuku from Sukuna's Curse-King POV. */
+  function getAntiSukunaBossMovesSlices(boss) {
+    var bfMult = Math.pow(1.5, (boss && boss.sukunaBfStacks) || 0);
+    return (DATA.ANTI_SUKUNA_MOVES || []).filter(function (m) {
+      if (m.requiresGojo && !boss.enemyHasGojo) return false;
+      if (m.requiresCoalition && !boss.enemyHasCoalition) return false;
+      return true;
+    }).map(function (m) {
+      var w = m.isBlackFlash ? Math.round(m.weight * bfMult) : m.weight;
+      return Object.assign({}, m, { weight: w });
+    });
+  }
+
+  /** Map Shinjuku order presets onto Sukuna's anti-coalition POV table when playing Sukuna. */
+  function resolveShinjukuOrderForChar(char, slice) {
+    if (!slice || !char || char.canonCharId !== 'sukuna') return slice;
+    var list = DATA.SUKUNA_SHINJUKU_ORDERS || [];
+    return list.find(function (o) { return o.id === slice.id || o.mapsFrom === slice.id; }) || slice;
+  }
+
+  /** Filter slices/choices whose excludeIds or onlyIds conflict with the active canon character. */
+  function filterByCanonId(list, canonId) {
+    if (!Array.isArray(list)) return [];
+    if (!canonId) return list.filter(function (item) { return !item.onlyIds; });
+    return list.filter(function (item) {
+      if (item.onlyIds && item.onlyIds.indexOf(canonId) === -1) return false;
+      if (item.excludeIds && item.excludeIds.indexOf(canonId) >= 0) return false;
+      return true;
+    });
+  }
+
+  /** Resolve era event perspective overrides (povByChar) and self-conflict choice filters. */
+  function resolveCanonEventForChar(char, ev) {
+    if (!ev) return ev;
+    var cid = char && char.identityId === 'canon' ? char.canonCharId : '';
+    var active = (cid && ev.povByChar && ev.povByChar[cid])
+      ? Object.assign({ id: ev.id }, ev.povByChar[cid])
+      : ev;
+    var filtered = filterByCanonId(active.choices, cid);
+    return Object.assign({}, active, { choices: filtered.length ? filtered : active.choices });
   }
 
   function getCombatFormulaSummary(state) {
@@ -1249,8 +1333,9 @@
       if (!step.chosenEvent) {
         var unused = pool.filter(function (ev) { return state.usedEventIds.indexOf(ev.id) === -1; });
         var cand = unused.length ? unused : pool;
-        step.chosenEvent = cand[Math.floor(Math.random() * cand.length)];
-        state.usedEventIds.push(step.chosenEvent.id);
+        var pickedEv = cand[Math.floor(Math.random() * cand.length)];
+        step.chosenEvent = resolveCanonEventForChar(char, pickedEv);
+        state.usedEventIds.push(pickedEv.id);
       }
       var ev = step.chosenEvent;
       return { title: ev.choiceTitle, subtag: ev.title, explain: ev.intro, slices: getSliceColors(ev.choices), eventMeta: ev };
@@ -1259,6 +1344,22 @@
       return { title: char.identityName + ' · ' + DATA.CROSS_ERA_WHEEL.title, subtag: '跨越漫长岁月进入现代', explain: '古代人物跨越千百年苏醒的方式。', slices: getSliceColors(DATA.CROSS_ERA_WHEEL.slices) };
     }
     if (step.type === 'shibuya_gojo_seal') {
+      if (char.canonCharId === 'gojo') {
+        return {
+          title: '涩谷事变 · 本尊直面狱门疆闭锁瞬间',
+          subtag: '96% 原著收束 vs 4% 强行破局',
+          explain: '「脑内一分钟」流逝，全凭你当下能否看穿假体算计！',
+          slices: [{ id: true, label: '遭「一分钟」算计封入狱门疆（96%）', weight: 96, color: '#ef5d58' }, { id: false, label: '提前看破羂索强破突围！（4%）', weight: 4, color: '#29bce8' }]
+        };
+      }
+      if (char.canonCharId === 'sukuna') {
+        return {
+          title: '涩谷事变 · 狱门疆封印五条悟节点',
+          subtag: '诅咒阵营布局检验',
+          explain: '五条悟一旦入匣，你在现代再无掣肘直至新宿决战。',
+          slices: [{ id: true, label: '狱门疆成功封住五条悟（96%）', weight: 96, color: '#2ac19a' }, { id: false, label: '五条悟强破狱门疆脱身（4%）', weight: 4, color: '#ef5d58' }]
+        };
+      }
       return {
         title: '涩谷事变 · 五条悟是否被封印',
         subtag: '96% 原著收束 vs 4% 世界线奇迹',
@@ -1267,6 +1368,30 @@
       };
     }
     if (step.type === 'sukuna_vessel') {
+      if (char.canonCharId === 'sukuna') {
+        return {
+          title: '宿傩 · 新宿前选择受肉躯壳',
+          subtag: '诅咒之王 · 死灭终局容器抉择',
+          explain: '亲自决定夺舍伏黑惠解锁十影法术，抑或以原身四臂四眼全盛迎敌！',
+          slices: [
+            { id: 'megumi', label: '夺舍伏黑惠（解锁十种影法术）', weight: 78, color: '#3d7ae8' },
+            { id: 'itadori', label: '维持原身复原四臂四眼完全体', weight: 14, color: '#ef5d58' },
+            { id: 'darkhorse', label: '择取高天资稀有宿体重塑躯壳', weight: 8, color: '#7b4ce2' }
+          ]
+        };
+      }
+      if (char.canonCharId === 'megumi') {
+        return {
+          title: '死灭转折 · 宿傩强夺十影躯壳危机',
+          subtag: '灵魂控制权争夺战',
+          explain: '决定你能否抵抗夺舍保住身体，抑或身陷黑暗由宿傩暂管肉身！',
+          slices: [
+            { id: 'megumi', label: '不幸失守遭宿傩夺舍伏黑身躯', weight: 78, color: '#ef5d58' },
+            { id: 'itadori', label: '强守神魂未失！宿傩维持原体受肉', weight: 14, color: '#29bce8' },
+            { id: 'darkhorse', label: '险避致命契阔，宿傩改择别体', weight: 8, color: '#2ac19a' }
+          ]
+        };
+      }
       return {
         title: '宿傩选择的新容器',
         subtag: '死灭回游终局转折',
@@ -1319,9 +1444,25 @@
       return { title: '决战准备期 · 战前特训成长', subtag: '人外魔境新宿决战前夕', explain: '一个月准备期内再获得一次全盘强化或新技巧。', slices: getSliceColors(DATA.SHINJUKU_PREP_GROWTH) };
     }
     if (step.type === 'shinjuku_motive') {
+      if (char.canonCharId === 'sukuna') {
+        return {
+          title: '新宿决战 · 诅咒之王的心境与姿态',
+          subtag: '坐镇人外魔境 · 迎战五条悟与高专讨伐阵',
+          explain: '决定你在新宿防卫战中的开局战意与余力分配。',
+          slices: getSliceColors(DATA.SUKUNA_SHINJUKU_MOTIVES || DATA.SHINJUKU_MOTIVES)
+        };
+      }
       return { title: '新宿决战 · 为何参战', subtag: '决战出征宣言', explain: '你的信念决定关键回合的爆发倾斜。', slices: getSliceColors(DATA.SHINJUKU_MOTIVES) };
     }
     if (step.type === 'shinjuku_sukuna_order') {
+      if (char.canonCharId === 'sukuna') {
+        return {
+          title: '新宿决战 · 诅咒之王迎战哪波讨伐阵',
+          subtag: '两面宿傩主视角 · 人外魔境总决战',
+          explain: '挑选直面全盛五条悟、五条＋高专总阵或四臂真身车轮战！',
+          slices: getSliceColors(DATA.SUKUNA_SHINJUKU_ORDERS || DATA.SHINJUKU_SUKUNA_ORDERS)
+        };
+      }
       var orders = DATA.SHINJUKU_SUKUNA_ORDERS.map(function (o) {
         if (char.canonCharId === 'gojo') {
           var gojoLabel = o.id === 'with_gojo'
@@ -1332,9 +1473,6 @@
                 ? '消耗战后续 · 再战残血十影宿傩'
                 : '群殴围猎 · 联合日车/虎杖等包围宿傩';
           return Object.assign({}, o, { label: gojoLabel });
-        }
-        if (char.canonCharId === 'sukuna') {
-          return Object.assign({}, o, { label: '镜像试炼 · ' + o.label });
         }
         return o;
       });
@@ -1585,10 +1723,11 @@
       char.canonSyncLabel = slice.label;
       char.flags.canonSyncMode = slice.mode;
       var isZeroCe = (char.technique || '').indexOf('零咒力') >= 0;
+      var maxCanonRank = DATA.RANK_SCALE.length - 1;
       var capCanonStat = function (k, delta, allowPeak) {
         if (isZeroCe && (k === 'ceTotal' || k === 'ceControl' || k === 'ceEfficiency' || k === 'barrier')) return;
         var baseV = (char.canonBaseAttrs && char.canonBaseAttrs[k] != null) ? char.canonBaseAttrs[k] : (char.attrs[k] || 0);
-        var maxV = delta > 0 ? (allowPeak ? Math.max(10, Math.min(11, baseV + 1)) : Math.max(10, baseV)) : 12;
+        var maxV = delta > 0 ? Math.min(maxCanonRank, Math.max(10, allowPeak ? baseV + 1 : baseV)) : maxCanonRank;
         char.attrs[k] = clamp((char.attrs[k] || 0) + delta, 0, maxV);
       };
       if (slice.mode === 'perfect') {
@@ -1615,11 +1754,13 @@
       char.canonMemoryLabel = slice.label;
       char.flags.scriptLevel = slice.scriptLevel;
       if (slice.iqBoost) {
+        var maxMemRank = DATA.RANK_SCALE.length - 1;
         var baseIq = (char.canonBaseAttrs && char.canonBaseAttrs.iq != null) ? char.canonBaseAttrs.iq : (char.attrs.iq || 0);
-        char.attrs.iq = clamp((char.attrs.iq || 0) + slice.iqBoost, 0, Math.max(10, baseIq));
+        var maxIq = Math.min(maxMemRank, Math.max(10, slice.scriptLevel >= 2 ? baseIq + 1 : baseIq));
+        char.attrs.iq = clamp((char.attrs.iq || 0) + slice.iqBoost, 0, maxIq);
       }
       effectText = slice.scriptLevel >= 2
-        ? '完整先知剧本在握！智力提升（最高至EX），临场避险与战力判断占据先手'
+        ? '完整先知剧本在握！智力提升（最高可触及特级上限），临场避险与战力判断占据先手'
         : slice.scriptLevel === 1
           ? '保留关键剧情节点记忆，智力 +1，足以避开多数阴谋伏击'
           : slice.scriptLevel === -1
@@ -1630,12 +1771,13 @@
       char.canonDivergenceLabel = slice.label;
       char.flags.canonDivergence = slice.effect;
       var isZeroCeDiv = (char.technique || '').indexOf('零咒力') >= 0;
+      var maxDivRank = DATA.RANK_SCALE.length - 1;
       if (slice.effect === 'save_all') {
         char.flags.rewroteFate = true;
         effectText = '立下救人改命宏愿！大战死局回避率与攻坚胜率提升！';
       } else if (slice.effect === 'extra_tech') {
         var baseTal = (char.canonBaseAttrs && char.canonBaseAttrs.talent != null) ? char.canonBaseAttrs.talent : (char.attrs.talent || 0);
-        char.attrs.talent = clamp((char.attrs.talent || 0) + 1, 0, Math.max(10, baseTal));
+        char.attrs.talent = clamp((char.attrs.talent || 0) + 1, 0, Math.min(maxDivRank, Math.max(10, baseTal + 1)));
         effectText = '借先知优势提前深研咒术！天赋提升，即将额外抽取 1 项高级技巧！';
         state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
       } else if (slice.effect === 'ally_shield') {
@@ -1643,13 +1785,13 @@
         effectText = '秘密缔结跨阵营盟约！决战每回合将获得隐藏盟友支援战值！';
       } else {
         var baseTai = (char.canonBaseAttrs && char.canonBaseAttrs.taijutsu != null) ? char.canonBaseAttrs.taijutsu : (char.attrs.taijutsu || 0);
-        char.attrs.taijutsu = clamp((char.attrs.taijutsu || 0) + 1, 0, Math.max(10, baseTai));
+        char.attrs.taijutsu = clamp((char.attrs.taijutsu || 0) + 1, 0, Math.min(maxDivRank, Math.max(10, baseTai + 1)));
         if (!isZeroCeDiv) {
           var baseBar = (char.canonBaseAttrs && char.canonBaseAttrs.barrier != null) ? char.canonBaseAttrs.barrier : (char.attrs.barrier || 0);
-          char.attrs.barrier = clamp((char.attrs.barrier || 0) + 1, 0, Math.max(10, baseBar));
+          char.attrs.barrier = clamp((char.attrs.barrier || 0) + 1, 0, Math.min(maxDivRank, Math.max(10, baseBar + 1)));
         } else {
           var baseBody = (char.canonBaseAttrs && char.canonBaseAttrs.bodyResist != null) ? char.canonBaseAttrs.bodyResist : (char.attrs.bodyResist || 0);
-          char.attrs.bodyResist = clamp((char.attrs.bodyResist || 0) + 1, 0, Math.max(10, baseBody));
+          char.attrs.bodyResist = clamp((char.attrs.bodyResist || 0) + 1, 0, Math.min(maxDivRank, Math.max(10, baseBody + 1)));
         }
         effectText = isZeroCeDiv ? '低调隐忍潜修肉体：体术与身体抗性提升！' : '低调隐忍潜修基本功：体术与结界术提升！';
       }
@@ -1909,10 +2051,19 @@
       var shibuyaProgNote = syncCanonProgressionForEra(char, 'shibuya', false);
       if (char.flags.gojoSealed) {
         char.flags.nanamiDead = true;
-        effectText = '96% 收束！五条悟被狱门疆封印，涩谷陷入混乱！' + (shibuyaProgNote ? '｜' + shibuyaProgNote : '');
+        effectText = char.canonCharId === 'gojo'
+          ? '96% 收束！你因「脑内一分钟」遭狱门疆封印，涩谷陷入混乱！'
+          : char.canonCharId === 'sukuna'
+            ? '96% 收束！狱门疆成功锁住五条悟，诅咒阵营全面掌握涉谷后续节奏！'
+            : '96% 收束！五条悟被狱门疆封印，涩谷陷入混乱！';
       } else {
-        effectText = '4% 低概率事件！五条悟未被封印，正面击溃诅咒阵营防线！' + (shibuyaProgNote ? '｜' + shibuyaProgNote : '');
+        effectText = char.canonCharId === 'gojo'
+          ? '4% 奇迹破局！你看穿假体并击碎狱门疆，正面压制涉谷诅咒阵营！'
+          : char.canonCharId === 'sukuna'
+            ? '4% 意外变数！五条悟强破狱门疆防线并击溃涉谷伏兵，现世强敌依然在列！'
+            : '4% 低概率事件！五条悟未被封印，正面击溃诅咒阵营防线！';
       }
+      if (shibuyaProgNote) effectText += '｜' + shibuyaProgNote;
 
     } else if (step.type === 'sukuna_vessel') {
       char.flags.sukunaVessel = slice.label;
@@ -1920,7 +2071,11 @@
       char.currentEraLabel = '死灭回游';
       markVisitedEra(char, 'culling');
       var cullingProgNote = syncCanonProgressionForEra(char, 'culling', false);
-      effectText = '宿傩转移受肉至：' + slice.label + (cullingProgNote ? '｜' + cullingProgNote : '');
+      if (slice.id === 'darkhorse' && char.canonCharId === 'sukuna') {
+        applyStatDelta(char, 'versatility', 1);
+      }
+      effectText = (char.canonCharId === 'sukuna' ? '诅咒之王选定新宿容器形态：' : '宿傩转移受肉至：') +
+        slice.label + (cullingProgNote ? '｜' + cullingProgNote : '');
 
     } else if (step.type === 'fight_outcome') {
       var won = slice.id === 'win';
@@ -2402,6 +2557,9 @@
     if (flags.beatSukunaShinjuku) {
       addTrait('新宿弑王者', +10, '在新宿多回合决战中压制并战胜宿傩！', 't_omega');
     }
+    if (flags.beatCoalitionShinjuku) {
+      addTrait('新宿独尊 · 诅咒之王全胜', +12, '坐镇新宿魔境正面击败五条悟与高专讨伐联军！', 't_warlord');
+    }
     if (char.identityId === 'canon' && !flags.killedInAction) {
       addTrait('魂穿入局 · 改写剧情', +7, '魂穿原著「' + (char.canonCharName || '主角') + '」完整走完命运线并活到终点', 't_canon_soul');
     }
@@ -2520,8 +2678,10 @@
       addTrait('最后的加班', -3, '见证涩谷事变七海建人壮烈谢幕', 't_neg_overtime');
     }
     if (flags.killedInAction) {
-      var deathId = char.currentEraId === 'shibuya' ? 't_shibuya_fall' : char.currentEraId === 'shinjuku' ? 't_sukuna_slain' : '';
-      addTrait('半途折戟', -6, '战死于残酷时代或新宿决战之中', deathId);
+      var isSukunaShinjukuFall = char.canonCharId === 'sukuna' && char.currentEraId === 'shinjuku';
+      var deathId = char.currentEraId === 'shibuya' ? 't_shibuya_fall' : (char.currentEraId === 'shinjuku' && !isSukunaShinjukuFall) ? 't_sukuna_slain' : '';
+      addTrait(isSukunaShinjukuFall ? '堕天陨落 · 终局落幕' : '半途折戟', -6,
+        isSukunaShinjukuFall ? '在新宿车轮决战中被高专联军合力讨伐落幕' : '战死于残酷时代或新宿决战之中', deathId);
     }
 
     if (!traits.length) {
@@ -2765,36 +2925,42 @@
     }
   }
 
-  function initUpgradedBossState(state, slice) {
+  function initUpgradedBossState(state, rawSlice) {
     var char = state.char;
     initExtensionFields(char);
-    var isTrueForm = slice.id === 'higuruma_squad';
     var isPlayerGojo = char.canonCharId === 'gojo';
     var isPlayerSukuna = char.canonCharId === 'sukuna';
-    var baseTitle = isPlayerSukuna ? ('平行世界·' + slice.enemyTitle + '（宿王镜像）') : slice.enemyTitle;
-    var gojoAlly = !isPlayerGojo && Boolean(slice.startWithGojo);
-    var gojoCanJoin = !isPlayerGojo && Boolean(slice.canGojoJoin);
+    var slice = resolveShinjukuOrderForChar(char, rawSlice);
+    var isTrueForm = slice.id === 'higuruma_squad';
+    var gojoAlly = !isPlayerGojo && !isPlayerSukuna && Boolean(slice.startWithGojo);
+    var gojoCanJoin = !isPlayerGojo && !isPlayerSukuna && Boolean(slice.canGojoJoin);
     if (gojoAlly) char.flags.gojoJoinedInShinjuku = true;
     var nativeInfinity = isPlayerGojo ? (4 + (char.flags.hasSecretAlly ? 1 : 0)) : 0;
+    var keptYujiBody = Boolean(char.flags && char.flags.sukunaVessel && char.flags.sukunaVessel.indexOf('四臂四眼') >= 0);
     state.boss = {
       active: true,
       round: 1,
       maxRounds: 3,
       orderId: slice.id,
       isTrueForm: isTrueForm,
-      forbidMahoSummon: Boolean(slice.forbidMahoSummon),
-      mahoragaDestroyed: Boolean(slice.forbidMahoSummon),
+      isSukunaPlayer: isPlayerSukuna,
+      forbidMahoSummon: isPlayerSukuna || Boolean(slice.forbidMahoSummon),
+      mahoragaDestroyed: isPlayerSukuna || Boolean(slice.forbidMahoSummon),
       playerWins: 0,
       enemyWins: 0,
-      enemyTitle: baseTitle,
+      enemyTitle: slice.enemyTitle,
       enemyBaseAtk: slice.baseAtk,
-      agitoAlive: Boolean(slice.agito),
-      mahoragaAlive: Boolean(slice.mahoraga),
+      agitoAlive: isPlayerSukuna ? false : Boolean(slice.agito),
+      mahoragaAlive: isPlayerSukuna ? false : Boolean(slice.mahoraga),
       adaptations: {},
       totalAdaptations: 0,
       gojoJoined: gojoAlly,
       canGojoJoin: gojoCanJoin,
       infinityBlocks: gojoAlly ? (4 + (char.flags.hasSecretAlly ? 1 : 0)) : nativeInfinity,
+      enemyHasGojo: isPlayerSukuna ? Boolean(slice.enemyHasGojo) : false,
+      enemyHasCoalition: isPlayerSukuna ? Boolean(slice.enemyHasCoalition) : false,
+      enemyInfinityBlocks: (isPlayerSukuna && slice.enemyHasGojo) ? (slice.enemyInfinity || 4) : 0,
+      hasTenShadows: isPlayerSukuna ? (Boolean(slice.hasTenShadows) && !keptYujiBody) : false,
       gojoDomainCount: 0,
       gojoMovesTotal: 0,
       gojoMovesLeft: 0,
@@ -2821,7 +2987,7 @@
       enemyRoundPower: 0,
       usedMovesThisRound: [],
       roundWon: false,
-      squadAllyBonus: slice.squadAlly ? 14 : 0,
+      squadAllyBonus: (!isPlayerSukuna && slice.squadAlly) ? 14 : 0,
       lastAdaptPickCount: 1
     };
     state.stepQueue = state.stepQueue.filter(function (s) {
@@ -2874,7 +3040,13 @@
       return { title: '宿傩落幕 68 年后 · 是否出面参战', subtag: '68年后的新时代篇章', explain: '选择重返一线应对星外来客/次世代战力，或安静退隐。', slices: getSliceColors(DATA.FUTURE68_DATA.decide) };
     }
     if (step.type === 'future68_opponent') {
-      return { title: '68年后 · 遭遇哪位对手', subtag: '挑选或遭遇次世代人物', explain: '包含达布拉、完全体魔虚罗、68岁虎杖、马鲁等角色。', slices: getSliceColors(DATA.FUTURE68_DATA.opponents) };
+      var cid68 = char.identityId === 'canon' ? char.canonCharId : '';
+      return {
+        title: '68年后 · 遭遇哪位对手',
+        subtag: '挑选或遭遇次世代人物',
+        explain: '包含达布拉、完全体魔虚罗、68岁虎杖、马鲁等角色。',
+        slices: getSliceColors(filterByCanonId(DATA.FUTURE68_DATA.opponents, cid68))
+      };
     }
     if (step.type === 'future68_motive') {
       var oppLabel = step.opponent ? step.opponent.enemyName : '对手';
@@ -2951,16 +3123,25 @@
     }
 
     // 新宿决战 · 完全体回合制轮盘
+    var isSP = Boolean(boss.isSukunaPlayer);
     if (step.type === 'boss_player_count') {
-      return { title: '第 ' + boss.round + ' 回合 · 我方出招次数', subtag: boss.enemyTitle + ' · 准备开战', explain: '决定本回合主角可以转动几次出招转盘。', slices: getSliceColors(DATA.BOSS_COUNT_SLICES.player) };
+      return {
+        title: '第 ' + boss.round + ' 回合 · 我方出招次数',
+        subtag: boss.enemyTitle + ' · 准备开战',
+        explain: isSP ? '决定诅咒之王本回合可转动几次攻击转盘。' : '决定本回合主角可以转动几次出招转盘。',
+        slices: getSliceColors(isSP ? DATA.BOSS_COUNT_SLICES.sukunaPlayer : DATA.BOSS_COUNT_SLICES.player)
+      };
     }
     if (step.type === 'boss_player_move') {
       var chantTag = boss.playerChantStacks > 0 ? ' [完整咏唱×' + Math.pow(2, boss.playerChantStacks) + '待发]' : '';
       var bfTag = boss.playerBfStacks > 0 ? ' [黑闪无我×' + Math.pow(1.2, boss.playerBfStacks).toFixed(2) + ']' : '';
+      var shieldTag = (isSP && boss.enemyInfinityBlocks > 0) ? ' [五条不可侵剩' + boss.enemyInfinityBlocks + '层]' : '';
       return {
-        title: '战斗盘 · 主角第 ' + step.nth + '/' + step.total + ' 招',
-        subtag: '已习得术式专属池' + chantTag + bfTag,
-        explain: '完整咏唱×2（不耗于治疗/领域/肘击），黑闪触发额外行动 2 次！',
+        title: '战斗盘 · ' + (isSP ? '诅咒之王' : '主角') + '第 ' + step.nth + '/' + step.total + ' 招',
+        subtag: (isSP ? '御厨子与破界底牌池' : '已习得术式专属池') + chantTag + bfTag + shieldTag,
+        explain: isSP
+          ? '领域展开/领域展延/世界斩/魔虚罗均可透穿或打破五条悟「不可侵」护盾！'
+          : '完整咏唱×2（不耗于治疗/领域/肘击），黑闪触发额外行动 2 次！',
         slices: getSliceColors(getPlayerBossMovesSlices(state))
       };
     }
@@ -2982,17 +3163,21 @@
       var stunInfo = (boss.sukunaStun || 0) + (boss.sukunaNextPenalty || 0);
       return {
         title: '战斗盘 · ' + boss.enemyTitle + '出招数',
-        subtag: stunInfo > 0 ? '受无量空处/贷款减益 -' + stunInfo + ' 招' : '诅咒之王回合展开',
-        explain: '宿傩抽取出招次数后再扣减受控/贷款惩罚。',
-        slices: getSliceColors(DATA.BOSS_COUNT_SLICES.sukuna)
+        subtag: isSP ? '五条悟＆高专联军回合展开' : (stunInfo > 0 ? '受无量空处/贷款减益 -' + stunInfo + ' 招' : '诅咒之王回合展开'),
+        explain: isSP ? '判定敌方本回合向宿傩发动的围攻出招次数。' : '宿傩抽取出招次数后再扣减受控/贷款惩罚。',
+        slices: getSliceColors(isSP ? DATA.BOSS_COUNT_SLICES.antiSukuna : DATA.BOSS_COUNT_SLICES.sukuna)
       };
     }
     if (step.type === 'boss_enemy_move') {
       return {
         title: '战斗盘 · ' + boss.enemyTitle + '第 ' + step.nth + '/' + step.total + ' 招',
-        subtag: (boss.mahoragaAlive ? '魔虚罗在场 · ' : '') + (boss.sukunaLoanStacks > 0 ? '宿傩贷款×2待发' : '压迫性攻势'),
-        explain: '注意「贷款」下击×2但下轮减招、以及魔虚罗「主动适应」与「世界斩」！',
-        slices: getSliceColors(getSukunaBossMovesSlices(boss))
+        subtag: isSP
+          ? ((boss.enemyInfinityBlocks > 0 ? '敌不可侵剩' + boss.enemyInfinityBlocks + '层 · ' : '') + '联军合围反扑')
+          : ((boss.mahoragaAlive ? '魔虚罗在场 · ' : '') + (boss.sukunaLoanStacks > 0 ? '宿傩贷款×2待发' : '压迫性攻势')),
+        explain: isSP
+          ? '留意敌方五条悟「无量空处」「茈」与乙骨邪去侮之梯、日车处刑剑的高额反击！'
+          : '注意「贷款」下击×2但下轮减招、以及魔虚罗「主动适应」与「世界斩」！',
+        slices: getSliceColors(isSP ? getAntiSukunaBossMovesSlices(boss) : getSukunaBossMovesSlices(boss))
       };
     }
     if (step.type === 'boss_player_counter_check') {
@@ -3003,9 +3188,9 @@
       var bigPct = clamp(18 + barBonus * 2 + (stackN - 1) * 6, 18, 62);
       var midPct = 34;
       return {
-        title: '战斗盘 · 主角抵消敌方招式' + (stackN > 1 ? '（×' + stackN + '叠加）' : ''),
+        title: '战斗盘 · ' + (isSP ? '诅咒之王' : '主角') + '抵消敌方招式' + (stackN > 1 ? '（×' + stackN + '叠加）' : ''),
         subtag: '累积抵消层数 ' + (step.count || 1) + ' 层',
-        explain: '多层反制与咒具无效化将成倍提高对宿傩输出的削减幅度！',
+        explain: '多层反制与领域展延将成倍提高对敌方累计输出的削减幅度！',
         slices: [
           { id: 'big', label: '大幅抵消！（敌方总战值 -' + Math.round(bigCut * 100) + '%）', pct: bigCut, weight: bigPct, color: '#2ac19a' },
           { id: 'mid', label: '成功格挡消解（敌方战值 -' + Math.round(midCut * 100) + '%）', pct: midCut, weight: midPct, color: '#29bce8' },
@@ -3423,7 +3608,14 @@
         var domGain = Math.round(((move.power || 19) + (char.attrs.barrier || 5) * 0.9) * debuffMult2 * bfMult2);
         boss.playerRoundPower += domGain;
         boss.usedMovesThisRound.push(move.label);
-        effectText = '展开生得领域！领域强压 +' + domGain + '（不消耗完整咏唱）';
+        if (boss.isSukunaPlayer) {
+          var domStrip = boss.enemyInfinityBlocks > 0 ? Math.min(boss.enemyInfinityBlocks, 2) : 0;
+          if (domStrip > 0) boss.enemyInfinityBlocks -= domStrip;
+          effectText = '展开「伏魔御厨子」强压领域！战斗值 +' + domGain +
+            (domStrip > 0 ? ' · 必中砍穿五条无下限 ' + domStrip + ' 层（剩 ' + boss.enemyInfinityBlocks + ' 层）' : '（不消耗完整咏唱）');
+        } else {
+          effectText = '展开生得领域！领域强压 +' + domGain + '（不消耗完整咏唱）';
+        }
       } else {
         // 常规有效术式攻击 / 黑闪 / 咒具秘技 / 咒术科学 / 多重启动 / 百兵演武
         var rawPower = move.power || 16;
@@ -3463,9 +3655,28 @@
           }
         }
 
-        var adaptLv = (boss.adaptations && boss.adaptations[move.label]) || 0;
+        var adaptLv = !boss.isSukunaPlayer && boss.adaptations ? (boss.adaptations[move.label] || 0) : 0;
         var adaptReduction = Math.min(1.0, adaptLv * 0.30);
         var finalGain = Math.round(rawPower * debuffMult2 * bfMult2 * (1 - adaptReduction));
+
+        var infNote = '';
+        if (boss.isSukunaPlayer) {
+          if (move.breaksInfinityLayers && boss.enemyInfinityBlocks > 0) {
+            var broken = Math.min(boss.enemyInfinityBlocks, move.breaksInfinityLayers);
+            boss.enemyInfinityBlocks -= broken;
+            infNote = '｜魔虚罗调律劈穿不可侵 ' + broken + ' 层（剩 ' + boss.enemyInfinityBlocks + ' 层）';
+          } else if (boss.enemyInfinityBlocks > 0 && !boss.playerDomainActive) {
+            boss.enemyInfinityBlocks = Math.max(0, boss.enemyInfinityBlocks - 1);
+            if (move.bypassInfinityShield) {
+              infNote = '｜「世界斩」劈开空间无视不可侵，同时削落 1 层（剩 ' + boss.enemyInfinityBlocks + ' 层）';
+            } else if (move.piercesInfinity) {
+              infNote = '｜穿破「不可侵」直击五条，削落 1 层（剩 ' + boss.enemyInfinityBlocks + ' 层）';
+            } else {
+              finalGain = Math.max(6, Math.round(finalGain * 0.4));
+              infNote = '｜受五条无下限「不可侵」减伤，仍强磨 1 层（剩 ' + boss.enemyInfinityBlocks + ' 层）';
+            }
+          }
+        }
 
         boss.playerRoundPower += finalGain;
         boss.usedMovesThisRound.push(move.label);
@@ -3488,8 +3699,9 @@
 
         effectText = move.label + '：+' + finalGain + chantUsedText +
           (adaptLv > 0 ? '（魔虚罗已适应-' + Math.round(adaptReduction * 100) + '%）' : '') +
+          infNote +
           (move.isBlackFlash ? '｜无我境界已激活，后续×1.2 & 黑闪概率飙升！' : '') +
-          (move.cancels ? '｜排入抵消宿傩判定' : '');
+          (move.cancels ? (boss.isSukunaPlayer ? '｜排入反制联军判定' : '｜排入抵消宿傩判定') : '');
       }
 
       if (boss.playerMovesLeft > 0) {
@@ -3552,14 +3764,16 @@
 
     } else if (step.type === 'boss_enemy_count') {
       var rawECnt = slice.count || 4;
-      var penalty = (boss.sukunaStun || 0) + (boss.sukunaNextPenalty || 0);
+      var penalty = boss.isSukunaPlayer ? 0 : ((boss.sukunaStun || 0) + (boss.sukunaNextPenalty || 0));
       boss.sukunaStun = 0;
       boss.sukunaNextPenalty = 0;
       var actualECnt = Math.max(1, rawECnt - penalty);
       boss.sukunaMovesTotal = actualECnt;
       boss.sukunaMovesLeft = actualECnt;
-      effectText = '宿傩原本出招 ' + rawECnt + ' 次' +
-        (penalty > 0 ? '，被无量空处/贷款扣除 ' + penalty + ' 次 -> 实际 ' + actualECnt + ' 次！' : '，实际 ' + actualECnt + ' 次！');
+      effectText = boss.isSukunaPlayer
+        ? (boss.enemyTitle + ' 本轮发起 ' + actualECnt + ' 次协同合击！')
+        : ('宿傩原本出招 ' + rawECnt + ' 次' +
+          (penalty > 0 ? '，被无量空处/贷款扣除 ' + penalty + ' 次 -> 实际 ' + actualECnt + ' 次！' : '，实际 ' + actualECnt + ' 次！'));
       state.stepQueue.unshift({ type: 'boss_enemy_move', nth: 1, total: actualECnt });
 
     } else if (step.type === 'boss_enemy_move') {
@@ -3567,7 +3781,24 @@
       var sm = slice;
       var sBfMult = Math.pow(1.2, boss.sukunaBfStacks || 0);
 
-      if (sm.isLoan) {
+      if (boss.isSukunaPlayer) {
+        var antiDmg = sm.dmg || 18;
+        var antiNote = '';
+        if (sm.isGojoUv && (boss.playerDomainActive || (char.skills && char.skills.indexOf('领域展开') >= 0 && Math.random() < 0.65))) {
+          antiDmg = Math.round(antiDmg * 0.5);
+          antiNote = '（遭我方「伏魔御厨子」从外部强破无量空处结界！）';
+        }
+        var totalAntiDmg = Math.round(antiDmg * sBfMult);
+        boss.enemyRoundPower += totalAntiDmg;
+        if (sm.isBlackFlash) {
+          boss.sukunaBfStacks += 1;
+          var aAdd = step.total < 15 ? Math.min(2, sm.extraActions || 1) : 0;
+          boss.sukunaMovesLeft += aAdd;
+          step.total += aAdd;
+          antiNote += '（黑闪爆发！额外行动+' + aAdd + '，敌方后续×1.2）';
+        }
+        effectText = sm.label.split('（')[0] + '：敌方战值 +' + totalAntiDmg + antiNote;
+      } else if (sm.isLoan) {
         boss.sukunaLoanStacks = (boss.sukunaLoanStacks || 0) + 1;
         boss.sukunaNextPenalty = (boss.sukunaNextPenalty || 0) + 1;
         if (step.total < 15) {
@@ -3656,16 +3887,17 @@
       boss.roundWon = won;
       if (won) boss.playerWins += 1;
       else boss.enemyWins += 1;
+      var oppShort = boss.isSukunaPlayer ? boss.enemyTitle : '宿傩';
       effectText = won
         ? '我方第 ' + boss.round + ' 回合正面压制胜出！（大比分 ' + boss.playerWins + ':' + boss.enemyWins + '）'
-        : '本回合未能压住宿傩，进入伤势与减益检验！（大比分 ' + boss.playerWins + ':' + boss.enemyWins + '）';
+        : '本回合未能压住' + oppShort + '，进入伤势与减益检验！（大比分 ' + boss.playerWins + ':' + boss.enemyWins + '）';
 
       var evoSteps = [];
       if (!won) evoSteps.push({ type: 'boss_injury' });
-      if (boss.agitoAlive) evoSteps.push({ type: 'boss_agito_survive' });
-      if (boss.mahoragaAlive) evoSteps.push({ type: 'boss_mahoraga_survive' });
+      if (!boss.isSukunaPlayer && boss.agitoAlive) evoSteps.push({ type: 'boss_agito_survive' });
+      if (!boss.isSukunaPlayer && boss.mahoragaAlive) evoSteps.push({ type: 'boss_mahoraga_survive' });
       if ((char.tools || []).some(function (t) { return !t.destroyed; })) evoSteps.push({ type: 'boss_tool_survive' });
-      if (!boss.gojoJoined && boss.canGojoJoin) evoSteps.push({ type: 'boss_gojo_join' });
+      if (!boss.isSukunaPlayer && !boss.gojoJoined && boss.canGojoJoin) evoSteps.push({ type: 'boss_gojo_join' });
       evoSteps.push({ type: 'boss_next_round' });
 
       for (var ei = evoSteps.length - 1; ei >= 0; ei--) {
@@ -3819,15 +4051,31 @@
         if (b && b.active) {
           if (b.playerWins >= 2 || (b.round >= b.maxRounds && b.playerWins >= b.enemyWins)) {
             b.active = false;
-            char.flags.beatSukunaShinjuku = true;
             char.statsLog.wins += 1;
-            char.statsLog.defeatedEnemies.push('两面宿傩');
-            state.lastEffectText += '｜🎉 新宿决战大获全胜！正面击败两面宿傩！！';
+            if (b.isSukunaPlayer) {
+              char.flags.beatCoalitionShinjuku = true;
+              if (b.enemyHasGojo && char.statsLog.defeatedEnemies.indexOf('五条悟') === -1) {
+                char.statsLog.defeatedEnemies.push('五条悟');
+              }
+              if (b.enemyHasCoalition && char.statsLog.defeatedEnemies.indexOf('高专讨伐联军') === -1) {
+                char.statsLog.defeatedEnemies.push('高专讨伐联军');
+              }
+              state.lastEffectText += '｜新宿魔境大获全胜！诅咒之王正面击败「' + b.enemyTitle + '」！！';
+            } else {
+              char.flags.beatSukunaShinjuku = true;
+              char.statsLog.defeatedEnemies.push('两面宿傩');
+              state.lastEffectText += '｜🎉 新宿决战大获全胜！正面击败两面宿傩！！';
+            }
           } else if (b.round >= b.maxRounds) {
             b.active = false;
-            char.flags.foughtSukunaSurvived = true;
             char.statsLog.losses += 1;
-            state.lastEffectText += '｜鏖战宿傩三回合全身而退，历史车轮继续向前！';
+            if (b.isSukunaPlayer) {
+              char.flags.foughtCoalitionSurvived = true;
+              state.lastEffectText += '｜与「' + b.enemyTitle + '」激战三回合打成相持，历史车轮继续向前！';
+            } else {
+              char.flags.foughtSukunaSurvived = true;
+              state.lastEffectText += '｜鏖战宿傩三回合全身而退，历史车轮继续向前！';
+            }
           } else {
             b.round += 1;
             b.playerRoundPower = 0;
@@ -3894,11 +4142,23 @@
         if (presetOrder) {
           state.stepQueue = state.stepQueue.filter(function (s) { return s.type !== 'shinjuku_sukuna_order'; });
           initUpgradedBossState(state, presetOrder);
+          if (char.canonCharId === 'sukuna' && state.boss) {
+            var sPresetNote = '诅咒之王坐镇新宿魔境！正式迎战「' + state.boss.enemyTitle + '」';
+            origOut.effectText = sPresetNote;
+            state.lastEffectText = sPresetNote;
+            if (char.timeline.length > 0) char.timeline[char.timeline.length - 1].effect = sPresetNote;
+          }
         }
       }
 
       if (preType === 'shinjuku_sukuna_order') {
         initUpgradedBossState(state, slice);
+        if (char.canonCharId === 'sukuna' && state.boss) {
+          var sOrdNote = '诅咒之王坐镇新宿魔境！正式迎战「' + state.boss.enemyTitle + '」';
+          origOut.effectText = sOrdNote;
+          state.lastEffectText = sOrdNote;
+          if (char.timeline.length > 0) char.timeline[char.timeline.length - 1].effect = sOrdNote;
+        }
       }
 
       if (preType === 'shibuya_gojo_seal' && !char.flags.seanceEventDone && (char.techniqueId === 'seance' || Math.random() < 0.55)) {
