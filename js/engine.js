@@ -31,6 +31,58 @@
     });
   }
 
+  function applyCanonTemplate(char, canonObj, preset) {
+    char.canonCharId = canonObj.id;
+    char.canonCharName = canonObj.name;
+    char.canonTitle = canonObj.title;
+    char.canonNote = canonObj.canonNote;
+    char.identityId = 'canon';
+    char.identityName = '魂穿 · ' + canonObj.name;
+    char.faction = canonObj.faction;
+    char.factionLabel = canonObj.faction === 'good' ? '高专/正道阵营（原著）' : canonObj.faction === 'evil' ? '诅咒/暗面阵营（原著）' : '自由独行派（原著）';
+    char.nativeEraId = canonObj.eraId;
+    var eraMeta = DATA.ERAS.find(function (e) { return e.id === canonObj.eraId; }) || DATA.ERAS[4];
+    if (!preset || !preset.eraId || preset.eraId === 'random') {
+      char.birthEraId = eraMeta.id;
+      char.birthEraLabel = eraMeta.label;
+      char.currentEraId = eraMeta.id;
+      char.currentEraLabel = eraMeta.short;
+    }
+    var techMeta = DATA.TECHNIQUES_ALL.find(function (t) { return t.id === canonObj.techniqueId; });
+    char.technique = canonObj.technique;
+    char.techniquePower = techMeta ? techMeta.power : 14;
+    char.techniqueDesc = canonObj.canonNote;
+    char.officialGrade = canonObj.officialGrade;
+    char.gradeBonus = canonObj.gradeBonus || 10;
+    char.attrs = cloneState(canonObj.attrs);
+    if (preset && preset.talentLv && preset.talentLv !== 'random') {
+      char.attrs.talent = Math.max(char.attrs.talent || 4, parseInt(preset.talentLv, 10) || 8);
+    }
+    var mergedSkills = canonObj.skills.slice();
+    (char.skills || []).forEach(function (s) {
+      if (mergedSkills.indexOf(s) === -1) mergedSkills.push(s);
+    });
+    char.skills = mergedSkills;
+    char.tools = cloneState(canonObj.tools || []);
+    char.looksText = getRankMeta(canonObj.looks || 7).code + '（原著容姿）';
+    char.moralityText = canonObj.morality >= 3 ? '坚守良知正道' : canonObj.morality <= -3 ? '冷酷反派本性' : '亦正亦邪果决';
+    char.aggroText = canonObj.aggro >= 8 ? '极高好战狂气' : canonObj.aggro >= 5 ? '敏锐战意昂扬' : '冷静克制务实';
+  }
+
+  function applyAttrTierFloor(char, attrTier) {
+    if (!attrTier || attrTier === 'random') return;
+    var minLv = attrTier === 'ex' ? 10 : attrTier === 's' ? 7 : attrTier === 'b' ? 5 : 0;
+    if (!minLv) return;
+    DATA.ATTRIBUTE_DEFS.forEach(function (d) {
+      if (char.technique === '天与咒缚（零咒力）' && (d.key === 'ceTotal' || d.key === 'ceControl' || d.key === 'ceEfficiency' || d.key === 'barrier')) {
+        return;
+      }
+      if ((char.attrs[d.key] || 0) < minLv) {
+        char.attrs[d.key] = minLv;
+      }
+    });
+  }
+
   function getPowerBreakdown(char) {
     var a = char.attrs;
     var sumTen = a.ceTotal + a.ceControl + a.ceEfficiency + a.taijutsu + a.bodyResist +
@@ -40,8 +92,10 @@
     var skillBonus = char.skills.length * 2.8 + (char.techniquePower || 4) + (hasDomain ? 9 : 0) + (hasRct ? 5 : 0);
     var toolBonus = (char.tools || []).reduce(function (sum, t) { return sum + (t.bonus || 3); }, 0);
     var supplyMult = char.masterSupplyMult || 1;
+    var vowMult = (char.flags && char.flags.vowAtkMult) ? char.flags.vowAtkMult : 1;
+    var scriptBonus = (char.flags && char.flags.scriptLevel > 0) ? char.flags.scriptLevel * 2 : 0;
     var injuryPenalty = char.hpStatus === '重伤' ? 9 : char.hpStatus === '轻伤' ? 3 : 0;
-    var raw = (sumTen * 0.56 + skillBonus + toolBonus + (char.gradeBonus || 2)) * supplyMult - injuryPenalty;
+    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
     return clamp(Math.round(raw), 1, 180);
   }
 
@@ -103,6 +157,23 @@
 
   function buildInitialSetupSteps(char, preset) {
     var setup = [];
+    if (char.identityId === 'canon') {
+      if (!char.canonCharId) {
+        setup.push({ type: 'canon_character' });
+      }
+      if (!preset || preset.eraId === 'random') {
+        setup.push({ type: 'canon_timepoint' });
+      }
+      setup.push({ type: 'canon_sync' });
+      setup.push({ type: 'canon_memory' });
+      setup.push({ type: 'canon_divergence' });
+      setup.push({ type: 'radar', stage: 'initial', title: '魂穿原著初始面板' });
+      if (preset && preset.eraId !== 'random') {
+        setup = setup.concat(buildEraQueue(char.birthEraId));
+      }
+      return setup;
+    }
+
     if (char.identityId === 'shikigami') {
       setup.push({ type: 'shikigami_auto' });
       if (!preset || preset.eraId === 'random') setup.push({ type: 'birth_era' });
@@ -137,6 +208,11 @@
     if (char.identityId !== 'shikigami') {
       setup.push({ type: 'faction' });
     }
+    if (char.identityId === 'corpse') setup.push({ type: 'identity_extra', key: 'corpse_cores' });
+    else if (char.identityId === 'higherUp') setup.push({ type: 'identity_extra', key: 'higherUp_scheme' });
+    else if (char.identityId === 'civilian') setup.push({ type: 'identity_extra', key: 'civilian_awakening' });
+    else if (char.identityId === 'curse') setup.push({ type: 'identity_extra', key: 'curse_origin' });
+
     setup.push({ type: 'radar', stage: 'initial', title: '初始能力面板' });
 
     if (preset && preset.eraId !== 'random') {
@@ -158,11 +234,20 @@
       canRerollLast: false,
       prevSnapshot: null,
       usedEventIds: [],
+      customAttrTier: preset && preset.attrTier ? preset.attrTier : 'random',
       boss: { active: false },
       stepQueue: [],
       char: {
         identityId: 'sorcerer',
         identityName: '未定身份',
+        canonCharId: null,
+        canonCharName: null,
+        canonTitle: '',
+        canonNote: '',
+        nativeEraId: null,
+        canonSyncLabel: '',
+        canonMemoryLabel: '',
+        canonDivergenceLabel: '',
         faction: 'neutral',
         factionLabel: '未定阵营',
         birthEraId: 'canonStart',
@@ -218,7 +303,18 @@
           nanamiDead: false,
           killedInAction: false,
           beatSukunaShinjuku: false,
-          awakenedRCTInBattle: false
+          awakenedRCTInBattle: false,
+          canonSyncMode: '',
+          scriptLevel: 0,
+          canonDivergence: '',
+          rewroteFate: false,
+          hasSecretAlly: false,
+          civilianAwakened: false,
+          activeVowId: '',
+          activeVowLabel: '',
+          vowAtkMult: 1,
+          vowDangerDelta: 0,
+          bindingVowPicked: false
         },
         timeline: []
       }
@@ -230,6 +326,12 @@
       state.char.identityName = idObj.label;
       state.char.faction = idObj.faction;
     }
+    if (preset && preset.canonCharId && preset.canonCharId !== 'random' && state.char.identityId === 'canon') {
+      var cObj = DATA.CANON_CHARACTERS.find(function (c) { return c.id === preset.canonCharId; });
+      if (cObj) {
+        applyCanonTemplate(state.char, cObj, preset);
+      }
+    }
     if (preset && preset.eraId && preset.eraId !== 'random') {
       var eraObj = DATA.ERAS.find(function (e) { return e.id === preset.eraId; });
       if (eraObj) {
@@ -239,7 +341,7 @@
         state.char.currentEraLabel = eraObj.short;
       }
     }
-    if (preset && preset.techId && preset.techId !== 'random') {
+    if (preset && preset.techId && preset.techId !== 'random' && state.char.identityId !== 'canon') {
       var techObj = DATA.TECHNIQUES_ALL.find(function (t) { return t.id === preset.techId; });
       if (techObj) {
         state.char.technique = techObj.label;
@@ -247,7 +349,7 @@
         state.char.techniqueDesc = techObj.desc;
       }
     }
-    if (preset && preset.gradeId && preset.gradeId !== 'random') {
+    if (preset && preset.gradeId && preset.gradeId !== 'random' && state.char.identityId !== 'canon') {
       var grObj = DATA.GRADE_WHEELS.standard.find(function (g) { return g.id === preset.gradeId; });
       if (grObj) {
         state.char.officialGrade = grObj.id;
@@ -255,12 +357,19 @@
       }
     }
     if (preset && preset.talentLv && preset.talentLv !== 'random') {
-      state.char.attrs.talent = parseInt(preset.talentLv, 10) || 8;
+      state.char.attrs.talent = Math.max(state.char.attrs.talent, parseInt(preset.talentLv, 10) || 8);
     }
     if (preset && preset.perk && preset.perk !== 'random') {
-      if (preset.perk === 'rct') state.char.skills.push('反转术式');
-      else if (preset.perk === 'domain') state.char.skills.push('领域展开');
-      else if (preset.perk === 'both') state.char.skills.push('反转术式', '领域展开', '黑闪');
+      if (preset.perk === 'rct' && state.char.skills.indexOf('反转术式') === -1) state.char.skills.push('反转术式');
+      else if (preset.perk === 'domain' && state.char.skills.indexOf('领域展开') === -1) state.char.skills.push('领域展开');
+      else if (preset.perk === 'both') {
+        ['反转术式', '领域展开', '黑闪'].forEach(function (sk) {
+          if (state.char.skills.indexOf(sk) === -1) state.char.skills.push(sk);
+        });
+      }
+    }
+    if (preset && preset.attrTier && preset.attrTier !== 'random') {
+      applyAttrTierFloor(state.char, preset.attrTier);
     }
 
     if (preset && preset.identityId && preset.identityId !== 'random') {
@@ -284,7 +393,8 @@
 
   function buildFightSlices(state, enemyPower) {
     var myPower = getPowerBreakdown(state.char);
-    var diff = myPower - enemyPower + (state.char.statsLog.wins > 0 ? 1 : 0);
+    var rewriteBonus = state.char.flags.rewroteFate ? 4 : 0;
+    var diff = myPower + rewriteBonus - enemyPower + (state.char.statsLog.wins > 0 ? 1 : 0);
     var prob = Math.round(100 / (1 + Math.exp(-diff / 14)));
     var winPct = clamp(prob, 8, 94);
     return [
@@ -296,8 +406,9 @@
   function buildInjurySlices(state, won, canDie) {
     var bodyLv = state.char.attrs.bodyResist;
     var hasRct = state.char.skills.indexOf('反转术式') >= 0;
+    var dangerDelta = state.char.flags.vowDangerDelta || 0;
     if (won) {
-      var noInj = clamp(34 + bodyLv * 4 + (hasRct ? 12 : 0), 28, 84);
+      var noInj = clamp(34 + bodyLv * 4 + (hasRct ? 12 : 0) - Math.round(dangerDelta * 0.5), 24, 84);
       var light = clamp(100 - noInj - 6, 12, 60);
       var heavy = Math.max(4, 100 - noInj - light);
       return [
@@ -307,11 +418,12 @@
       ];
     }
 
-    var deathRisk = canDie ? clamp(22 - Math.floor(bodyLv * 1.3) - (hasRct ? 6 : 0), 4, 24) : 0;
-    if (state.char.hpStatus === '重伤' && canDie) deathRisk = clamp(deathRisk + 8, 6, 30);
+    var rewriteReduce = state.char.flags.rewroteFate ? 7 : 0;
+    var deathRisk = canDie ? clamp(22 - Math.floor(bodyLv * 1.3) - (hasRct ? 6 : 0) + Math.round(dangerDelta * 0.6) - rewriteReduce, 3, 28) : 0;
+    if (state.char.hpStatus === '重伤' && canDie) deathRisk = clamp(deathRisk + 8, 5, 34);
     var rctBreakChance = !hasRct ? clamp(6 + state.char.attrs.talent + state.char.attrs.ceControl, 8, 24) : 0;
-    var heavyLoss = clamp(42 - bodyLv * 2, 16, 46);
-    var lightLoss = Math.max(18, 100 - heavyLoss - deathRisk - rctBreakChance);
+    var heavyLoss = clamp(42 - bodyLv * 2 + Math.round(dangerDelta * 0.4), 16, 52);
+    var lightLoss = Math.max(16, 100 - heavyLoss - deathRisk - rctBreakChance);
 
     var slices = [
       { id: 'light', label: '轻伤突围', weight: lightLoss, color: '#ffa500' },
@@ -371,7 +483,25 @@
     var char = state.char;
 
     if (step.type === 'identity') {
-      return { title: '穿越后的初始身份', subtag: '浮生若梦 · 第 ' + (state.stepCount + 1) + ' 轮', explain: '决定你在咒术世界降生时的根本存在形式。', slices: getSliceColors(DATA.IDENTITIES) };
+      return { title: '穿越后的初始身份', subtag: '浮生若梦 · 第 ' + (state.stepCount + 1) + ' 轮', explain: '决定你在咒术世界降生时的根本存在形式（包含魂穿22位原著角色！）。', slices: getSliceColors(DATA.IDENTITIES) };
+    }
+    if (step.type === 'canon_character') {
+      var cSlices = DATA.CANON_CHARACTERS.map(function (c) {
+        return { id: c.id, label: c.name, weight: c.weight, canonObj: c };
+      });
+      return { title: '魂穿对象 · 降临哪位原著角色', subtag: '22位原作核心人物全收录', explain: '继承原主十维面板、生得术式、绝技与专属咒具，开启改命剧本！', slices: getSliceColors(cSlices) };
+    }
+    if (step.type === 'canon_timepoint') {
+      return { title: '魂穿「' + (char.canonCharName || '原著人物') + '」· 苏醒时间线', subtag: '挑选或随机切入原著节点的时刻', explain: '越早苏醒越有充足时间篡改怀玉/涩谷关键悲剧。', slices: getSliceColors(DATA.CANON_TIMEPOINTS) };
+    }
+    if (step.type === 'canon_sync') {
+      return { title: '灵魂契合度判定', subtag: char.canonCharName + ' · 夺舍融魂测试', explain: '100%共鸣可突破原著面板天花板；排异低契则需要后天磨合。', slices: getSliceColors(DATA.CANON_SYNC_SLICES) };
+    }
+    if (step.type === 'canon_memory') {
+      return { title: '前世原著剧本记忆保留度', subtag: '上帝视角先知权限', explain: '记忆越完整，智力与关键战避险判定越占绝对主动！', slices: getSliceColors(DATA.CANON_MEMORY_SLICES) };
+    }
+    if (step.type === 'canon_divergence') {
+      return { title: '「' + (char.canonCharName || '原著角色') + '」核心改命方针', subtag: '决定你打破原著宿命的道路', explain: '或抢救便当同伴、或借先知狂卷悟道额外技巧、或与强援暗中结盟！', slices: getSliceColors(DATA.CANON_DIVERGENCE_SLICES) };
     }
     if (step.type === 'shikigami_auto') {
       return { title: DATA.SHIKIGAMI_SUB_BRANCHES.autonomous.title, subtag: '式神意识设定', explain: '是否可独立脱离御主精细遥控。', slices: getSliceColors(DATA.SHIKIGAMI_SUB_BRANCHES.autonomous.slices) };
@@ -450,6 +580,13 @@
     if (step.type === 'faction') {
       var fPool = DATA.FACTION_WHEELS[char.identityId] || DATA.FACTION_WHEELS.sorcerer;
       return { title: '初始所属阵营', subtag: char.identityName + ' 立场确立', explain: '决定你在涩谷事变等重大战役中的归属站位。', slices: getSliceColors(fPool) };
+    }
+    if (step.type === 'identity_extra') {
+      var extMeta = DATA.IDENTITY_EXTRA_WHEELS[step.key];
+      return { title: extMeta ? extMeta.title : '身份专属特化分支', subtag: char.identityName + ' · 独特机缘', explain: '依据当前出身展开的独家分支机缘判定（普通人亦有机会脑改觉醒术式！）。', slices: getSliceColors(extMeta ? extMeta.slices : [{ label: '常态平稳过渡', weight: 100 }]) };
+    }
+    if (step.type === 'binding_vow') {
+      return { title: '决战前夕 · 立下「束缚」契约', subtag: '咒术最核心的等价交换原则', explain: '可立誓公开术式稳健增伤，或赌上性命换取暴涨输出！', slices: getSliceColors(DATA.BINDING_VOWS) };
     }
     if (step.type === 'era_count') {
       var eObj = DATA.ERAS.find(function (e) { return e.id === step.eraId; });
@@ -727,6 +864,84 @@
       state.customPresetPending = null;
       state.stepQueue = setupSteps.concat(state.stepQueue);
 
+    } else if (step.type === 'canon_character') {
+      var targetCanon = slice.canonObj || DATA.CANON_CHARACTERS.find(function (c) { return c.id === slice.id; }) || DATA.CANON_CHARACTERS[0];
+      applyCanonTemplate(char, targetCanon, null);
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+      effectText = '已夺舍降临为【' + targetCanon.name + '】（' + targetCanon.title + ' · ' + targetCanon.officialGrade + '）';
+
+    } else if (step.type === 'canon_timepoint') {
+      var chosenEraId = slice.id === 'native' ? (char.nativeEraId || char.birthEraId || 'canonStart') : slice.eraId;
+      var cEraObj = DATA.ERAS.find(function (e) { return e.id === chosenEraId; }) || DATA.ERAS[4];
+      char.birthEraId = cEraObj.id;
+      char.birthEraLabel = cEraObj.label;
+      char.currentEraId = cEraObj.id;
+      char.currentEraLabel = cEraObj.short;
+      effectText = slice.note + ' → 将于「' + cEraObj.label + '」开启原著改命！';
+      state.stepQueue = state.stepQueue.concat(buildEraQueue(chosenEraId));
+
+    } else if (step.type === 'canon_sync') {
+      char.canonSyncLabel = slice.label;
+      char.flags.canonSyncMode = slice.mode;
+      if (slice.mode === 'perfect') {
+        ['ceTotal', 'ceControl', 'taijutsu', 'talent'].forEach(function (k) {
+          if (char.technique !== '天与咒缚（零咒力）' || k === 'taijutsu' || k === 'talent') {
+            applyStatDelta(char, k, 1);
+          }
+        });
+        char.attrs.bodyResist = clamp(char.attrs.bodyResist + 1, 0, 13);
+        effectText = '灵魂100%共鸣超越原主！多项核心能力突破 +1，黑闪契合感暴涨！';
+      } else if (slice.mode === 'high') {
+        var boostKeys = char.technique === '天与咒缚（零咒力）' ? ['taijutsu', 'bodyResist'] : ['ceControl', 'versatility'];
+        boostKeys.forEach(function (k) { applyStatDelta(char, k, 1); });
+        effectText = '85%高度融魂，操纵与适应性提升 +1！';
+      } else if (slice.mode === 'reject') {
+        var nerfs = char.technique === '天与咒缚（零咒力）' ? ['taijutsu', 'versatility'] : ['ceControl', 'barrier'];
+        nerfs.forEach(function (k) { applyStatDelta(char, k, -1); });
+        effectText = '灵魂产生短暂排异，部分发挥微降 -1，需在后续战斗磨合弥补';
+      } else {
+        effectText = '顺利融合原著躯壳，完整继承原主巅峰属性与术式';
+      }
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+
+    } else if (step.type === 'canon_memory') {
+      char.canonMemoryLabel = slice.label;
+      char.flags.scriptLevel = slice.scriptLevel;
+      if (slice.iqBoost) applyStatDelta(char, 'iq', slice.iqBoost);
+      effectText = slice.scriptLevel >= 2
+        ? '完整全知剧本在握！智力 +' + slice.iqBoost + '，临场避险与战力判断全方面占据先手'
+        : slice.scriptLevel === 1
+          ? '保留关键剧情节点记忆，智力 +1，足以避开多数阴谋伏击'
+          : slice.scriptLevel === -1
+            ? '忘却全部穿书外挂，完全融入咒术世界人物本心'
+            : '零星碎片印象隐约浮现，胜负全靠当下操作';
+
+    } else if (step.type === 'canon_divergence') {
+      char.canonDivergenceLabel = slice.label;
+      char.flags.canonDivergence = slice.effect;
+      if (slice.effect === 'save_all') {
+        char.flags.rewroteFate = true;
+        effectText = '立下救人改命宏愿！大战死局回避率与攻坚胜率提升！';
+      } else if (slice.effect === 'extra_tech') {
+        applyStatDelta(char, 'talent', 1);
+        effectText = '借先知优势提前深研咒术极限！天赋 +1，即将额外抽取 1 项高级技巧！';
+        state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
+      } else if (slice.effect === 'ally_shield') {
+        char.flags.hasSecretAlly = true;
+        effectText = '秘密缔结跨阵营盟约！决战每回合将获得隐藏盟友支援战值！';
+      } else {
+        applyStatDelta(char, 'taijutsu', 1);
+        applyStatDelta(char, 'barrier', 1);
+        effectText = '低调隐忍潜修基本功：体术 +1、结界术 +1！';
+      }
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+
     } else if (step.type === 'shikigami_auto') {
       char.shikigamiDesc = slice.id ? '自律式神' : '受命式神';
       effectText = slice.id ? '具备独立战局判断能力' : '完全执行御主契约指令';
@@ -830,11 +1045,49 @@
       char.officialGrade = slice.id;
       char.gradeBonus = slice.bonus;
       effectText = '高专正式评定阶级：' + slice.id;
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
 
     } else if (step.type === 'faction') {
       char.faction = slice.id;
       char.factionLabel = slice.label;
       effectText = slice.note;
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+
+    } else if (step.type === 'identity_extra') {
+      if (slice.up1) applyStatDelta(char, slice.up1, slice.iqDouble ? 2 : 1);
+      if (slice.up2) applyStatDelta(char, slice.up2, 1);
+      if (slice.repBonus) char.reputationLevel += Math.round(slice.repBonus / 5);
+      if (slice.awakenTech) {
+        char.flags.civilianAwakened = true;
+        if (char.officialGrade.indexOf('四级') >= 0 || char.officialGrade === '潜力体（高抗性常人）') {
+          char.officialGrade = '准一级';
+          char.gradeBonus = 6;
+        }
+        effectText = '奇迹发生！脑中沉睡的术式遭唤醒！即将当场补抽一门生得术式与高级技巧！';
+        state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
+        state.stepQueue.unshift({ type: 'technique' });
+      } else {
+        effectText = slice.note || slice.label;
+      }
+      if (state.customAttrTier && state.customAttrTier !== 'random') {
+        applyAttrTierFloor(char, state.customAttrTier);
+      }
+
+    } else if (step.type === 'binding_vow') {
+      char.flags.bindingVowPicked = true;
+      char.flags.activeVowId = slice.id;
+      char.flags.activeVowLabel = slice.label;
+      char.flags.vowAtkMult = slice.atkMult || 1.0;
+      char.flags.vowDangerDelta = slice.dangerDelta || 0;
+      if (slice.statBoost) {
+        applyStatDelta(char, 'ceControl', 1);
+        applyStatDelta(char, 'ceEfficiency', 1);
+      }
+      effectText = slice.desc;
 
     } else if (step.type === 'era_count') {
       var eCount = slice.count || 1;
@@ -1005,6 +1258,9 @@
 
     } else if (step.type === 'shinjuku_motive') {
       effectText = slice.buffNote;
+      if (!char.flags.bindingVowPicked) {
+        state.stepQueue.unshift({ type: 'binding_vow' });
+      }
 
     } else if (step.type === 'shinjuku_sukuna_order') {
       var isTrueForm = slice.id === 'trueForm';
@@ -1021,7 +1277,7 @@
         adaptations: {},
         gojoJoined: Boolean(slice.startWithGojo),
         canGojoJoin: Boolean(slice.canGojoJoin),
-        infinityBlocks: slice.startWithGojo ? 4 : 0,
+        infinityBlocks: (slice.startWithGojo ? 4 : 0) + (slice.startWithGojo && char.flags.hasSecretAlly ? 1 : 0),
         sukunaStun: 0,
         playerRoundPower: 0,
         enemyRoundPower: 0,
@@ -1035,11 +1291,12 @@
 
     } else if (step.type === 'boss_player_count') {
       var pCnt = slice.count || 3;
-      state.boss.playerRoundPower = Math.round(getPowerBreakdown(char) * 0.35);
+      var allySupport = char.flags.hasSecretAlly ? 12 : 0;
+      state.boss.playerRoundPower = Math.round(getPowerBreakdown(char) * 0.35) + allySupport;
       state.boss.enemyRoundPower = 0;
       state.boss.usedMovesThisRound = [];
       state.boss.playerMovesLeft = pCnt;
-      effectText = '我方本回合共获 ' + pCnt + ' 次出手契机！';
+      effectText = '我方本回合共获 ' + pCnt + ' 次出手契机！' + (allySupport ? '（含秘密盟友援护 +' + allySupport + ' 战值）' : '');
       for (var pm = pCnt; pm >= 1; pm--) {
         state.stepQueue.unshift({ type: 'boss_player_move', nth: pm, total: pCnt });
       }
@@ -1047,7 +1304,8 @@
     } else if (step.type === 'boss_player_move') {
       state.boss.playerMovesLeft = Math.max(0, state.boss.playerMovesLeft - 1);
       var myBase = Math.max(12, Math.round(getPowerBreakdown(char) * 0.28));
-      var rawAtk = Math.round(myBase * (slice.mult || 1.1));
+      var vowMultMove = char.flags.vowAtkMult || 1;
+      var rawAtk = Math.round(myBase * (slice.mult || 1.1) * vowMultMove);
       var adaptCount = state.boss.adaptations[slice.label] || 0;
       var adaptMult = adaptCount >= 4 ? 0 : adaptCount === 3 ? 0.1 : adaptCount === 2 ? 0.4 : adaptCount === 1 ? 0.7 : 1;
       var finalAtk = Math.round(rawAtk * adaptMult);
@@ -1299,9 +1557,15 @@
     var log = char.statsLog;
     var flags = char.flags;
     var traits = [];
+    var unlockedIds = [];
 
-    function addTrait(name, score, desc) {
+    function unlock(id) {
+      if (id && unlockedIds.indexOf(id) === -1) unlockedIds.push(id);
+    }
+
+    function addTrait(name, score, desc, catalogId) {
       traits.push({ name: name, score: score, desc: desc });
+      if (catalogId) unlock(catalogId);
     }
 
     var attrVals = DATA.ATTRIBUTE_DEFS.map(function (d) { return attrs[d.key] || 0; });
@@ -1310,25 +1574,54 @@
     var minV = Math.min.apply(null, attrVals);
 
     if (flags.beatSukunaShinjuku) {
-      addTrait('新宿弑王者', +10, '在新宿多回合决战中压制并战胜宿傩！');
+      addTrait('新宿弑王者', +10, '在新宿多回合决战中压制并战胜宿傩！', 't_omega');
+    }
+    if (char.identityId === 'canon' && !flags.killedInAction) {
+      addTrait('魂穿入局 · 逆天改命', +7, '魂穿原著「' + (char.canonCharName || '主角') + '」完整走完命运线并活到终点', 't_canon_soul');
+    }
+    if (char.identityId === 'canon' && flags.canonSyncMode === 'perfect') {
+      addTrait('百分百共鸣 · 超越原主', +8, '灵魂100%共鸣突破原著天花板上限', 't_canon_perfect');
+    }
+    if (char.identityId === 'canon' && flags.scriptLevel >= 1) {
+      addTrait('剧本先知棋手', +5, '手握原著关键节点先知布局规避阴谋', 't_canon_prophet');
+    }
+    if (flags.canonSyncMode === 'reject' && flags.killedInAction) {
+      addTrait('魂穿水土不服 · 逆境陨落', -4, '灵魂排异未磨合彻底便遗憾倒在战场', 't_glass_cannon');
+    }
+    if (flags.activeVowId === 'vow_life' && !flags.killedInAction) {
+      addTrait('舍命死契的狂徒', +8, '立下赌命束缚决战宿傩且依然存活', 't_vow_breaker');
+    } else if (flags.activeVowId && flags.activeVowId !== 'vow_none' && !flags.killedInAction) {
+      addTrait('善用束缚的宗师', +4, '以精准束缚等价交换推高决战上限', 't_binding_vow');
+    }
+    if (flags.civilianAwakened) {
+      addTrait('凡胎觉醒生得术式', +6, '以普通人开局意外觉醒生得术式踏入主舞台', 't_awakened_civilian');
+    }
+    if (char.technique === '天与咒缚（零咒力）' && log.wins >= 2) {
+      addTrait('天与暴君（零咒力之巅）', +7, '凭零咒力肉体与咒具击溃诸多强敌', 't_heaven');
     }
     if (log.beatStronger) {
       addTrait('以下克上', +5, '战胜至少一名综合战力强于自己的敌人');
     }
     if ((char.birthEraId === 'heian' || char.birthEraId === 'edo400') && !flags.killedInAction) {
-      addTrait('活化石', +8, '从千年前或四百年前一路活跃至六十八年后');
+      addTrait('活化石 · 时代见证者', +8, '从千年前或四百年前一路活跃至六十八年后', 't_multi_era');
+    }
+    if (char.currentEraId === 'future68' && !flags.killedInAction) {
+      addTrait('68年后依旧健在的传奇', +6, '平稳跨入并活跃于宿傩落幕六十八年后的世界', 't_legend_68');
     }
     if (flags.preservedToFuture) {
       addTrait('封存到未来', +5, '经封存沉睡或咒物化跨越时代在现代苏醒');
+    }
+    if (char.officialGrade === '特级') {
+      addTrait('特级评定认证', +6, '站上咒术界「特级」规格外宝座', 't_special_grade');
     }
     if (char.faction === 'evil' && log.wins >= 4 && !flags.killedInAction) {
       addTrait('乱世枭雄', +6, '保持暗面阵营立场并赢下四场以上激战活到结局');
     }
     if (char.faction === 'good' && log.wins >= 4 && !flags.killedInAction) {
-      addTrait('咒术界支柱', +6, '正道立场奋战四胜以上并护卫世间直至终局');
+      addTrait('咒术界支柱', +6, '正道立场奋战四胜以上并护卫世间直至终局', 't_six_eyes');
     }
     if (log.wins >= 5) {
-      addTrait('旗开得胜', +4, '全生涯累计胜场 ≥ 5 场（实际 ' + log.wins + ' 胜）');
+      addTrait('连战连捷战神', +5, '全生涯累计胜场 ≥ 5 场（实际 ' + log.wins + ' 胜）', 't_double_kill');
     }
     if (exCount >= 2) {
       addTrait('双绝以上', +5, '最终十维属性达到 EX 及以上数量 ≥ 2');
@@ -1340,16 +1633,19 @@
       addTrait('金刚不坏', +4, '身体抗性达到 EX 级别屹立不倒');
     }
     if (char.skills.indexOf('领域展开') >= 0) {
-      addTrait('领域主宰', +5, '成功掌握咒术最高境界「领域展开」');
+      addTrait('领域主宰', +5, '成功掌握咒术最高境界「领域展开」', 't_domain');
     }
     if (flags.awakenedRCTInBattle) {
       addTrait('绝境抓核', +6, '在濒危败局伤势转盘中当场抓准咒力核心领悟反转术式！');
     }
     if (log.defeatedEnemies.indexOf('choso') >= 0) {
-      addTrait('赤血断流', +5, '在实战交锋中击败九相图·胀相');
+      addTrait('赤血断流', +5, '在实战交锋中击败九相图·胀相', 't_choso_slayer');
+    }
+    if (log.defeatedEnemies.indexOf('toji') >= 0) {
+      addTrait('破灭术师杀手', +6, '在怀玉夜正面对决击败天与暴君伏黑甚尔', 't_toji_slayer');
     }
     if (log.defeatedEnemies.indexOf('dabura') >= 0) {
-      addTrait('超光速之外', +8, '在六十八年后的切磋中击败达布拉');
+      addTrait('超光速之外', +8, '在六十八年后的切磋中击败达布拉', 't_dabura_clear');
     }
     if (log.blackFlashes >= 2) {
       addTrait('黑闪的宠儿', +5, '生涯多次爆发灵魂共振的黑闪一击（共 ' + log.blackFlashes + ' 次）');
@@ -1358,7 +1654,13 @@
       addTrait('大难不死', +4, '多次熬过死亡风险判定绝地翻盘');
     }
     if (flags.gojoSealed === false) {
-      addTrait('4% 奇迹见证者', +7, '涉谷见证五条悟未被封印的神级改写世界线');
+      addTrait('4% 奇迹见证者', +7, '涉谷见证五条悟未被封印的神级改写世界线', 't_save_gojo');
+    }
+    if (char.flags.nanamiDead === false && (log.defeatedEnemies.indexOf('真人') >= 0 || (char.statsLog && char.statsLog.savedNanami))) {
+      addTrait('涉谷站台救下七海建人', +7, '于涉谷站台死保七海前辈改写遗憾', 't_save_nanami');
+    }
+    if (char.identityId === 'civilian' && !flags.killedInAction && log.wins + log.losses <= 2) {
+      addTrait('平平安安是福', +4, '普通人视角稳健远离致命冲突平安走完一生', 't_civilian_peace');
     }
 
     if (log.lostToWeaker) {
@@ -1374,7 +1676,8 @@
       addTrait('最后的加班', -3, '见证涩谷事变七海建人壮烈谢幕');
     }
     if (flags.killedInAction) {
-      addTrait('半途折戟', -6, '战死于残酷时代或新宿决战之中');
+      var deathId = char.currentEraId === 'shibuya' ? 't_shibuya_fall' : char.currentEraId === 'shinjuku' ? 't_sukuna_slain' : '';
+      addTrait('半途折戟', -6, '战死于残酷时代或新宿决战之中', deathId);
     }
 
     if (!traits.length) {
@@ -1409,6 +1712,7 @@
       blackFlashes: log.blackFlashes,
       fateReward: fateReward,
       traits: traits,
+      unlockedIds: unlockedIds,
       summaryLine: char.identityName + ' · ' + char.officialGrade + ' · ' + char.technique + ' · 声望「' + char.reputationText + '」（战力 ' + getPowerBreakdown(char) + '）'
     };
   }

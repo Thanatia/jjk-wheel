@@ -48,13 +48,14 @@
   ];
 
   var IDENTITIES = [
-    { id: 'sorcerer', label: '咒术师', weight: 22, cost: 3, faction: 'good', desc: '正统入世的咒术行使者，行走于明暗交界' },
-    { id: 'curseUser', label: '诅咒师', weight: 13, cost: 3, faction: 'evil', desc: '以咒术行私欲或暗杀之事的法外之人' },
-    { id: 'civilian', label: '普通人', weight: 28, cost: 0, faction: 'neutral', desc: '看似平凡的常人，命运也可能卷入咒力漩涡' },
-    { id: 'higherUp', label: '咒术高层', weight: 11, cost: 2, faction: 'neutral', desc: '端坐屏风之后制定规矩与处刑令的掌权者' },
-    { id: 'curse', label: '咒灵', weight: 9, cost: 4, faction: 'evil', desc: '人类负面情绪凝结诞生的诅咒具现' },
-    { id: 'shikigami', label: '式神', weight: 9, cost: 3, faction: 'neutral', desc: '依附术式或御主显化的异界灵体战力' },
-    { id: 'corpse', label: '咒骸', weight: 8, cost: 3, faction: 'good', desc: '灌注咒核、具备自我意识的人造傀儡存在' }
+    { id: 'sorcerer', label: '咒术师', weight: 19, cost: 3, faction: 'good', desc: '正统入世的咒术行使者，行走于明暗交界' },
+    { id: 'curseUser', label: '诅咒师', weight: 11, cost: 3, faction: 'evil', desc: '以咒术行私欲或暗杀之事的法外之人' },
+    { id: 'civilian', label: '普通人', weight: 22, cost: 0, faction: 'neutral', desc: '看似平凡的常人，命运也可能卷入咒力漩涡' },
+    { id: 'canon', label: '魂穿原著角色', weight: 16, cost: 4, faction: 'neutral', desc: '灵魂穿越附身或降临为《咒术回战》原著人物，改写命运线' },
+    { id: 'higherUp', label: '咒术高层', weight: 9, cost: 2, faction: 'neutral', desc: '端坐屏风之后制定规矩与处刑令的掌权者' },
+    { id: 'curse', label: '咒灵', weight: 8, cost: 4, faction: 'evil', desc: '人类负面情绪凝结诞生的诅咒具现' },
+    { id: 'shikigami', label: '式神', weight: 8, cost: 3, faction: 'neutral', desc: '依附术式或御主显化的异界灵体战力' },
+    { id: 'corpse', label: '咒骸', weight: 7, cost: 3, faction: 'good', desc: '灌注咒核、具备自我意识的人造傀儡存在' }
   ];
 
   var ERAS = [
@@ -385,9 +386,10 @@
         intro: '夏油杰放出千余咒灵掀起百鬼夜行，祈本里香与乙骨忧太迎来巅峰交锋',
         choiceTitle: '百鬼夜行中你镇守的方向',
         choices: [
-          { label: '拦截特级诅咒师夏油杰本阵', weight: 44, action: 'fight', enemyName: '夏油杰（百鬼夜行）', enemyPower: 55 },
-          { label: '清扫新宿街头百鬼咒灵大军', weight: 38, action: 'fight', enemyName: '百鬼夜行特级咒灵', enemyPower: 40 },
-          { label: '抢救伤员并构筑大范围「帐」', weight: 18, action: 'safe', effectText: '稳妥护下后方，结界术 +1', statUp: 'barrier' }
+          { label: '拦截特级诅咒师夏油杰本阵', weight: 40, action: 'fight', enemyName: '夏油杰（百鬼夜行）', enemyPower: 55 },
+          { label: '阻击非洲术师·米格尔与黑绳阵线', weight: 24, action: 'fight', enemyName: '米格尔（黑绳）', enemyPower: 45 },
+          { label: '清扫新宿街头百鬼咒灵大军', weight: 22, action: 'fight', enemyName: '百鬼夜行特级咒灵', enemyPower: 40 },
+          { label: '抢救伤员并构筑大范围「帐」', weight: 14, action: 'safe', effectText: '稳妥护下后方，结界术 +1', statUp: 'barrier' }
         ]
       }
     ],
@@ -418,12 +420,13 @@
       {
         id: 'shi_g_frontline',
         title: '涩谷事变·B5F 至站台乱战',
-        intro: '胀相、漏瑚、真人接连现身，七海建人也正身陷绝境边缘！',
+        intro: '五条悟拼出0.2秒无量空处斩灭上千改造人，随后胀相、漏瑚、真人接连逼近！',
         choiceTitle: '涩谷夜晚你切入哪处战场',
         choices: [
-          { label: '独自拖住灾害极炎·漏瑚', weight: 34, action: 'fight', enemyName: '漏瑚', enemyPower: 54 },
-          { label: '在地铁厕所血战九相图大哥·胀相', weight: 40, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso' },
-          { label: '冲向涉谷站台死保七海建人！', weight: 26, action: 'fight', enemyName: '真人', enemyPower: 52, savesNanami: true }
+          { label: '独自拖住灾害极炎·漏瑚', weight: 30, action: 'fight', enemyName: '漏瑚', enemyPower: 54 },
+          { label: '在地铁厕所血战九相图大哥·胀相', weight: 34, action: 'fight', enemyName: '胀相', enemyPower: 44, defeatsKey: 'choso' },
+          { label: '冲向涉谷站台死保七海建人！', weight: 24, action: 'fight', enemyName: '真人', enemyPower: 52, savesNanami: true },
+          { label: '抢在狱门疆闭合前接应B5F散兵', weight: 12, action: 'safe', effectText: '及时稳住B5F战线避免大规模伤亡，咒力操纵 +1', statUp: 'ceControl' }
         ]
       },
       {
@@ -467,20 +470,22 @@
         intro: '乌鹭亨子、石流龙、黑沐死与杜鲁夫互相牵制，乙骨忧太独自压场',
         choiceTitle: '在仙台结界内选择交手对象',
         choices: [
-          { label: '正面硬撼仙台强敌·石流龙＆乌鹭', weight: 44, action: 'fight', enemyName: '仙台巅峰双强', enemyPower: 54 },
-          { label: '挑战刚入场的特级·乙骨忧太', weight: 30, action: 'fight', enemyName: '乙骨忧太（死灭回游）', enemyPower: 60 },
-          { label: '暗中收割泳者积分完善结界术', weight: 26, action: 'safe', effectText: '斩获足量总则分数，结界术 +1', statUp: 'barrier' }
+          { label: '正面硬撼仙台强敌·石流龙＆乌鹭', weight: 42, action: 'fight', enemyName: '仙台巅峰双强', enemyPower: 54 },
+          { label: '挑战刚入场的特级·乙骨忧太', weight: 28, action: 'fight', enemyName: '乙骨忧太（死灭回游）', enemyPower: 60 },
+          { label: '在岩手/樱岛迎战直哉暴走咒灵态', weight: 16, action: 'fight', enemyName: '咒灵化·禅院直哉', enemyPower: 50 },
+          { label: '暗中收割泳者积分完善结界术', weight: 14, action: 'safe', effectText: '斩获足量总则分数，结界术 +1', statUp: 'barrier' }
         ]
       },
       {
         id: 'cg_tokyo',
-        title: '死灭回游·东京第1与第2结界',
-        intro: '日车宽见与秤金次、鹿紫云一打出令人窒息的极限对局，随后突破薨星宫防线',
-        choiceTitle: '在东京结界的关键一战',
+        title: '死灭回游·东京结界与搞笑异变',
+        intro: '日车宽见、秤金次与高羽史彦接连引爆规则对局，随后突破薨星宫防线',
+        choiceTitle: '在东京与岩手结界的关键一战',
         choices: [
-          { label: '对决天才律师·日车宽见', weight: 34, action: 'fight', enemyName: '日车宽见', enemyPower: 46 },
-          { label: '迎战坐杀博徒·秤金次（不死狂热态）', weight: 36, action: 'fight', enemyName: '秤金次', enemyPower: 54 },
-          { label: '随阵营突击薨星宫天元防线', weight: 30, action: 'fight', enemyName: '薨星宫守护防线', enemyPower: 52 }
+          { label: '对决天才律师·日车宽见', weight: 28, action: 'fight', enemyName: '日车宽见', enemyPower: 46 },
+          { label: '迎战坐杀博徒·秤金次（不死狂热态）', weight: 30, action: 'fight', enemyName: '秤金次', enemyPower: 54 },
+          { label: '误入高羽「超人」搞笑现实演出舞台', weight: 18, action: 'safe', effectText: '被迫配合演出脱力胜出，术式泛用 +1、灵魂抗性 +1', statUp: 'versatility' },
+          { label: '随阵营突击薨星宫天元防线', weight: 24, action: 'fight', enemyName: '薨星宫守护防线', enemyPower: 52 }
         ]
       }
     ],
@@ -488,14 +493,15 @@
       {
         id: 'f68_opponent',
         title: '68年后·跨越半个世纪的传闻',
-        intro: '宿傩落幕六十八年后，新生的传闻与远古残影再次回响世间',
+        intro: '宿傩落幕六十八年后，外星遗迹调和者与远古残影在次世代舞台交汇',
         choiceTitle: '68年后·你的战斗对手',
         choices: [
-          { label: '友好切磋·挑战达布拉', weight: 24, action: 'fight', enemyName: '达布拉', enemyPower: 58, defeatsKey: 'dabura', canDie: false },
-          { label: '生死决斗·八握剑异戒神将魔虚罗', weight: 20, action: 'fight', enemyName: '完全体魔虚罗', enemyPower: 66, canDie: true },
-          { label: '切磋高寿传说·68虎杖', weight: 20, action: 'fight', enemyName: '68虎杖', enemyPower: 56, canDie: false },
-          { label: '降伏卷土重来·灵魂形态真人', weight: 18, action: 'fight', enemyName: '灵魂形态·真人', enemyPower: 54, canDie: true },
-          { label: '隐居传道静观后世（平顺养老）', weight: 18, action: 'safe', effectText: '德高望重安度余生，智力 +1', statUp: 'iq' }
+          { label: '友好切磋·挑战星外来客达布拉', weight: 22, action: 'fight', enemyName: '达布拉', enemyPower: 58, defeatsKey: 'dabura', canDie: false },
+          { label: '生死决斗·八握剑异戒神将魔虚罗', weight: 18, action: 'fight', enemyName: '完全体魔虚罗', enemyPower: 66, canDie: true },
+          { label: '切磋高寿传说·68虎杖', weight: 18, action: 'fight', enemyName: '68虎杖', enemyPower: 56, canDie: false },
+          { label: '对峙「里梅附身真剑」与混沌调和·马鲁', weight: 14, action: 'fight', enemyName: '附身真剑＆马鲁', enemyPower: 60, canDie: false },
+          { label: '降伏卷土重来·灵魂形态真人', weight: 14, action: 'fight', enemyName: '灵魂形态·真人', enemyPower: 54, canDie: true },
+          { label: '隐居传道静观后世（平顺养老）', weight: 14, action: 'safe', effectText: '德高望重安度余生，智力 +1', statUp: 'iq' }
         ]
       }
     ]
@@ -645,6 +651,319 @@
     }
   ];
 
+  // ==================== 魂穿原著角色全池（22位核心人物） ====================
+  var CANON_CHARACTERS = [
+    {
+      id: 'gojo', name: '五条悟', title: '现代最强 · 六眼无下限', weight: 4, cost: 6,
+      faction: 'good', eraId: 'hiddenInv', techniqueId: 'limitless', technique: '无下限咒术',
+      officialGrade: '特级', gradeBonus: 15, looks: 10, morality: 2, aggro: 9,
+      skills: ['反转术式', '领域展开', '黑闪', '简易领域', '落之雪（落花之情）'],
+      tools: [],
+      attrs: { ceTotal: 8, ceControl: 10, ceEfficiency: 12, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 10, versatility: 10, iq: 9, talent: 11 },
+      canonNote: '天生六眼与无下限并立，唯需戒备狱门疆与世界斩'
+    },
+    {
+      id: 'sukuna', name: '两面宿傩', title: '诅咒之王 · 堕天御厨子', weight: 3, cost: 6,
+      faction: 'evil', eraId: 'heian', techniqueId: 'shrine', technique: '御厨子',
+      officialGrade: '特级', gradeBonus: 15, looks: 6, morality: -5, aggro: 10,
+      skills: ['完整咏唱', '反转术式', '领域展开', '黑闪', '领域展延', '弥虚葛笼'],
+      tools: [{ shape: '降魔杵', effect: '咒力传导增幅（输出+20%）', bonus: 6 }],
+      attrs: { ceTotal: 12, ceControl: 10, ceEfficiency: 10, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 11, versatility: 10, iq: 10, talent: 11 },
+      canonNote: '史上最强术师与开放式领域宗师，一切生灵俯首'
+    },
+    {
+      id: 'itadori', name: '虎杖悠仁', title: '黑闪宠儿 · 宿傩受肉体', weight: 7, cost: 2,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'bloodManip', technique: '赤血操术 / 宿傩残影（解）',
+      officialGrade: '一级', gradeBonus: 8, looks: 7, morality: 4, aggro: 5,
+      skills: ['黑闪', '反转术式', '简易领域'],
+      tools: [],
+      attrs: { ceTotal: 6, ceControl: 7, ceEfficiency: 7, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 5, versatility: 6, iq: 6, talent: 9 },
+      canonNote: '超常肉体耐受与近乎百发百中的黑闪直觉，专克灵魂防线'
+    },
+    {
+      id: 'megumi', name: '伏黑惠', title: '禅院血脉 · 十种影法术师', weight: 6, cost: 3,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'tenShadows', technique: '十种影法术',
+      officialGrade: '一级', gradeBonus: 8, looks: 8, morality: 2, aggro: 4,
+      skills: ['领域展开', '简易领域'],
+      tools: [{ shape: '打刀', effect: '纯白板高硬度物理咒具', bonus: 3 }],
+      attrs: { ceTotal: 7, ceControl: 7, ceEfficiency: 6, taijutsu: 7, bodyResist: 6, soulResist: 7, barrier: 7, versatility: 9, iq: 8, talent: 9 },
+      canonNote: '坐拥魔虚罗潜力与嵌合暗翳庭，关键在于守住灵魂不被宿傩夺舍'
+    },
+    {
+      id: 'yuta', name: '乙骨忧太', title: '纯爱特级 · 诅咒女王之主', weight: 5, cost: 5,
+      faction: 'good', eraId: 'vol0', techniqueId: 'copy', technique: '模倣·术式拷贝',
+      officialGrade: '特级', gradeBonus: 15, looks: 7, morality: 4, aggro: 5,
+      skills: ['反转术式', '领域展开', '黑闪'],
+      tools: [{ shape: '打刀', effect: '咒力传导增幅（输出+20%）', bonus: 5 }],
+      attrs: { ceTotal: 11, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 8, barrier: 9, versatility: 10, iq: 8, talent: 10 },
+      canonNote: '底蕴深不见底的第二位现代特级，真赝相爱拥有无限可能'
+    },
+    {
+      id: 'geto', name: '夏油杰', title: '咒灵操使 · 极之番漩涡', weight: 5, cost: 4,
+      faction: 'evil', eraId: 'hiddenInv', techniqueId: 'curseManip', technique: '咒灵操术',
+      officialGrade: '特级', gradeBonus: 15, looks: 8, morality: -2, aggro: 7,
+      skills: ['完整咏唱'],
+      tools: [{ shape: '三节棍', effect: '沉重刚烈叠加破坏力（游云系）', bonus: 7 }],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 7, versatility: 9, iq: 9, talent: 8 },
+      canonNote: '苦夏的歧途站在眼前，若带着后世记忆或许能逆转分道扬镳'
+    },
+    {
+      id: 'toji', name: '伏黑甚尔', title: '天与暴君 · 术师杀手', weight: 4, cost: 5,
+      faction: 'neutral', eraId: 'hiddenInv', techniqueId: 'heavenZero', technique: '天与咒缚（零咒力）',
+      officialGrade: '特级', gradeBonus: 14, looks: 8, morality: -2, aggro: 6,
+      skills: ['百兵演武'],
+      tools: [
+        { shape: '短匕', effect: '强制解除敌方术式特攻（天逆系）', bonus: 8 },
+        { shape: '打刀', effect: '直切灵魂忽略防御（释魂系）', bonus: 8 }
+      ],
+      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 12, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 8, talent: 7 },
+      canonNote: '彻底挣脱因果与领域必中的零咒力怪胎，全靠肉体与特级咒具横推'
+    },
+    {
+      id: 'nanami', name: '七海建人', title: '七三战神 · 加班社畜一级', weight: 7, cost: 2,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'ratio', technique: '十划咒法',
+      officialGrade: '一级', gradeBonus: 8, looks: 7, morality: 3, aggro: 3,
+      skills: ['黑闪'],
+      tools: [{ shape: '短匕', effect: '咒力传导增幅（输出+20%）', bonus: 4 }],
+      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 7, barrier: 5, versatility: 6, iq: 9, talent: 6 },
+      canonNote: '最可靠的成年人护盾，绝不让涩谷站台成为遗憾终点'
+    },
+    {
+      id: 'maki', name: '禅院真希', title: '鬼人觉醒 · 天与全盛体', weight: 6, cost: 4,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'heavenZero', technique: '天与咒缚（零咒力）',
+      officialGrade: '特级', gradeBonus: 14, looks: 8, morality: 2, aggro: 5,
+      skills: ['百兵演武'],
+      tools: [{ shape: '大太刀', effect: '直切灵魂忽略防御（释魂系）', bonus: 8 }],
+      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 11, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 7, talent: 8 },
+      canonNote: '比肩甚尔的鬼神体魄，一刀释魂令御宅术师战栗'
+    },
+    {
+      id: 'nobara', name: '钉崎野蔷薇', title: '共鸣直击 · 狂气高专少女', weight: 6, cost: 1,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'strawDoll', technique: '刍灵咒法',
+      officialGrade: '三级', gradeBonus: 3, looks: 7, morality: 3, aggro: 5,
+      skills: ['黑闪'],
+      tools: [{ shape: '重锤', effect: '命中附带诅咒侵蚀与灼伤', bonus: 4 }],
+      attrs: { ceTotal: 5, ceControl: 7, ceEfficiency: 6, taijutsu: 5, bodyResist: 5, soulResist: 8, barrier: 4, versatility: 7, iq: 7, talent: 7 },
+      canonNote: '灵魂共鸣在最终战能直接跨过千里锁死宿傩最后一根手指'
+    },
+    {
+      id: 'todo', name: '东堂葵', title: '五十万智力 · 不义游戏挚友', weight: 6, cost: 2,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'boogieWoogie', technique: '不义游戏',
+      officialGrade: '一级', gradeBonus: 8, looks: 6, morality: 2, aggro: 4,
+      skills: ['黑闪', '简易领域'],
+      tools: [{ shape: '手摇铁片（Vibraslap型）', effect: '可抵消敌方招式减伤护盾', bonus: 5 }],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 7, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 8, iq: 10, talent: 8 },
+      canonNote: '只要有搭档便能把任何绝境化为狂风骤雨的双打舞台'
+    },
+    {
+      id: 'hakari', name: '秤金次', title: '停学赌徒 · 四分十一秒不死', weight: 5, cost: 4,
+      faction: 'good', eraId: 'culling', techniqueId: 'gamble', technique: '坐杀博徒',
+      officialGrade: '一级', gradeBonus: 9, looks: 7, morality: 1, aggro: 5,
+      skills: ['领域展开', '反转术式'],
+      tools: [],
+      attrs: { ceTotal: 8, ceControl: 7, ceEfficiency: 9, taijutsu: 9, bodyResist: 9, soulResist: 7, barrier: 8, versatility: 7, iq: 7, talent: 8 },
+      canonNote: '热切豪运下溢出全身的全自动反转术式，拖战能力天下无双'
+    },
+    {
+      id: 'kashimo', name: '鹿紫云一', title: '江户雷神 · 幻兽琥珀', weight: 4, cost: 4,
+      faction: 'neutral', eraId: 'edo400', techniqueId: 'mythBeast', technique: '幻兽琥珀（电气属性）',
+      officialGrade: '特级', gradeBonus: 13, looks: 7, morality: 0, aggro: 8,
+      skills: ['弥虚葛笼'],
+      tools: [{ shape: '手杖', effect: '命中附带诅咒侵蚀与灼伤', bonus: 5 }],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 7, iq: 7, talent: 8 },
+      canonNote: '四百年最纯粹的求道者，带电咒力与必定命中之雷令万物失色'
+    },
+    {
+      id: 'choso', name: '胀相', title: '九相图长兄 · 穿血赤血操', weight: 6, cost: 2,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'bloodManip', technique: '赤血操术',
+      officialGrade: '准特级', gradeBonus: 11, looks: 7, morality: 2, aggro: 4,
+      skills: ['反转术式', '简易领域'],
+      tools: [],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 8, bodyResist: 8, soulResist: 7, barrier: 5, versatility: 8, iq: 7, talent: 7 },
+      canonNote: '受肉特殊体质使他能够源源不断用咒力造血，只为守护弟弟们而战'
+    },
+    {
+      id: 'higuruma', name: '日车宽见', title: '十二天修成领域 · 鬼才律师', weight: 5, cost: 4,
+      faction: 'good', eraId: 'culling', techniqueId: 'higurumaLaw', technique: '诛伏赐死（审判领域）',
+      officialGrade: '一级', gradeBonus: 10, looks: 8, morality: 2, aggro: 4,
+      skills: ['领域展开', '领域展延', '反转术式'],
+      tools: [{ shape: '重锤', effect: '可抵消敌方招式减伤护盾', bonus: 6 }],
+      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 8, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 9, versatility: 7, iq: 10, talent: 11 },
+      canonNote: '天赋直逼五条悟的超级天才，战场现学反转术式与领域展延'
+    },
+    {
+      id: 'yuki', name: '九十九由基', title: '星之怒 · 游历四海的特级', weight: 4, cost: 5,
+      faction: 'good', eraId: 'hiddenInv', techniqueId: 'starRage', technique: '星之怒（质量赋予）',
+      officialGrade: '特级', gradeBonus: 15, looks: 9, morality: 2, aggro: 6,
+      skills: ['反转术式', '领域展开', '简易领域'],
+      tools: [{ shape: '凰轮式神环', effect: '沉重刚烈叠加破坏力（游云系）', bonus: 6 }],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 10, bodyResist: 8, soulResist: 9, barrier: 8, versatility: 8, iq: 9, talent: 9 },
+      canonNote: '掌握灵魂之书且一拳可轰碎特级概念的存在，若能改写薨星宫死局不可估量'
+    },
+    {
+      id: 'kenjaku', name: '羂索', title: '千年棋手 · 万千结界宗师', weight: 3, cost: 5,
+      faction: 'evil', eraId: 'heian', techniqueId: 'curseManip', technique: '咒灵操术 / 百年换脑',
+      officialGrade: '特级', gradeBonus: 15, looks: 7, morality: -5, aggro: 9,
+      skills: ['完整咏唱', '反转术式', '领域展开', '领域展延'],
+      tools: [],
+      attrs: { ceTotal: 9, ceControl: 9, ceEfficiency: 9, taijutsu: 8, bodyResist: 7, soulResist: 9, barrier: 12, versatility: 11, iq: 11, talent: 9 },
+      canonNote: '除天元外结界术造诣冠绝古今的百年幕后黑手，深谙无数冷门术式'
+    },
+    {
+      id: 'mahito', name: '真人', title: '镜面人类恶意 · 无为转变', weight: 4, cost: 4,
+      faction: 'evil', eraId: 'canonStart', techniqueId: 'idleTransfig', technique: '无为转变',
+      officialGrade: '特级', gradeBonus: 14, looks: 7, morality: -5, aggro: 8,
+      skills: ['领域展开', '黑闪'],
+      tools: [],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 7, bodyResist: 8, soulResist: 11, barrier: 8, versatility: 10, iq: 8, talent: 10 },
+      canonNote: '不损伤灵魂便几乎不灭的成长型噩梦，灵魂抗性与塑性站在咒灵顶点'
+    },
+    {
+      id: 'jogo', name: '漏瑚', title: '大地畏惧 · 陨石灾炎', weight: 4, cost: 3,
+      faction: 'evil', eraId: 'canonStart', techniqueId: 'disasterFlames', technique: '大地灼炎',
+      officialGrade: '特级', gradeBonus: 13, looks: 2, morality: -4, aggro: 7,
+      skills: ['领域展开', '领域展延'],
+      tools: [],
+      attrs: { ceTotal: 9, ceControl: 7, ceEfficiency: 7, taijutsu: 7, bodyResist: 6, soulResist: 6, barrier: 8, versatility: 8, iq: 7, talent: 8 },
+      canonNote: '纸面战力媲美八九指宿傩的自然灾厄，只是时运不佳专挑最强碰撞'
+    },
+    {
+      id: 'uraume', name: '里梅', title: '千年冰星 · 宿傩忠臣兼厨师', weight: 4, cost: 3,
+      faction: 'evil', eraId: 'heian', techniqueId: 'iceForm', technique: '冰凝咒法',
+      officialGrade: '准特级', gradeBonus: 12, looks: 7, morality: -3, aggro: 6,
+      skills: ['反转术式', '弥虚葛笼'],
+      tools: [],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 7, bodyResist: 7, soulResist: 7, barrier: 7, versatility: 8, iq: 8, talent: 8 },
+      canonNote: '一招大范围霜凪即可冰封群雄千年老怪，忠心贯穿平安时代至68年后'
+    },
+    {
+      id: 'yorozu', name: '万', title: '疯狂真爱 · 构筑真球虫铠', weight: 4, cost: 4,
+      faction: 'neutral', eraId: 'heian', techniqueId: 'construct', technique: '构筑术式',
+      officialGrade: '特级', gradeBonus: 13, looks: 8, morality: -1, aggro: 6,
+      skills: ['领域展开', '弥虚葛笼'],
+      tools: [{ shape: '液态金属（构筑神武解模板）', effect: '咒力传导增幅（输出+20%）', bonus: 6 }],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 8, versatility: 9, iq: 7, talent: 8 },
+      canonNote: '开发出昆虫铠与零接触压力无限大「真球」的天才，只败于魔虚罗相性'
+    },
+    {
+      id: 'takaba', name: '高羽史彦', title: '半吊子搞笑艺人 · 超人术式', weight: 4, cost: 4,
+      faction: 'good', eraId: 'culling', techniqueId: 'comedian', technique: '超人（喜剧人现实改写）',
+      officialGrade: '一级', gradeBonus: 11, looks: 6, morality: 4, aggro: 2,
+      skills: [],
+      tools: [],
+      attrs: { ceTotal: 6, ceControl: 4, ceEfficiency: 6, taijutsu: 5, bodyResist: 8, soulResist: 8, barrier: 3, versatility: 12, iq: 5, talent: 8 },
+      canonNote: '只要我觉得好笑就能压制甚至拖垮千年羂索的因果律外挂，唯一死穴是不杀人'
+    }
+  ];
+
+  // 魂穿入场时间节点盘
+  var CANON_TIMEPOINTS = [
+    { id: 'native', label: '原主本命登场时期（忠于设定）', weight: 38, note: '严格降临在原著该角色正式活跃的时代节点' },
+    { id: 'hiddenInv', label: '怀玉·玉折时期提前苏醒', eraId: 'hiddenInv', weight: 18, note: '提早截停伏黑甚尔刺杀与夏油苦夏的分水岭' },
+    { id: 'vol0', label: '0卷·百鬼夜行前夕切入', eraId: 'vol0', weight: 14, note: '恰逢夏油杰宣战，正面改变百鬼夜行战局' },
+    { id: 'canonStart', label: '虎杖吞指开篇夜苏醒', eraId: 'canonStart', weight: 18, note: '与宿傩复活同步醒来，手握完整时间窗部署' },
+    { id: 'shibuya', label: '空降10月31日涩谷事变中心', eraId: 'shibuya', weight: 12, note: '直面狱门疆封印与群魔乱舞，一战定乾坤' }
+  ];
+
+  // 魂穿灵魂契合度盘
+  var CANON_SYNC_SLICES = [
+    { id: 'perfect', label: '100% 灵魂共振超越原主（核心三维+1，黑闪率+8%）', weight: 18, delta: 1, mode: 'perfect' },
+    { id: 'high', label: '85% 高度契合如臂使指（主力两维+1，稳定驾驭术式）', weight: 32, delta: 1, mode: 'high' },
+    { id: 'normal', label: '65% 顺利融合水到渠成（完全继承原主巅峰面板）', weight: 34, delta: 0, mode: 'normal' },
+    { id: 'reject', label: '40% 灵魂排异略微生疏（核心维-1，需战后慢慢磨合）', weight: 16, delta: -1, mode: 'reject' }
+  ];
+
+  // 魂穿剧本先知记忆盘
+  var CANON_MEMORY_SLICES = [
+    { id: 'fullScript', label: '全知全卷剧本先知（智力+2，避险/识破伏笔概率大增）', weight: 20, iqBoost: 2, scriptLevel: 2 },
+    { id: 'keyNodes', label: '牢记关键大事件与弱点（智力+1，先知提前防备伏击）', weight: 38, iqBoost: 1, scriptLevel: 1 },
+    { id: 'fragment', label: '碎片化模煳记忆（仅存直觉印象，全靠个人临场操作）', weight: 28, iqBoost: 0, scriptLevel: 0 },
+    { id: 'blind', label: '失去外挂记忆纯土著融入（彻底活出原主本心人生）', weight: 14, iqBoost: 0, scriptLevel: -1 }
+  ];
+
+  // 魂穿关键改命抉择盘
+  var CANON_DIVERGENCE_SLICES = [
+    { id: 'rewriteFate', label: '彻底改写原著意难平便当线（全书关键救援触发率↑）', weight: 32, tag: '改命破局', effect: 'save_all' },
+    { id: 'breakCeiling', label: '趁先知期狂卷悟道破格（天赋+1，额外抽取1项高级技巧）', weight: 28, tag: '超越极限', effect: 'extra_tech' },
+    { id: 'secretAlliance', label: '暗中与跨阵营强者结盟（决战额外获得强力协防增益）', weight: 24, tag: '合纵连横', effect: 'ally_shield' },
+    { id: 'lowKey', label: '隐忍藏拙不轻动大势（体术/结界+1，保留隐藏杀手锏）', weight: 16, tag: '深藏不露', effect: 'stat_hidden' }
+  ];
+
+  // 束缚契约转盘（大战前立誓机制）
+  var BINDING_VOWS = [
+    { id: 'vow_reveal', label: '「公开术式」束缚：坦白术式情报换取全输出 +18%', weight: 32, atkMult: 1.18, dangerDelta: 0, desc: '正统稳赚的束缚策略，向对手披露机制以推高咒力释放上限' },
+    { id: 'vow_limit', label: '「限定时刻」束缚：平时压制换决战双维临时 +1（输出+12%）', weight: 28, atkMult: 1.12, statBoost: 1, dangerDelta: 0, desc: '类似七海时间外加班的限制型束缚，决战全面增幅' },
+    { id: 'vow_life', label: '「死地舍命」束缚：输出飙升 +36%，重伤与战死惩罚加深', weight: 16, atkMult: 1.36, dangerDelta: 12, desc: '赌上性命或术式废止的高危死契，弱者逆伐强敌的最后底牌' },
+    { id: 'vow_none', label: '拒绝一切束缚：保留自由临场空间，稳扎稳打迎战', weight: 24, atkMult: 1.0, dangerDelta: 0, desc: '不以自由作为筹码，依靠自身纯粹修为应对万变战局' }
+  ];
+
+  // 非原著身份的细分拓展盘（补全咒骸/高层/普通人/咒灵的特有流程）
+  var IDENTITY_EXTRA_WHEELS = {
+    corpse_cores: {
+      title: '咒骸 · 咒核结构形态',
+      slices: [
+        { label: '完全自律三核互辅体（灵魂抗性+1、身体抗性+1）', weight: 30, up1: 'soulResist', up2: 'bodyResist', note: '如熊猫般的复核共鸣，切核亦不致立刻覆灭' },
+        { label: '战斗特化高输出单核体（体术+1、咒力效率+1）', weight: 42, up1: 'taijutsu', up2: 'ceEfficiency', note: '舍弃冗余核数，集中供能打造钢铁肉搏机器' },
+        { label: '常规测试型自律咒骸（稳妥积累，常规生长）', weight: 28, note: '按普通觉醒咒骸路径踏入现代风波' }
+      ]
+    },
+    higherUp_scheme: {
+      title: '咒术高层 · 实际门第与权柄',
+      slices: [
+        { label: '御三家首席元老握死刑令（智力+2，声望基数+15）', weight: 34, up1: 'iq', iqDouble: true, repBonus: 15, note: '一言即可定夺特级咒术师通缉与封印决策' },
+        { label: '隐秘忌库与结界监理长官（结界术+1、术式泛用+1）', weight: 38, up1: 'barrier', up2: 'versatility', repBonus: 8, note: '暗中掌握特级咒具库藏与薨星宫往来通道' },
+        { label: '高专改革暗线协调长老（柔和积淀，少结死仇）', weight: 28, repBonus: 10, note: '尝试在老派规则与新生代间保留一丝缓冲' }
+      ]
+    },
+    civilian_awakening: {
+      title: '普通人 · 异变潜力与觉醒机缘',
+      slices: [
+        { label: '死灭回游前夕突遭术式脑改觉醒！（直抽1门生得术式）', weight: 16, awakenTech: true, note: '命运巨轮猛转，平凡市民瞬间踏入术师厮杀榜！' },
+        { label: '天生极限硬核凡胎（体术+2、身体抗性+1）', weight: 22, up1: 'taijutsu', up2: 'bodyResist', note: '无术式却凭借非人健身与危机直觉死里逃生' },
+        { label: '微弱灵感转入高专辅助监督（咒力+1、结界+1）', weight: 28, up1: 'ceTotal', up2: 'barrier', note: '学会放「帐」并成为前线术师最信赖的调度后盾' },
+        { label: '彻底远离漩涡安稳过一生（稳妥低调生存率↑）', weight: 34, note: '在东京霓虹灯下平安度过所有风暴夜晚' }
+      ]
+    },
+    curse_origin: {
+      title: '咒灵 · 诞生畏惧与本体性质',
+      slices: [
+        { label: '山川烈焰等自然畏惧诞生的特级灾厄（咒力总量+1、泛用+1）', weight: 32, up1: 'ceTotal', up2: 'versatility', note: '天灾具现，咒力澎湃如泉涌' },
+        { label: '人类相互憎恶孕育的黑泥恶意（灵魂抗性+1、操纵+1）', weight: 36, up1: 'soulResist', up2: 'ceControl', note: '精擅灵魂干涉与心理洞悉，极难被常规攻击彻底消灭' },
+        { label: '都市怪谈假想怨灵（体术+1，稳健成长）', weight: 32, up1: 'taijutsu', note: '凭借恐怖传说快速聚合畸形战力' }
+      ]
+    }
+  };
+
+  // ==================== 成就词条图鉴目录 ====================
+  var ACHIEVEMENT_CATALOG = [
+    { id: 't_omega', title: '千古唯一 · 超越诅咒之王', category: '巅峰成就', tier: 'ssr', points: 40, desc: '在新宿决战中亲手击败两面宿傩本尊，改写终末之战' },
+    { id: 't_six_eyes', title: '最强共鸣 · 并肩六眼', category: '巅峰成就', tier: 'ssr', points: 25, desc: '在新宿双打局协助五条悟共抗强敌或独挑大梁' },
+    { id: 't_save_gojo', title: '逆转封印 · 守护最强', category: '改命奇迹', tier: 'sr', points: 25, desc: '涩谷事变打破4%极低概率，当场阻断狱门疆闭合' },
+    { id: 't_save_nanami', title: '涩谷之救赎 · 护住七海建人', category: '改命奇迹', tier: 'sr', points: 20, desc: '涩谷站台血战真人并硬生生救下七海前辈' },
+    { id: 't_canon_soul', title: '魂穿入局 · 逆天改命', category: '魂穿专属', tier: 'sr', points: 18, desc: '以「魂穿原著角色」身份完成一次完整命运线并活到结局' },
+    { id: 't_canon_perfect', title: '百分百契合 · 超越原主', category: '魂穿专属', tier: 'ssr', points: 24, desc: '魂穿抽取到100%灵魂共鸣并让战力凌驾原著设定之上' },
+    { id: 't_canon_prophet', title: '手握剧本的全知棋手', category: '魂穿专属', tier: 'r', points: 15, desc: '带着完整/关键剧本记忆步步为营布局天下' },
+    { id: 't_vow_breaker', title: '舍命死契的逆伐狂徒', category: '束缚系统', tier: 'sr', points: 18, desc: '大战前立下「死地舍命」束缚却依旧活着站到终点' },
+    { id: 't_binding_vow', title: '善用束缚的算计宗师', category: '束缚系统', tier: 'r', points: 10, desc: '通过公开术式或限时加班等束缚放大战力收获胜果' },
+    { id: 't_maho', title: '调伏八握剑异戒神将魔虚罗', category: '特殊奇遇', tier: 'ssr', points: 35, desc: '凭借十种影法术或硬实力亲手突破魔虚罗适应轮盘' },
+    { id: 't_awakened_civilian', title: '从凡夫俗子到术式觉醒', category: '逆袭剧本', tier: 'sr', points: 18, desc: '以普通人开局却在时代剧变中意外觉醒生得术式' },
+    { id: 't_heaven', title: '挣脱因果的天与零咒力之巅', category: '战斗流派', tier: 'sr', points: 20, desc: '以零咒力天与咒缚立于战力最前线' },
+    { id: 't_domain', title: '生得领域掌控者', category: '高级技巧', tier: 'r', points: 12, desc: '习得高专最顶尖的领域展开技巧' },
+    { id: 't_double_kill', title: '斩灭强敌战神', category: '战绩评价', tier: 'r', points: 15, desc: '生涯正面斩杀过5位以上知名强者' },
+    { id: 't_multi_era', title: '跨越千年的时代见证者', category: '历史长河', tier: 'r', points: 15, desc: '活过并深度参与4个以上核心历史时代' },
+    { id: 't_legend_68', title: '68年后依旧健在的传奇', category: '历史长河', tier: 'sr', points: 20, desc: '一路见证到宿傩落幕六十八年后的全新时代' },
+    { id: 't_special_grade', title: '评定为「特级」的存在', category: '实力认证', tier: 'r', points: 16, desc: '实力被官方评定为规格之外的特级存在' },
+    { id: 't_immortal_star', title: '四高专全明星人气王', category: '人物魅力', tier: 'r', points: 10, desc: '兼具顶尖颜值、高道德感与极高阵营声望' },
+    { id: 't_toji_slayer', title: '击破伏黑甚尔', category: '击败强敌', tier: 'r', points: 15, desc: '正面击溃天与暴君伏黑甚尔' },
+    { id: 't_choso_slayer', title: '击破九相图·胀相', category: '击败强敌', tier: 'r', points: 12, desc: '涩谷事变正面迎战并胜过赤血操使胀相' },
+    { id: 't_dabura_clear', title: '68年后·切磋压制达布拉', category: '击败强敌', tier: 'r', points: 14, desc: '在六十八年后的世界与神秘星外来客达布拉分出高下' },
+    { id: 't_true_love', title: '天命伴侣相守一生', category: '情感线', tier: 'r', points: 10, desc: '在乱世咒术界收获值得托付生死的伴侣羁绊' },
+    { id: 't_civilian_peace', title: '平平安安是福（普通人安稳度日）', category: '佛系结局', tier: 'n', points: 10, desc: '远离绝大部分致命厮杀平顺走完一世' },
+    { id: 't_shibuya_fall', title: '陨落于10月31日的无名英魂', category: '悲壮遗憾', tier: 'n', points: -6, desc: '未能走出百鬼横行与群魔围攻的涩谷地狱夜' },
+    { id: 't_sukuna_slain', title: '倒在宿傩「解」与「世界斩」下', category: '悲壮遗憾', tier: 'n', points: -8, desc: '虽挺进新宿终局却还是饮恨在诅咒之王刀锋下' },
+    { id: 't_glass_cannon', title: '魂穿水土不服 · 逆境陨落', category: '遗憾结局', tier: 'n', points: -5, desc: '灵魂排异未稳便仓促赴死，空留外挂面板' }
+  ];
+
   global.JJK_OMEGA_DATA = {
     SLICE_COLORS: SLICE_COLORS,
     RANK_SCALE: RANK_SCALE,
@@ -674,6 +993,14 @@
     GOJO_UV_EFFECTS: GOJO_UV_EFFECTS,
     CROSS_ERA_WHEEL: CROSS_ERA_WHEEL,
     REPUTATION_BY_FACTION: REPUTATION_BY_FACTION,
-    ARENA_CHAMPIONS: ARENA_CHAMPIONS
+    ARENA_CHAMPIONS: ARENA_CHAMPIONS,
+    CANON_CHARACTERS: CANON_CHARACTERS,
+    CANON_TIMEPOINTS: CANON_TIMEPOINTS,
+    CANON_SYNC_SLICES: CANON_SYNC_SLICES,
+    CANON_MEMORY_SLICES: CANON_MEMORY_SLICES,
+    CANON_DIVERGENCE_SLICES: CANON_DIVERGENCE_SLICES,
+    BINDING_VOWS: BINDING_VOWS,
+    IDENTITY_EXTRA_WHEELS: IDENTITY_EXTRA_WHEELS,
+    ACHIEVEMENT_CATALOG: ACHIEVEMENT_CATALOG
   };
 })(window);

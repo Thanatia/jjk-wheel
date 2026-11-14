@@ -23,7 +23,7 @@
             <h1>咒术转盘</h1>
             <span class="title-omega">Ω</span>
           </div>
-          <p class="start-subtitle">静音纯净版（无任何语音播报）· 含 10 维属性 / 宿傩回合决战 / 天命自定 / 竞技场</p>
+          <p class="start-subtitle">静音纯净版（无语音播报）· 含 10 维属性 / 魂穿 22 位原著角色 / 宿傩决战 / 束缚 / 竞技场</p>
 
           <div class="split-art-card" aria-hidden="true">
             <div class="split-half split-gojo">
@@ -49,11 +49,13 @@
           <button type="button" class="btn-resume-large is-hidden" id="btnResumeLife">▶ 继续未完成人生（第 <span id="resumeStepNum">1</span> 轮）</button>
           <button type="button" class="btn-primary-large" id="btnEnterGame">开始新的人生</button>
           <div class="start-secondary-row">
-            <button type="button" class="text-link-btn" id="btnStartCards">🃏 角色卡与排行榜 (<span id="startCardCount">0</span>)</button>
+            <button type="button" class="text-link-btn" id="btnStartCards">🃏 图鉴榜 (<span id="startCardCount">0</span>)</button>
             <span class="dot-sep">·</span>
-            <button type="button" class="text-link-btn" id="btnStartArena">⚔ 咒术竞技场</button>
+            <button type="button" class="text-link-btn" id="btnStartTraits">🏅 成就 (<span id="startTraitCount">0/26</span>)</button>
             <span class="dot-sep">·</span>
-            <span class="fate-mini">💎 命运点 <strong id="startFatePoints">30</strong></span>
+            <button type="button" class="text-link-btn" id="btnStartArena">⚔ 竞技场</button>
+            <span class="dot-sep">·</span>
+            <span class="fate-mini">💎 <strong id="startFatePoints">30</strong></span>
           </div>
         </div>
       </section>
@@ -323,21 +325,34 @@
             <span>初始身份</span>
             <select id="custIdentity" class="select-input"></select>
           </label>
-          <label class="custom-field">
-            <span>活跃/出生时期</span>
-            <select id="custEra" class="select-input"></select>
+          <label class="custom-field is-hidden is-highlight" id="custCanonWrap">
+            <span>指定魂穿原著人物（22位核心角色）</span>
+            <select id="custCanonChar" class="select-input"></select>
           </label>
           <label class="custom-field">
+            <span>活跃/出生时期（魂穿选随机会走原主本命时期）</span>
+            <select id="custEra" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custTechWrap">
             <span>生得术式</span>
             <select id="custTech" class="select-input"></select>
           </label>
-          <label class="custom-field">
+          <label class="custom-field" id="custGradeWrap">
             <span>初始官方评级</span>
             <select id="custGrade" class="select-input"></select>
           </label>
           <label class="custom-field">
             <span>天赋潜力（影响技巧数与成长）</span>
             <select id="custTalent" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>十维初始保底档位</span>
+            <select id="custAttrTier" class="select-input">
+              <option value="random" data-cost="0">🎲 随缘掷点 / 原著默认 (0 点)</option>
+              <option value="b" data-cost="2">🔹 全维 B级及以上保底 (2 点)</option>
+              <option value="s" data-cost="5">🔥 全维 S级特级准线保底 (5 点)</option>
+              <option value="ex" data-cost="10">👑 全维 EX破格神域保底 (10 点)</option>
+            </select>
           </label>
           <label class="custom-field">
             <span>自带核心底牌</span>
@@ -427,8 +442,9 @@
         <div class="tab-strip" id="cardsTabStrip">
           <button type="button" class="tab-btn is-active" data-cardtab="dream">🌌 浮生若梦榜</button>
           <button type="button" class="tab-btn" data-cardtab="custom">✨ 天命自定榜</button>
+          <button type="button" class="tab-btn" data-cardtab="traits">🏅 成就图鉴 (<span id="traitsUnlockCount">0</span>/<span id="traitsTotalCount">26</span>)</button>
         </div>
-        <div class="cards-toolbar">
+        <div class="cards-toolbar" id="cardsToolbar">
           <button type="button" class="pill-chip" id="btnExportCards">导出全部 JSON</button>
           <label class="pill-chip file-label">导入 JSON<input type="file" id="inputImportCards" accept="application/json" hidden /></label>
         </div>
@@ -501,10 +517,11 @@
         <button type="button" class="light-close-btn" id="btnCloseNoticeModal" aria-label="关闭说明">✕</button>
       </div>
       <div class="light-modal-body notice-copy">
-        <p><strong>Q1：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部随时可点 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动跑完剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 精细滑块调整。而且在<strong>转盘旋转过程中点击转盘圆盘任意位置或按 Space 键，都会瞬间急停落定出结果！</strong></p>
-        <p><strong>Q2：为什么默认送 30 命运点？怎么获得与使用？</strong><br />新玩家自带 30 点命运点！每当不满意当前轮盘结果时，点底部「重抽本轮 (-1💎)」即可重抽一次；也可以在「天命自定」中消费点数自选强力开局词条。只有在「浮生若梦」模式通关结算时（每满 10 分奖 1 点，保底 1 点）才会产出新命运点。</p>
-        <p><strong>Q3：新宿决战宿傩机制是怎么算的？</strong><br />进入新宿决战前会二次提升能力并决定参战顺序，随后进入真正的<strong>回合制出招转盘博弈</strong>：每回合抽双方出招数、逐招累积战斗值、简易领域/展延抵消攻击、魔虚罗永久适应已用过的招式（最高 100% 免疫）、咒具损耗，还可触发五条悟入场开「无量空处」削减宿傩行动次数！</p>
-        <p><strong>Q4：全程有没有语音播报？</strong><br />本网页按需求已彻底移除所有语音播报与 TTS 阻塞等待，全程静音丝滑体验。</p>
+        <p><strong>Q1：如何玩转「魂穿原著角色」与各身分特化分支？</strong><br />浮生若梦初始身份轮盘现已收录 <strong>16% 概率的「魂穿原著角色」</strong>（或在「天命自定」中直接指定 22 位原著人物如五条悟、宿傩、虎杖、伏黑惠、乙骨等）！魂穿后会进入专属的 <strong>苏醒时间节点 · 灵魂契合度 · 剧本先知记忆 · 核心改命方针</strong> 四连轮盘；其他如普通人、咒骸、咒灵、咒术高层也各有专属奇缘判定。</p>
+        <p><strong>Q2：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部随时可点 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动跑完剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 精细滑块调整。而且在<strong>转盘旋转过程中点击转盘圆盘任意位置或按 Space 键，都会瞬间急停落定出结果！</strong></p>
+        <p><strong>Q3：为什么默认送 30 命运点？怎么获得与使用？</strong><br />新玩家自带 30 点命运点！每当不满意当前轮盘结果时，点底部「重抽本轮 (-1💎)」即可重抽一次；也可以在「天命自定」中消费点数自选强力开局词条或魂穿原著人物。只有在「浮生若梦」模式通关结算时（每满 10 分奖 1 点，保底 1 点）才会产出新命运点。</p>
+        <p><strong>Q4：新宿决战宿傩与「束缚契约」是怎么算的？</strong><br />进入新宿决战前会二次提升能力、选择参战顺序，并立下<strong>「束缚契约」</strong>（公开术式/限定增幅/死地舍命），随后进入真正的<strong>回合制出招转盘博弈</strong>：每回合抽双方出招数、逐招累积战斗值、简易领域/展延抵消攻击、魔虚罗永久适应已用过的招式（最高 100% 免疫）、咒具损耗，还可触发五条悟入场开「无量空处」！</p>
+        <p><strong>Q5：全程有没有语音播报？</strong><br />本网页按需求已彻底移除所有语音播报与 TTS 阻塞等待，全程静音丝滑体验。</p>
       </div>
     </div>
   </div>

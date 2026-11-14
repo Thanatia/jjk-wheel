@@ -11,6 +11,7 @@
   var STORAGE_PREFS = 'jjk_omega_prefs_v2';
   var STORAGE_ACTIVE_RUN = 'jjk_omega_active_run_v2';
   var STORAGE_ARENA_LOGS = 'jjk_omega_arena_logs_v2';
+  var STORAGE_TRAITS = 'jjk_omega_traits_v2';
 
   var SPEED_CYCLE = [0.2, 0.5, 0.8, 1.5, 3.0, 5.0];
 
@@ -34,6 +35,7 @@
     fatePoints: 30,
     savedCards: [],
     arenaLogs: [],
+    unlockedTraits: [],
     activeCardsTab: 'dream',
     run: null,
     currentWheelDesc: null,
@@ -79,7 +81,29 @@
         var parsedLogs = JSON.parse(logsRaw);
         if (Array.isArray(parsedLogs)) appState.arenaLogs = parsedLogs;
       }
+
+      var traitsRaw = localStorage.getItem(STORAGE_TRAITS);
+      if (traitsRaw) {
+        var parsedTraits = JSON.parse(traitsRaw);
+        if (Array.isArray(parsedTraits)) appState.unlockedTraits = parsedTraits;
+      }
     } catch (err) { /* ignore storage errors */ }
+  }
+
+  function saveUnlockedTraits() {
+    try { localStorage.setItem(STORAGE_TRAITS, JSON.stringify(appState.unlockedTraits)); } catch (err) { /* ignore */ }
+  }
+
+  function recordUnlockedTraits(ids) {
+    if (!Array.isArray(ids) || !ids.length) return;
+    var changed = false;
+    ids.forEach(function (id) {
+      if (appState.unlockedTraits.indexOf(id) === -1) {
+        appState.unlockedTraits.push(id);
+        changed = true;
+      }
+    });
+    if (changed) saveUnlockedTraits();
   }
 
   function savePrefs() {
@@ -167,6 +191,11 @@
 
   function updateGlobalCounters() {
     $('startCardCount').textContent = String(appState.savedCards.length);
+    var totalTraits = (DATA.ACHIEVEMENT_CATALOG || []).length;
+    var unlockedCount = appState.unlockedTraits.length;
+    $('startTraitCount').textContent = unlockedCount + '/' + totalTraits;
+    $('traitsUnlockCount').textContent = String(unlockedCount);
+    $('traitsTotalCount').textContent = String(totalTraits);
     $('startFatePoints').textContent = String(appState.fatePoints);
     $('gameFatePoints').textContent = String(appState.fatePoints);
     $('customFateRemain').textContent = String(appState.fatePoints);
@@ -300,6 +329,7 @@
           appState.fatePoints += appState.settlementEvaluated.fateReward;
           saveFate();
         }
+        recordUnlockedTraits(appState.settlementEvaluated.unlockedIds || []);
         saveActiveRun();
         updateGlobalCounters();
         setTimeout(openSaveNameModal, 220);
@@ -440,6 +470,7 @@
     $('charGradeTag').textContent = char.officialGrade;
 
     var subParts = ['出生地：' + char.birthplace, '时期：' + char.currentEraLabel, '颜值：' + char.looksText];
+    if (char.canonTitle) subParts.unshift('原著定位：' + char.canonTitle);
     if (char.master) subParts.push('御主：' + char.master);
     $('charSubline').textContent = subParts.join(' · ');
 
@@ -449,6 +480,10 @@
       '好战：' + char.aggroText,
       '胜 ' + char.statsLog.wins + ' / 负 ' + char.statsLog.losses + ' / 黑闪 ' + char.statsLog.blackFlashes
     ];
+    if (char.canonSyncLabel) quickPills.push('契合：' + char.canonSyncLabel.split('（')[0]);
+    if (char.canonMemoryLabel) quickPills.push('先知：' + char.canonMemoryLabel.split('（')[0]);
+    if (char.canonDivergenceLabel) quickPills.push('改命：' + char.canonDivergenceLabel.split('（')[0]);
+    if (char.flags && char.flags.activeVowLabel) quickPills.push('束缚：' + char.flags.activeVowLabel.split('：')[0]);
     if (char.shikigamiDesc) quickPills.push('式神：' + char.shikigamiDesc);
     $('charQuickPills').innerHTML = quickPills.map(function (t) {
       return '<span class="dark-mini-pill">' + escapeHtml(t) + '</span>';
@@ -501,6 +536,12 @@
       DATA.IDENTITIES.map(function (x) { return { value: x.id, label: x.label + ' (' + x.cost + ' 点)', cost: x.cost }; })
     ));
 
+    fillSelect('custCanonChar', [{ value: 'random', label: '🎲 随机抽取原著角色 (0 点)', cost: 0 }].concat(
+      (DATA.CANON_CHARACTERS || []).map(function (c) {
+        return { value: c.id, label: c.name + ' · ' + c.officialGrade + '·' + c.technique.split('（')[0] + ' (' + c.cost + ' 点)', cost: c.cost };
+      })
+    ));
+
     fillSelect('custEra', [{ value: 'random', label: '🎲 随机时期 (0 点)', cost: 0 }].concat(
       DATA.ERAS.filter(function (e) { return e.id !== 'future68'; }).map(function (e) {
         return { value: e.id, label: e.label + ' (' + e.cost + ' 点)', cost: e.cost };
@@ -521,10 +562,28 @@
       { value: '9', label: 'SSS · 天纵奇才 (5 点)', cost: 5 },
       { value: '10', label: 'EX · 百年奇观 (8 点)', cost: 8 }
     ]);
+    syncCustomFieldVisibility();
+  }
+
+  function syncCustomFieldVisibility() {
+    var isCanon = $('custIdentity').value === 'canon';
+    $('custCanonWrap').classList.toggle('is-hidden', !isCanon);
+    $('custTechWrap').classList.toggle('is-hidden', isCanon);
+    $('custGradeWrap').classList.toggle('is-hidden', isCanon);
+    if (isCanon) {
+      $('custTech').value = 'random';
+      $('custGrade').value = 'random';
+    } else {
+      $('custCanonChar').value = 'random';
+    }
   }
 
   function calcCustomCost() {
-    var ids = ['custIdentity', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custPerk'];
+    syncCustomFieldVisibility();
+    var isCanon = $('custIdentity').value === 'canon';
+    var ids = isCanon
+      ? ['custIdentity', 'custCanonChar', 'custEra', 'custTalent', 'custAttrTier', 'custPerk']
+      : ['custIdentity', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'];
     var total = 0;
     ids.forEach(function (id) {
       var sel = $(id);
@@ -627,9 +686,50 @@
     }).join('');
   }
 
-  /* ==================== 排行榜与角色卡 / 回放 ==================== */
+  /* ==================== 排行榜与角色卡 / 成就词条 / 回放 ==================== */
+  function openCardsModalOnTab(tabName) {
+    appState.activeCardsTab = tabName || 'dream';
+    document.querySelectorAll('#cardsTabStrip .tab-btn').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-cardtab') === appState.activeCardsTab);
+    });
+    renderSavedCardsList();
+    openModal('cardsModal');
+  }
+
   function renderSavedCardsList() {
     var listEl = $('savedCardsList');
+    var toolbarEl = $('cardsToolbar');
+
+    if (appState.activeCardsTab === 'traits') {
+      if (toolbarEl) toolbarEl.classList.add('is-hidden');
+      var catalog = DATA.ACHIEVEMENT_CATALOG || [];
+      var unlockedSet = appState.unlockedTraits || [];
+      var sortedCatalog = catalog.slice().sort(function (a, b) {
+        var ua = unlockedSet.indexOf(a.id) >= 0 ? 1 : 0;
+        var ub = unlockedSet.indexOf(b.id) >= 0 ? 1 : 0;
+        return ub - ua;
+      });
+      listEl.innerHTML =
+        '<div class="trait-catalog-summary">总收集进度：<strong>' + unlockedSet.length + ' / ' + catalog.length + '</strong>（达成对应人生事件、魂穿结局或新宿战绩自动点亮词条）</div>' +
+        sortedCatalog.map(function (item) {
+          var unlocked = unlockedSet.indexOf(item.id) >= 0;
+          var scoreStr = (item.points >= 0 ? '+' : '') + item.points + '分';
+          return '<div class="trait-catalog-item' + (unlocked ? '' : ' is-locked') + '">' +
+            '<div>' +
+            '<div class="trait-catalog-head">' +
+            '<span class="trait-tier-badge tier-' + escapeHtml(item.tier) + '">' + escapeHtml(item.tier.toUpperCase()) + '</span>' +
+            '<strong>' + escapeHtml(item.title) + '</strong>' +
+            '<span class="odds-explain" style="margin:0;">(' + escapeHtml(item.category) + ' · ' + scoreStr + ')</span>' +
+            '</div>' +
+            '<div class="trait-desc" style="margin-top:4px;">' + escapeHtml(item.desc) + '</div>' +
+            '</div>' +
+            '<span class="trait-lock-pill">' + (unlocked ? '✓ 已解锁' : '🔒 未解锁') + '</span>' +
+            '</div>';
+        }).join('');
+      return;
+    }
+
+    if (toolbarEl) toolbarEl.classList.remove('is-hidden');
     var filtered = appState.savedCards
       .map(function (card, rawIdx) { return { card: card, rawIdx: rawIdx }; })
       .filter(function (wrap) {
@@ -818,8 +918,9 @@
     $('btnMenuNotice').addEventListener('click', function () { closeModal('menuModal'); openModal('noticeModal'); });
     $('btnCloseNoticeModal').addEventListener('click', function () { closeModal('noticeModal'); });
 
-    $('btnStartCards').addEventListener('click', function () { renderSavedCardsList(); openModal('cardsModal'); });
-    $('btnHubBoards').addEventListener('click', function () { closeModal('menuModal'); renderSavedCardsList(); openModal('cardsModal'); });
+    $('btnStartCards').addEventListener('click', function () { openCardsModalOnTab('dream'); });
+    $('btnStartTraits').addEventListener('click', function () { openCardsModalOnTab('traits'); });
+    $('btnHubBoards').addEventListener('click', function () { closeModal('menuModal'); openCardsModalOnTab(appState.activeCardsTab || 'dream'); });
     $('btnCloseCardsModal').addEventListener('click', function () { closeModal('cardsModal'); });
     $('btnCloseReplayModal').addEventListener('click', function () { closeModal('replayModal'); });
 
@@ -831,11 +932,11 @@
     $('btnCloseCustomModal').addEventListener('click', function () { closeModal('customModal'); });
 
     // 天命自定联动算点与开局
-    ['custIdentity', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custPerk'].forEach(function (id) {
+    ['custIdentity', 'custCanonChar', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'].forEach(function (id) {
       $(id).addEventListener('change', calcCustomCost);
     });
     $('btnResetCustomForm').addEventListener('click', function () {
-      ['custIdentity', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custPerk'].forEach(function (id) { $(id).value = 'random'; });
+      ['custIdentity', 'custCanonChar', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'].forEach(function (id) { $(id).value = 'random'; });
       calcCustomCost();
     });
     $('btnStartCustomRun').addEventListener('click', function () {
@@ -846,10 +947,12 @@
       closeModal('customModal');
       startNewRunWithState(ENGINE.createRun('custom', {
         identityId: $('custIdentity').value,
+        canonCharId: $('custCanonChar').value,
         eraId: $('custEra').value,
         techId: $('custTech').value,
         gradeId: $('custGrade').value,
         talentLv: $('custTalent').value,
+        attrTier: $('custAttrTier').value,
         perk: $('custPerk').value
       }));
     });
@@ -980,10 +1083,12 @@
       clearAutoTimer();
       appState.savedCards = [];
       appState.arenaLogs = [];
+      appState.unlockedTraits = [];
       appState.fatePoints = 30;
       localStorage.removeItem(STORAGE_ACTIVE_RUN);
       saveCards();
       saveArenaLogs();
+      saveUnlockedTraits();
       saveFate();
       updateGlobalCounters();
       closeModal('menuModal');

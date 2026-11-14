@@ -1276,6 +1276,76 @@ button:disabled {
 .notice-copy p { margin: 0 0 10px; font-size: 13px; color: var(--text-sub); }
 .notice-copy code { padding: 1px 6px; background: var(--bg-soft); border-radius: 6px; font-size: 12px; }
 
+.custom-field.is-highlight {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+}
+
+.trait-catalog-summary {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid var(--border-light);
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.trait-catalog-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: #ffffff;
+}
+
+.trait-catalog-item.is-locked {
+  background: #f9fafb;
+  opacity: 0.72;
+}
+
+.trait-catalog-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.trait-tier-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--bg-soft);
+  color: var(--text-sub);
+}
+
+.trait-tier-badge.tier-ssr { background: #fef3c7; color: #b45309; }
+.trait-tier-badge.tier-sr { background: #ede9fe; color: #6d28d9; }
+.trait-tier-badge.tier-r { background: #dbeafe; color: #1d4ed8; }
+.trait-tier-badge.tier-n { background: #f3f4f6; color: #4b5563; }
+
+.trait-lock-pill {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.trait-catalog-item.is-locked .trait-lock-pill {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
 @media (max-width: 480px) {
   .viewport-bg { padding: 0; }
   .app-shell { max-width: 100%; min-height: 100dvh; border-radius: 0; box-shadow: none; }
