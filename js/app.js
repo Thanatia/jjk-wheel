@@ -675,11 +675,17 @@
     ));
 
     fillSelect('custTech', [{ value: 'random', label: '🎲 随机术式 (0 点)', cost: 0 }].concat(
-      DATA.TECHNIQUES_ALL.map(function (t) { return { value: t.id, label: t.label + ' (' + (t.cost || 2) + ' 点)', cost: t.cost || 2 }; })
+      DATA.TECHNIQUES_ALL.map(function (t) {
+        var tc = t.cost != null ? t.cost : 2;
+        return { value: t.id, label: t.label + ' (' + tc + ' 点)', cost: tc };
+      })
     ));
 
     fillSelect('custGrade', [{ value: 'random', label: '🎲 随机官方评级 (0 点)', cost: 0 }].concat(
-      DATA.GRADE_WHEELS.standard.map(function (g) { return { value: g.id, label: g.id + ' (' + (g.cost || 0) + ' 点)', cost: g.cost || 0 }; })
+      DATA.GRADE_WHEELS.standard.concat(DATA.GRADE_WHEELS.civilian || []).map(function (g) {
+        var gc = g.cost != null ? g.cost : 0;
+        return { value: g.id, label: g.id + ' (' + gc + ' 点)', cost: gc };
+      })
     ));
 
     fillSelect('custTalent', [
@@ -742,7 +748,7 @@
           '<span>' + escapeHtml(def.name) + '</span>' +
           '<select id="custStat_' + escapeHtml(def.key) + '" class="select-input cust-stat-override" data-statkey="' + escapeHtml(def.key) + '">' +
           '<option value="random" data-cost="0">🎲 随机 (0)</option>' +
-          '<option value="0" data-cost="1">F · 0 (1点)</option>' +
+          '<option value="0" data-cost="1">E- · 0 (1点)</option>' +
           '<option value="2" data-cost="1">D · 2 (1点)</option>' +
           '<option value="4" data-cost="1">C · 4 (1点)</option>' +
           '<option value="6" data-cost="1">A · 6 (1点)</option>' +
@@ -757,9 +763,19 @@
   function syncCustomFieldVisibility() {
     var idVal = $('custIdentity').value;
     var isCanon = idVal === 'canon';
+    var isCivilian = idVal === 'civilian';
     var isShikigami = idVal === 'shikigami';
     var tcVal = $('custToolCount') ? $('custToolCount').value : 'random';
     var hasCustomTools = tcVal === '1' || tcVal === '2' || tcVal === '3';
+
+    var techEl = $('custTech');
+    if (techEl && techEl.options && techEl.options[0]) {
+      techEl.options[0].textContent = isCivilian ? '🎲 默认无生得术式 (0 点)' : '🎲 随机术式 (0 点)';
+    }
+    var gradeEl = $('custGrade');
+    if (gradeEl && gradeEl.options && gradeEl.options[0]) {
+      gradeEl.options[0].textContent = isCivilian ? '🎲 按普通人阶层抽选 (0 点)' : '🎲 随机官方评级 (0 点)';
+    }
 
     $('custCanonWrap').classList.toggle('is-hidden', !isCanon);
     $('custTechWrap').classList.toggle('is-hidden', isCanon);

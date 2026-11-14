@@ -255,12 +255,82 @@
     if (char.visitedEras.indexOf(eraId) === -1) char.visitedEras.push(eraId);
   }
 
+  var ZERO_CE_FORBIDDEN_SKILLS = {
+    '反转术式': true,
+    '咒力高速再生': true,
+    '领域展开': true,
+    '完整咏唱': true,
+    '简易领域': true,
+    '领域展延': true,
+    '弥虚葛笼': true,
+    '术式多重启动': true,
+    '自动迎击术式': true,
+    '落之雪（落花之情）': true
+  };
+
+  function isHeavenZeroChar(char) {
+    return Boolean(char && (char.techniqueId === 'heavenZero' || char.technique === '天与咒缚（零咒力）'));
+  }
+
+  function hasHealingSkill(char) {
+    var skills = (char && char.skills) || [];
+    return skills.indexOf('反转术式') >= 0 || skills.indexOf('咒力高速再生') >= 0;
+  }
+
+  function isCurseEnemyName(name) {
+    return Boolean(name && /咒灵|怨灵|假想|灾厄|漏瑚|真人|花御|陀艮|黑沐死|疱疮|宿傩/.test(String(name)));
+  }
+
+  function enforceIdentityStatFloors(char) {
+    if (!char || !char.attrs || char.identityId === 'canon') return;
+    if (isHeavenZeroChar(char)) {
+      char.attrs.ceTotal = 0;
+      char.attrs.ceControl = 0;
+      char.attrs.ceEfficiency = 0;
+      char.attrs.barrier = 0;
+      char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 9);
+      char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 8);
+      char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 7);
+      char.skills = (char.skills || []).filter(function (s) { return !ZERO_CE_FORBIDDEN_SKILLS[s]; });
+      return;
+    }
+    if (char.identityId === 'curse') {
+      if (char.skills && char.skills.indexOf('反转术式') >= 0) {
+        char.skills = char.skills.filter(function (s) { return s !== '反转术式'; });
+        if (char.skills.indexOf('咒力高速再生') === -1) char.skills.push('咒力高速再生');
+      }
+      char.attrs.ceTotal = Math.max(char.attrs.ceTotal || 0, 6);
+      char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 5);
+    } else if (char.identityId === 'corpse') {
+      char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 5);
+      char.attrs.soulResist = Math.max(char.attrs.soulResist || 0, 5);
+    } else if (char.identityId === 'higherUp') {
+      char.attrs.iq = Math.max(char.attrs.iq || 0, 6);
+      char.attrs.barrier = Math.max(char.attrs.barrier || 0, 5);
+    }
+  }
+
+  function enforceIdentityAndTechConstraints(char, stepQueue) {
+    enforceIdentityStatFloors(char);
+    if (Array.isArray(stepQueue) && isHeavenZeroChar(char)) {
+      for (var i = stepQueue.length - 1; i >= 0; i--) {
+        var st = stepQueue[i];
+        if (st && st.type === 'attr' && DATA.ATTRIBUTE_WHEELS[st.index]) {
+          var ak = DATA.ATTRIBUTE_WHEELS[st.index].attr;
+          if (ak === 'ceTotal' || ak === 'ceControl' || ak === 'ceEfficiency' || ak === 'barrier') {
+            stepQueue.splice(i, 1);
+          }
+        }
+      }
+    }
+  }
+
   function applyAttrTierFloor(char, attrTier) {
     if (!attrTier || attrTier === 'random') return;
     var minLv = attrTier === 'ex' ? 10 : attrTier === 's' ? 7 : attrTier === 'b' ? 5 : 0;
     if (!minLv) return;
     DATA.ATTRIBUTE_DEFS.forEach(function (d) {
-      if (char.technique === '天与咒缚（零咒力）' && (d.key === 'ceTotal' || d.key === 'ceControl' || d.key === 'ceEfficiency' || d.key === 'barrier')) {
+      if (isHeavenZeroChar(char) && (d.key === 'ceTotal' || d.key === 'ceControl' || d.key === 'ceEfficiency' || d.key === 'barrier')) {
         return;
       }
       if ((char.attrs[d.key] || 0) < minLv) {
@@ -277,23 +347,28 @@
     }, 0);
   }
 
-  function getPowerBreakdown(char) {
+  function getPowerBreakdown(char, enemyName) {
     var a = char.attrs;
     var sumTen = a.ceTotal + a.ceControl + a.ceEfficiency + a.taijutsu + a.bodyResist +
       a.soulResist + a.barrier + a.versatility + a.iq + a.talent * 0.6;
     var hasDomain = char.skills.indexOf('领域展开') >= 0;
-    var hasRct = char.skills.indexOf('反转术式') >= 0;
+    var hasRct = hasHealingSkill(char);
     var skillBonus = char.skills.length * 2.8 + (char.techniquePower || 4) + (hasDomain ? 9 : 0) + (hasRct ? 5 : 0);
     var activeTools = (char.tools || []).filter(function (t) { return !t.destroyed; });
-    var toolBonus = activeTools.reduce(function (sum, t) { return sum + (t.bonus || 3); }, 0);
+    var toolBonus = activeTools.reduce(function (sum, t) { return sum + (t.bonus || 3) + (t.extraCe ? 2 : 0); }, 0);
     var corpseBonus = getCorpsePowerBonus(char);
     var shikigamiExtra = (char.shikigamiAgeBonus || 0) + (char.shikigamiMechBonus || 0);
+    var bondBonus = (char.identityId === 'shikigami' && char.flags && typeof char.flags.masterBondScore === 'number')
+      ? char.flags.masterBondScore * 2
+      : 0;
+    var antiCurseBonus = (char.shikigamiMechId === 'sword_exorcism' && isCurseEnemyName(enemyName)) ? 8 : 0;
     var seanceBonus = (char.flags && char.flags.seanceAllyBonus) ? char.flags.seanceAllyBonus : 0;
+    var flagPowerBonus = (char.flags && char.flags.powerBonusAcc) ? char.flags.powerBonusAcc : 0;
     var supplyMult = char.masterSupplyMult || 1;
     var vowMult = (char.flags && char.flags.vowAtkMult) ? char.flags.vowAtkMult : 1;
     var scriptBonus = (char.flags && char.flags.scriptLevel > 0) ? char.flags.scriptLevel * 2 : 0;
     var injuryPenalty = char.hpStatus === '重伤' ? 9 : char.hpStatus === '轻伤' ? 3 : 0;
-    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + seanceBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
+    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + bondBonus + antiCurseBonus + seanceBonus + flagPowerBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
     return clamp(Math.round(raw), 1, 210);
   }
 
@@ -385,6 +460,16 @@
       setup.push({ type: 'elder_clan_decide' });
     }
 
+    var hasExplicitTech = Boolean(preset && preset.techId && preset.techId !== 'random');
+    var hasExplicitTools = Boolean(preset && preset.toolCount && preset.toolCount !== 'random');
+    var isCivilianDefault = char.identityId === 'civilian' && !hasExplicitTech;
+    if (isCivilianDefault) {
+      char.techniqueId = 'civilian_none';
+      char.technique = '无生得术式（常人）';
+      char.techniquePower = 1;
+      char.techniqueDesc = '生于平凡世俗，暂未觉醒生得术式';
+    }
+
     if (char.identityId === 'shikigami') {
       setup.push({ type: 'shikigami_auto' });
       if (!preset || !preset.eraId || preset.eraId === 'random') setup.push({ type: 'birth_era' });
@@ -392,14 +477,14 @@
       setup.push({ type: 'shikigami_body' });
       setup.push({ type: 'shikigami_age' });
       setup.push({ type: 'shikigami_mechanism' });
-      if (!preset || !preset.techId || preset.techId === 'random') setup.push({ type: 'technique' });
+      if (!hasExplicitTech) setup.push({ type: 'technique' });
       setup.push({ type: 'shikigami_master' });
       setup.push({ type: 'shikigami_supply' });
       setup.push({ type: 'shikigami_bond' });
     } else {
       if (!preset || !preset.eraId || preset.eraId === 'random') setup.push({ type: 'birth_era' });
       if (!preset || !preset.birthplaceId || preset.birthplaceId === 'random') setup.push({ type: 'birthplace' });
-      if (!preset || !preset.techId || preset.techId === 'random') setup.push({ type: 'technique' });
+      if (!hasExplicitTech && !isCivilianDefault) setup.push({ type: 'technique' });
     }
 
     if (!preset || !preset.looksLv || preset.looksLv === 'random') setup.push({ type: 'looks' });
@@ -408,6 +493,9 @@
 
     for (var i = 0; i < DATA.ATTRIBUTE_WHEELS.length; i++) {
       var attrKey = DATA.ATTRIBUTE_WHEELS[i].attr;
+      if (isHeavenZeroChar(char) && (attrKey === 'ceTotal' || attrKey === 'ceControl' || attrKey === 'ceEfficiency' || attrKey === 'barrier')) {
+        continue;
+      }
       if (attrKey === 'talent' && preset && preset.talentLv && preset.talentLv !== 'random') {
         continue;
       }
@@ -417,14 +505,16 @@
       setup.push({ type: 'attr', index: i });
     }
 
-    setup.push({ type: 'high_tech_count' });
+    if (!isCivilianDefault) {
+      setup.push({ type: 'high_tech_count' });
+    }
 
-    if (preset && preset.toolCount && preset.toolCount !== 'random') {
+    if (hasExplicitTools) {
       var fixedToolCnt = clamp(parseInt(preset.toolCount, 10) || 0, 0, 3);
       for (var ftc = 1; ftc <= fixedToolCnt; ftc++) {
         setup.push({ type: 'tool_shape', nth: ftc, total: fixedToolCnt, seed: Math.floor(Math.random() * 50) });
       }
-    } else {
+    } else if (!isCivilianDefault) {
       setup.push({ type: 'tool_count' });
     }
 
@@ -447,6 +537,7 @@
       setup.push({ type: 'identity_extra', key: 'curseUser_bounty' });
     }
 
+    enforceIdentityAndTechConstraints(char, setup);
     setup.push({ type: 'radar', stage: 'initial', title: '初始能力面板' });
 
     if (preset && preset.eraId && preset.eraId !== 'random') {
@@ -563,7 +654,16 @@
           activeVowLabel: '',
           vowAtkMult: 1,
           vowDangerDelta: 0,
-          bindingVowPicked: false
+          bindingVowPicked: false,
+          powerBonusAcc: 0,
+          repBonusAcc: 0,
+          masterBondScore: 0,
+          corpseMultiCoreSave: false,
+          corpseMultiCoreUsed: false,
+          rabbitDecoyAvailable: false,
+          rabbitDecoyUsed: false,
+          firstRoundBossBonus: 0,
+          shinjukuProtectBonus: 0
         },
         timeline: []
       }
@@ -639,7 +739,8 @@
       }
     }
     if (preset && preset.gradeId && preset.gradeId !== 'random' && state.char.identityId !== 'canon') {
-      var grObj = DATA.GRADE_WHEELS.standard.find(function (g) { return g.id === preset.gradeId; });
+      var allGrades = DATA.GRADE_WHEELS.standard.concat(DATA.GRADE_WHEELS.civilian || []);
+      var grObj = allGrades.find(function (g) { return g.id === preset.gradeId; });
       if (grObj) {
         state.char.officialGrade = grObj.id;
         state.char.gradeBonus = grObj.bonus;
@@ -676,6 +777,7 @@
     }
 
     if (preset && preset.identityId && preset.identityId !== 'random') {
+      enforceIdentityStatFloors(state.char);
       state.stepQueue = buildInitialSetupSteps(state.char, preset);
       state.lastResultText = '自选设定开局';
       state.lastEffectText = '已应用自选预设（' + state.char.identityName + '），继续抽取其余阶段';
@@ -694,8 +796,8 @@
     return state.stepQueue[0];
   }
 
-  function buildFightSlices(state, enemyPower) {
-    var myPower = getPowerBreakdown(state.char);
+  function buildFightSlices(state, enemyPower, enemyName) {
+    var myPower = getPowerBreakdown(state.char, enemyName);
     var rewriteBonus = state.char.flags.rewroteFate ? 4 : 0;
     var diff = myPower + rewriteBonus - enemyPower + (state.char.statsLog.wins > 0 ? 1 : 0);
     var prob = Math.round(100 / (1 + Math.exp(-diff / 14)));
@@ -707,11 +809,14 @@
   }
 
   function buildInjurySlices(state, won, canDie) {
-    var bodyLv = state.char.attrs.bodyResist;
-    var hasRct = state.char.skills.indexOf('反转术式') >= 0;
-    var dangerDelta = state.char.flags.vowDangerDelta || 0;
+    var char = state.char;
+    var bodyLv = char.attrs.bodyResist;
+    var hasRct = hasHealingSkill(char);
+    var zeroCe = isHeavenZeroChar(char);
+    var isCurse = char.identityId === 'curse';
+    var dangerDelta = char.flags.vowDangerDelta || 0;
     if (won) {
-      var noInj = clamp(34 + bodyLv * 4 + (hasRct ? 12 : 0) - Math.round(dangerDelta * 0.5), 24, 84);
+      var noInj = clamp(34 + bodyLv * 4 + (hasRct ? 12 : 0) + (zeroCe ? 8 : 0) - Math.round(dangerDelta * 0.5), 24, 86);
       var light = clamp(100 - noInj - 6, 12, 60);
       var heavy = Math.max(4, 100 - noInj - light);
       return [
@@ -721,19 +826,33 @@
       ];
     }
 
-    var rewriteReduce = state.char.flags.rewroteFate ? 7 : 0;
+    var rewriteReduce = char.flags.rewroteFate ? 7 : 0;
+    var hasMultiCore = Boolean(char.flags && char.flags.corpseMultiCoreSave && !char.flags.corpseMultiCoreUsed);
+    var hasRabbitDecoy = Boolean(char.flags && char.flags.rabbitDecoyAvailable && !char.flags.rabbitDecoyUsed);
     var deathRisk = canDie ? clamp(22 - Math.floor(bodyLv * 1.3) - (hasRct ? 6 : 0) + Math.round(dangerDelta * 0.6) - rewriteReduce, 3, 28) : 0;
-    if (state.char.hpStatus === '重伤' && canDie) deathRisk = clamp(deathRisk + 8, 5, 34);
-    var rctBreakChance = !hasRct ? clamp(6 + state.char.attrs.talent + state.char.attrs.ceControl, 8, 24) : 0;
-    var heavyLoss = clamp(42 - bodyLv * 2 + Math.round(dangerDelta * 0.4), 16, 52);
-    var lightLoss = Math.max(16, 100 - heavyLoss - deathRisk - rctBreakChance);
+    if (char.hpStatus === '重伤' && canDie) deathRisk = clamp(deathRisk + 8, 5, 34);
+    var rctBreakChance = (!hasRct && !zeroCe) ? clamp(6 + char.attrs.talent + char.attrs.ceControl, 8, 24) : 0;
+    var decoyWeight = (hasMultiCore || hasRabbitDecoy) ? 22 : 0;
+    var heavyLoss = clamp(42 - bodyLv * 2 + Math.round(dangerDelta * 0.4) - (decoyWeight ? 8 : 0), 14, 52);
+    var lightLoss = Math.max(14, 100 - heavyLoss - deathRisk - rctBreakChance - decoyWeight);
 
-    var slices = [
+    var slices = [];
+    if (hasMultiCore) {
+      slices.push({ id: 'core_decoy', decoyKind: 'multiCore', label: '切换备用咒核！免除此次重伤与致死判定', weight: decoyWeight, color: '#2ac19a' });
+    } else if (hasRabbitDecoy) {
+      slices.push({ id: 'core_decoy', decoyKind: 'rabbitDecoy', label: '脱兔分身替死！安全撤出重伤区', weight: decoyWeight, color: '#2ac19a' });
+    }
+    slices.push(
       { id: 'light', label: '轻伤突围', weight: lightLoss, color: '#ffa500' },
       { id: 'heavy', label: '重伤退避', weight: heavyLoss, color: '#ef5d58' }
-    ];
+    );
     if (rctBreakChance > 0) {
-      slices.push({ id: 'core_rct', label: '抓准了咒力核心！（逆转突破）', weight: rctBreakChance, color: '#29bce8' });
+      slices.push({
+        id: 'core_rct',
+        label: isCurse ? '抓准了咒核极境！（咒力高速再生）' : '抓准了咒力核心！（逆转突破）',
+        weight: rctBreakChance,
+        color: '#29bce8'
+      });
     }
     if (deathRisk > 0) {
       slices.push({ id: 'dead', label: '力竭战死', weight: deathRisk, color: '#64748b' });
@@ -751,11 +870,30 @@
   }
 
   function getAvailableHighTechSlices(char) {
-    var remaining = DATA.HIGH_TECHNIQUES.filter(function (ht) {
+    var zeroCe = isHeavenZeroChar(char);
+    var isCurse = char.identityId === 'curse';
+    var pool = DATA.HIGH_TECHNIQUES;
+    if (zeroCe) {
+      pool = pool.filter(function (ht) { return ht.id === 'hundredWeapons'; });
+    } else if (isCurse) {
+      pool = pool.map(function (ht) {
+        if (ht.id !== 'rct') return ht;
+        return {
+          id: 'curse_regen',
+          label: '咒力高速再生',
+          weight: ht.weight,
+          power: ht.power,
+          note: '咒灵以自身负能量高速修复受损躯体（同等于反转术式之再生效力）'
+        };
+      });
+    }
+    var remaining = pool.filter(function (ht) {
       return char.skills.indexOf(ht.label) === -1;
     });
     if (!remaining.length) {
-      return [{ id: 'mastery', label: '技巧全面圆满（全属性精进）', weight: 100 }];
+      return zeroCe
+        ? [{ id: 'heaven_peak', label: '天与体术极境（体术与身体抗性精进）', weight: 100 }]
+        : [{ id: 'mastery', label: '技巧全面圆满（全属性精进）', weight: 100 }];
     }
     return remaining;
   }
@@ -772,6 +910,7 @@
 
     var activeTools = (char.tools || []).filter(function (t) { return !t.destroyed; });
     var firstTool = activeTools[0] || null;
+    var zeroCe = isHeavenZeroChar(char);
     var bfWeightMult = Math.pow(1.5, boss.playerBfStacks || 0);
 
     if (char.skills.indexOf('完整咏唱') >= 0) {
@@ -779,7 +918,7 @@
     }
 
     var elbowLabel = firstTool
-      ? '肘击（附着咒具1·' + firstTool.shape + '，不耗咏唱）'
+      ? '肘击（附着咒具·' + firstTool.shape + '，不耗咏唱）'
       : '肘击（高速体术贴靠，不耗咏唱）';
     list.push({
       id: 'elbow',
@@ -791,6 +930,8 @@
 
     if (char.skills.indexOf('反转术式') >= 0) {
       list.push({ id: 'heal', label: '反转术式·即时治疗修复伤势（不耗咏唱）', power: 0, isHeal: true, weight: 11 });
+    } else if (char.skills.indexOf('咒力高速再生') >= 0) {
+      list.push({ id: 'heal', label: '咒力高速再生·重塑受损躯体（不耗咏唱）', power: 0, isHeal: true, weight: 11 });
     }
     if (char.skills.indexOf('咒术科学') >= 0 || (char.attrs.iq || 0) >= 8) {
       list.push({ id: 'ce_science', label: '咒术科学·原理反制（+3，抵消敌方1次攻击）', power: 3, cancels: 1, weight: 10 });
@@ -801,12 +942,70 @@
     if (char.skills.indexOf('自动迎击术式') >= 0) {
       list.push({ id: 'auto_counter', label: '自动迎击术式（+3，抵消敌方1次攻击）', power: 3, cancels: 1, weight: 11 });
     }
-    if (firstTool && (firstTool.nullify || firstTool.canCancelMove || (firstTool.effect && (firstTool.effect.indexOf('无效化') >= 0 || firstTool.effect.indexOf('飞天') >= 0)))) {
+
+    // 所有未损毁咒具专属特效招式（覆盖全部 9 大咒具特效，不再只读取第 1 件）
+    var addedToolIds = {};
+    activeTools.forEach(function (tool, idx) {
+      if ((tool.nullify || tool.canCancelMove || (tool.effect && (tool.effect.indexOf('无效化') >= 0 || tool.effect.indexOf('飞天') >= 0))) && !addedToolIds.cancel) {
+        addedToolIds.cancel = true;
+        list.push({
+          id: 'tool_special_hit_' + idx,
+          label: '催动「' + tool.shape + '」· ' + tool.effect.split('（')[0] + '（抵消敌方1次攻击）',
+          power: 16 + (tool.bonus || 5),
+          cancels: 1,
+          isTechAttack: true,
+          weight: 13
+        });
+      } else if ((tool.extendRange || (tool.effect && tool.effect.indexOf('无限延长') >= 0)) && !addedToolIds.extend) {
+        addedToolIds.extend = true;
+        list.push({
+          id: 'tool_extend_' + idx,
+          label: '延伸「' + tool.shape + '」· 超距奇袭牵制（抵消敌方1次攻击）',
+          power: 17 + (tool.bonus || 5),
+          cancels: 1,
+          isTechAttack: true,
+          weight: 12
+        });
+      }
+      if ((tool.extraCe || (tool.effect && tool.effect.indexOf('储存咒力') >= 0)) && !addedToolIds.extraCe) {
+        addedToolIds.extraCe = true;
+        list.push({
+          id: 'tool_extra_ce_' + idx,
+          label: '释放「' + tool.shape + '」外置储存咒力 · 高密度冲击（+21，减轻状态压力）',
+          power: 21,
+          cancels: 1,
+          isTechAttack: true,
+          weight: 13
+        });
+      }
+      if ((tool.thunderCast || (tool.effect && tool.effect.indexOf('神武解') >= 0)) && !addedToolIds.thunder) {
+        addedToolIds.thunder = true;
+        list.push({
+          id: 'tool_thunder_' + idx,
+          label: '引动「' + tool.shape + '」内藏落雷咒术（+24 爆发出力）',
+          power: 24,
+          isTechAttack: true,
+          weight: 13
+        });
+      }
+      if ((tool.dmgStore || (tool.effect && tool.effect.indexOf('伤害储存') >= 0)) && !addedToolIds.dmgStore) {
+        addedToolIds.dmgStore = true;
+        var storeGain = 16 + (boss.heavyDebuffStacks || 0) * 8;
+        list.push({
+          id: 'tool_dmg_store_' + idx,
+          label: '解放「' + tool.shape + '」储存伤害蓄能斩击（+' + storeGain + '）',
+          power: storeGain,
+          isTechAttack: true,
+          weight: 12
+        });
+      }
+    });
+
+    if (char.shikigamiMechId === 'sword_exorcism') {
       list.push({
-        id: 'tool_special_hit',
-        label: '催动「' + firstTool.shape + '」· ' + firstTool.effect.split('（')[0] + '（抵消敌方1次攻击）',
-        power: 15 + (firstTool.bonus || 5),
-        cancels: 1,
+        id: 'shikigami_exorcism_sword',
+        label: '退魔之剑 · 正能量破咒重劈（+22）',
+        power: 22,
         isTechAttack: true,
         weight: 13
       });
@@ -821,17 +1020,28 @@
       });
     }
 
-    list.push({
-      id: 'blackFlash',
-      label: '黑闪！！！（额外行动2次，本轮后续×1.2，黑闪率↑）',
-      power: 22,
-      isBlackFlash: true,
-      isTechAttack: true,
-      extraActions: 2,
-      weight: Math.round((10 + (char.attrs.ceControl || 0) * 1.1) * bfWeightMult)
-    });
+    if (!zeroCe) {
+      list.push({
+        id: 'blackFlash',
+        label: '黑闪！！！（额外行动2次，本轮后续×1.2，黑闪率↑）',
+        power: 22,
+        isBlackFlash: true,
+        isTechAttack: true,
+        extraActions: 2,
+        weight: Math.round((10 + (char.attrs.ceControl || 0) * 1.1) * bfWeightMult)
+      });
+    } else {
+      list.push({
+        id: 'heaven_blitz',
+        label: '天与极致体感追击（额外行动1次，高速压迫连打）',
+        power: 23,
+        isTechAttack: true,
+        extraActions: 1,
+        weight: 15
+      });
+    }
 
-    if (char.skills.indexOf('领域展开') >= 0) {
+    if (!zeroCe && char.skills.indexOf('领域展开') >= 0) {
       list.push({ id: 'domain', label: '领域展开·生得领域强压（不耗咏唱）', power: 19, isDomain: true, weight: 12 });
     }
     if (char.skills.indexOf('百兵演武') >= 0 && activeTools.length > 0) {
@@ -853,7 +1063,7 @@
     return DATA.SUKUNA_MOVES.filter(function (m) {
       if (m.requiresAgito && !boss.agitoAlive) return false;
       if (m.requiresMahoraga && !boss.mahoragaAlive) return false;
-      if (m.canSummonMahoraga && (boss.mahoragaAlive || boss.isTrueForm)) return false;
+      if (m.canSummonMahoraga && (boss.mahoragaAlive || boss.isTrueForm || boss.forbidMahoSummon || boss.mahoragaDestroyed)) return false;
       return true;
     }).map(function (m) {
       var w = m.isBlackFlash ? Math.round(m.weight * bfMult) : m.weight;
@@ -932,7 +1142,16 @@
       return { title: '式神·具体形态', subtag: char.shikigamiDesc, explain: '细化具体召唤外观。', slices: getSliceColors(forms) };
     }
     if (step.type === 'technique') {
-      return { title: '生得术式 / 特殊机制（30种）', subtag: char.identityName + ' · 核心命门', explain: '决定你的招牌术式体系或天与咒缚。', slices: getSliceColors(DATA.TECHNIQUES_ALL) };
+      var techPool = DATA.TECHNIQUES_ALL.filter(function (t) {
+        if ((char.identityId === 'curse' || char.identityId === 'shikigami') && (t.id === 'heavenZero' || t.id === 'newShadow')) {
+          return false;
+        }
+        if (char.identityId === 'corpse' && t.id === 'heavenZero') {
+          return false;
+        }
+        return true;
+      });
+      return { title: '生得术式 / 特殊机制（' + techPool.length + '种）', subtag: char.identityName + ' · 核心命门', explain: '决定你的招牌术式体系或对应身躯能力。', slices: getSliceColors(techPool) };
     }
     if (step.type === 'shikigami_master') {
       var masters = (char.birthEraId === 'heian' || char.birthEraId === 'edo400') ? DATA.SHIKIGAMI_SUB_BRANCHES.mastersAncient : DATA.SHIKIGAMI_SUB_BRANCHES.mastersModern;
@@ -942,7 +1161,7 @@
       return { title: '御主供能·' + (char.master || '御主'), subtag: '咒力供应倍率', explain: '影响最终战斗数值倍率。', slices: getSliceColors(DATA.SHIKIGAMI_SUB_BRANCHES.supplyRates) };
     }
     if (step.type === 'shikigami_bond') {
-      return { title: '与' + (char.master || '御主') + '的关系', subtag: '契约羁绊评价', explain: '决定彼此默契度。', slices: getSliceColors(DATA.SHIKIGAMI_SUB_BRANCHES.bonds) };
+      return { title: '与' + (char.master || '御主') + '的关系', subtag: '契约羁绊评价', explain: '影响默契配合与实战临敌修正。', slices: getSliceColors(DATA.SHIKIGAMI_SUB_BRANCHES.bonds) };
     }
     if (step.type === 'looks') {
       return { title: '穿越颜值评级', subtag: '基础外貌档案', explain: '影响部分角色互动权重。', slices: getSliceColors(DATA.LOOKS_WHEEL) };
@@ -955,25 +1174,37 @@
     }
     if (step.type === 'attr') {
       var aw = DATA.ATTRIBUTE_WHEELS[step.index];
-      return { title: aw.title, subtag: '十维核心属性 (' + (step.index + 1) + ' / 10)', explain: aw.desc, slices: getSliceColors(aw.slices) };
+      var isLowCivilianAttr = char.identityId === 'civilian' && (!char.flags || !char.flags.civilianAwakened) &&
+        char.techniqueId === 'civilian_none' &&
+        (aw.attr === 'ceTotal' || aw.attr === 'ceControl' || aw.attr === 'ceEfficiency' || aw.attr === 'barrier' || aw.attr === 'versatility');
+      return {
+        title: aw.title,
+        subtag: isLowCivilianAttr ? '普通人未觉醒常态盘 (' + (step.index + 1) + ' / 10)' : '十维核心属性 (' + (step.index + 1) + ' / 10)',
+        explain: aw.desc,
+        slices: getSliceColors(isLowCivilianAttr ? DATA.CIVILIAN_LOW_ATTR_SLICES : aw.slices)
+      };
     }
     if (step.type === 'high_tech_count') {
       var tLv = char.attrs.talent;
-      var slices = tLv >= 8
-        ? [{ label: '2项', count: 2, weight: 20 }, { label: '3项', count: 3, weight: 32 }, { label: '4项', count: 4, weight: 30 }, { label: '5项', count: 5, weight: 18 }]
-        : tLv >= 5
-          ? [{ label: '1项', count: 1, weight: 30 }, { label: '2项', count: 2, weight: 40 }, { label: '3项', count: 3, weight: 22 }, { label: '4项', count: 4, weight: 8 }]
-          : [{ label: '0项（无高级技）', count: 0, weight: 35 }, { label: '1项', count: 1, weight: 45 }, { label: '2项', count: 2, weight: 20 }];
-      return { title: '高级技巧数量 · ' + getRankMeta(tLv).code + '天赋加成', subtag: '决定能掌握几项核心秘技', explain: '天赋越高可抽中的高级技巧（领域展开/反转术式/黑闪/简易领域等）越多！', slices: getSliceColors(slices) };
+      var slices = isHeavenZeroChar(char)
+        ? [{ label: '0项（专精白兵体术）', count: 0, weight: 45 }, { label: '1项（百兵演武）', count: 1, weight: 55 }]
+        : tLv >= 8
+          ? [{ label: '2项', count: 2, weight: 20 }, { label: '3项', count: 3, weight: 32 }, { label: '4项', count: 4, weight: 30 }, { label: '5项', count: 5, weight: 18 }]
+          : tLv >= 5
+            ? [{ label: '1项', count: 1, weight: 30 }, { label: '2项', count: 2, weight: 40 }, { label: '3项', count: 3, weight: 22 }, { label: '4项', count: 4, weight: 8 }]
+            : [{ label: '0项（无高级技）', count: 0, weight: 35 }, { label: '1项', count: 1, weight: 45 }, { label: '2项', count: 2, weight: 20 }];
+      return { title: '高级技巧数量 · ' + getRankMeta(tLv).code + '天赋加成', subtag: '决定能掌握几项核心秘技', explain: '天赋越高可抽中的高级技巧越多；零咒力体仅抽选兵器与肉搏类秘技。', slices: getSliceColors(slices) };
     }
     if (step.type === 'high_tech_pick') {
-      return { title: '第 ' + step.nth + ' 项 · 会哪个高级技巧', subtag: '共抽 ' + step.total + ' 项高级技巧', explain: '抽中领域展开或反转术式将在战局中带来压倒性优势。', slices: getSliceColors(getAvailableHighTechSlices(char)) };
+      return { title: '第 ' + step.nth + ' 项 · 会哪个高级技巧', subtag: '共抽 ' + step.total + ' 项高级技巧', explain: '抽中领域展开、再生或黑闪将在战局中带来明显优势。', slices: getSliceColors(getAvailableHighTechSlices(char)) };
     }
     if (step.type === 'tool_count') {
-      var cSlices = char.techniquePower <= 4
-        ? [{ label: '0件', count: 0, weight: 55 }, { label: '1件', count: 1, weight: 35 }, { label: '2件', count: 2, weight: 10 }]
-        : [{ label: '0件', count: 0, weight: 22 }, { label: '1件', count: 1, weight: 44 }, { label: '2件', count: 2, weight: 24 }, { label: '3件', count: 3, weight: 10 }];
-      return { title: '所持咒具数量', subtag: '武装配置', explain: '决定开局最多携带有几件专属咒具。', slices: getSliceColors(cSlices) };
+      var cSlices = isHeavenZeroChar(char)
+        ? [{ label: '1件（天与标配咒具）', count: 1, weight: 46 }, { label: '2件（双持切换咒具）', count: 2, weight: 38 }, { label: '3件（移动军火库）', count: 3, weight: 16 }]
+        : char.techniquePower <= 4
+          ? [{ label: '0件', count: 0, weight: 55 }, { label: '1件', count: 1, weight: 35 }, { label: '2件', count: 2, weight: 10 }]
+          : [{ label: '0件', count: 0, weight: 22 }, { label: '1件', count: 1, weight: 44 }, { label: '2件', count: 2, weight: 24 }, { label: '3件', count: 3, weight: 10 }];
+      return { title: '所持咒具数量', subtag: '武装配置', explain: isHeavenZeroChar(char) ? '零咒力天与咒缚必携咒具弥补对咒灵打击手段。' : '决定开局最多携带有几件专属咒具。', slices: getSliceColors(cSlices) };
     }
     if (step.type === 'tool_shape') {
       var pickedShapes = [];
@@ -986,7 +1217,9 @@
       return { title: '第 ' + step.nth + ' 件 · 「' + step.shape + '」专属特效', subtag: '咒具品质定级', explain: '特级天逆系、释魂系或游云系词条可显著提升实战能力。', slices: getSliceColors(DATA.TOOL_EFFECTS) };
     }
     if (step.type === 'grade') {
-      var gp = char.identityId === 'civilian' && char.techniquePower <= 2 ? DATA.GRADE_WHEELS.civilian : DATA.GRADE_WHEELS.standard;
+      var gp = (char.identityId === 'civilian' && (!char.flags || !char.flags.civilianAwakened) && char.techniqueId === 'civilian_none')
+        ? DATA.GRADE_WHEELS.civilian
+        : DATA.GRADE_WHEELS.standard;
       return { title: char.identityName + ' · 官方评级', subtag: '咒术界阶级评定', explain: '高阶官方评级直接提升临战气势与基础加权。', slices: getSliceColors(gp) };
     }
     if (step.type === 'faction') {
@@ -1045,12 +1278,12 @@
       return {
         title: '对战 ' + step.encounter.enemyName + ' · 胜负',
         subtag: step.eraLabel + ' · 实时战力判定',
-        explain: '当前我方战力 ' + getPowerBreakdown(char) + ' 对手实力 ' + step.encounter.enemyPower,
-        slices: buildFightSlices(state, step.encounter.enemyPower)
+        explain: '当前我方战力 ' + getPowerBreakdown(char, step.encounter.enemyName) + ' 对手实力 ' + step.encounter.enemyPower,
+        slices: buildFightSlices(state, step.encounter.enemyPower, step.encounter.enemyName)
       };
     }
     if (step.type === 'fight_injury') {
-      return { title: '战斗盘 · 战后伤势判定', subtag: step.won ? '凯旋余波' : '险境重创或突破', explain: '身体抗性决定存活与免伤概率；未习得反转时重压有几率悟出咒力核心！', slices: buildInjurySlices(state, step.won, step.canDie) };
+      return { title: '战斗盘 · 战后伤势判定', subtag: step.won ? '凯旋余波' : '险境重创或突破', explain: '身体抗性决定存活与免伤概率；未习得再生技时重压有几率悟出咒力核心！', slices: buildInjurySlices(state, step.won, step.canDie) };
     }
     if (step.type === 'heavy_impact') {
       return {
@@ -1089,7 +1322,23 @@
       return { title: '新宿决战 · 为何参战', subtag: '决战出征宣言', explain: '你的信念决定关键回合的爆发倾斜。', slices: getSliceColors(DATA.SHINJUKU_MOTIVES) };
     }
     if (step.type === 'shinjuku_sukuna_order') {
-      return { title: '决战对战宿傩顺序', subtag: '决定交锋宿傩哪一阶段形态', explain: '五条前全盛十影、协同五条双打、五条后残血或原身完全体！', slices: getSliceColors(DATA.SHINJUKU_SUKUNA_ORDERS) };
+      var orders = DATA.SHINJUKU_SUKUNA_ORDERS.map(function (o) {
+        if (char.canonCharId === 'gojo') {
+          var gojoLabel = o.id === 'with_gojo'
+            ? '新宿揭幕战 · 本尊独斗全盛十影宿傩'
+            : o.id === 'before_gojo'
+              ? '提前压上 · 正面迎战十影两面宿傩'
+              : o.id === 'after_gojo'
+                ? '消耗战后续 · 再战残血十影宿傩'
+                : '群殴围猎 · 联合日车/虎杖等包围宿傩';
+          return Object.assign({}, o, { label: gojoLabel });
+        }
+        if (char.canonCharId === 'sukuna') {
+          return Object.assign({}, o, { label: '镜像试炼 · ' + o.label });
+        }
+        return o;
+      });
+      return { title: '决战对战宿傩顺序', subtag: '决定交锋宿傩哪一阶段形态', explain: '五条前全盛十影、协同五条双打、五条后残血或原身完全体！', slices: getSliceColors(orders) };
     }
     if (step.type === 'boss_player_count') {
       var bonusMoves = char.attrs.taijutsu >= 8 ? 1 : 0;
@@ -1440,6 +1689,10 @@
       char.techniquePower = slice.power || 6;
       char.techniqueDesc = slice.desc || '';
       effectText = slice.desc || '核心生得术式锁定';
+      if (isHeavenZeroChar(char)) {
+        enforceIdentityAndTechConstraints(char, state.stepQueue);
+        effectText += '｜零咒力特化：已自动清零并跳过咒力四维，体魄底线拉升';
+      }
 
     } else if (step.type === 'shikigami_master') {
       char.master = slice.id;
@@ -1453,7 +1706,9 @@
 
     } else if (step.type === 'shikigami_bond') {
       char.masterBondLabel = slice.label;
-      effectText = '御主关系确立为：' + slice.label;
+      if (!char.flags) char.flags = {};
+      char.flags.masterBondScore = slice.score || 0;
+      effectText = '御主关系确立为：' + slice.label + (slice.score ? '（羁绊战力修正 ' + (slice.score > 0 ? '+' : '') + (slice.score * 2) + '）' : '');
 
     } else if (step.type === 'looks') {
       char.looksLevel = slice.level != null ? slice.level : 5;
@@ -1482,7 +1737,11 @@
       }
 
     } else if (step.type === 'high_tech_pick') {
-      if (slice.id === 'mastery') {
+      if (slice.id === 'heaven_peak') {
+        applyStatDelta(char, 'taijutsu', 1);
+        applyStatDelta(char, 'bodyResist', 1);
+        effectText = '天与体魄进一步突破！体术与身体抗性 +1';
+      } else if (slice.id === 'mastery') {
         applyStatDelta(char, 'ceControl', 1);
         applyStatDelta(char, 'barrier', 1);
         effectText = '技巧全满！改为精进操控与结界术 +1';
@@ -1510,6 +1769,8 @@
             indestructible: Boolean(lockedEff.indestructible),
             nullify: Boolean(lockedEff.nullify),
             canCancelMove: Boolean(lockedEff.canCancelMove),
+            extendRange: Boolean(lockedEff.extendRange),
+            dmgStore: Boolean(lockedEff.dmgStore),
             damageMult: lockedEff.damageMult,
             extraCe: Boolean(lockedEff.extraCe),
             thunderCast: Boolean(lockedEff.thunderCast)
@@ -1534,6 +1795,8 @@
         indestructible: Boolean(slice.indestructible),
         nullify: Boolean(slice.nullify),
         canCancelMove: Boolean(slice.canCancelMove),
+        extendRange: Boolean(slice.extendRange),
+        dmgStore: Boolean(slice.dmgStore),
         damageMult: slice.damageMult,
         extraCe: Boolean(slice.extraCe),
         thunderCast: Boolean(slice.thunderCast)
@@ -1552,26 +1815,41 @@
       char.faction = slice.id;
       char.factionLabel = slice.label;
       effectText = slice.note;
+      enforceIdentityStatFloors(char);
       if (state.customAttrTier && state.customAttrTier !== 'random') {
         applyAttrTierFloor(char, state.customAttrTier);
       }
 
     } else if (step.type === 'identity_extra') {
-      if (slice.up1) applyStatDelta(char, slice.up1, slice.iqDouble ? 2 : 1);
+      if (!char.flags) char.flags = {};
+      if (slice.up1) applyStatDelta(char, slice.up1, (slice.iqDouble || slice.up1Double) ? 2 : 1);
       if (slice.up2) applyStatDelta(char, slice.up2, 1);
-      if (slice.repBonus) char.reputationLevel += Math.round(slice.repBonus / 5);
+      if (slice.powerBonus) {
+        char.flags.powerBonusAcc = (char.flags.powerBonusAcc || 0) + slice.powerBonus;
+      }
+      if (slice.multiCore) {
+        char.flags.corpseMultiCoreSave = true;
+      }
+      if (slice.repBonus) {
+        char.flags.repBonusAcc = (char.flags.repBonusAcc || 0) + slice.repBonus;
+        char.reputationLevel = clamp((char.reputationLevel || 4) + Math.round(slice.repBonus / 5), 0, 10);
+      }
       if (slice.awakenTech) {
         char.flags.civilianAwakened = true;
+        ['ceTotal', 'ceControl', 'ceEfficiency', 'barrier', 'versatility'].forEach(function (k) {
+          if ((char.attrs[k] || 0) < 5) char.attrs[k] = 5;
+        });
         if (char.officialGrade.indexOf('四级') >= 0 || char.officialGrade === '潜力体（高抗性常人）') {
           char.officialGrade = '准一级';
           char.gradeBonus = 6;
         }
-        effectText = '原本沉睡的术式获得觉醒！接下来补抽生得术式与高级技巧。';
+        effectText = '原本沉睡的术式获得觉醒！咒力与结界基准同步打通，接下来补抽生得术式与高级技巧。';
         state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
         state.stepQueue.unshift({ type: 'technique' });
       } else {
         effectText = slice.note || slice.label;
       }
+      enforceIdentityStatFloors(char);
       if (state.customAttrTier && state.customAttrTier !== 'random') {
         applyAttrTierFloor(char, state.customAttrTier);
       }
@@ -1646,8 +1924,9 @@
 
     } else if (step.type === 'fight_outcome') {
       var won = slice.id === 'win';
-      var myP = getPowerBreakdown(char);
-      var hitBF = Math.random() < clamp(0.14 + char.attrs.ceControl * 0.025 + (char.skills.indexOf('黑闪') >= 0 ? 0.14 : 0), 0.1, 0.58);
+      var myP = getPowerBreakdown(char, step.encounter.enemyName);
+      var zeroCeFight = isHeavenZeroChar(char);
+      var hitBF = !zeroCeFight && Math.random() < clamp(0.14 + char.attrs.ceControl * 0.025 + (char.skills.indexOf('黑闪') >= 0 ? 0.14 : 0), 0.1, 0.58);
       if (won) {
         char.statsLog.wins += 1;
         if (step.encounter.enemyPower - myP >= 6) char.statsLog.beatStronger = true;
@@ -1656,8 +1935,13 @@
           char.flags.nanamiDead = false;
           char.statsLog.savedNanami = true;
         }
-        if (step.encounter.rewardSkill && char.skills.indexOf(step.encounter.rewardSkill) === -1) {
-          char.skills.push(step.encounter.rewardSkill);
+        if (step.encounter.rewardSkill) {
+          var rewardSk = (char.identityId === 'curse' && step.encounter.rewardSkill === '反转术式')
+            ? '咒力高速再生'
+            : step.encounter.rewardSkill;
+          if ((!zeroCeFight || !ZERO_CE_FORBIDDEN_SKILLS[rewardSk]) && char.skills.indexOf(rewardSk) === -1) {
+            char.skills.push(rewardSk);
+          }
         }
       } else {
         char.statsLog.losses += 1;
@@ -1686,13 +1970,24 @@
           { type: 'radar', stage: 'final', title: '最终能力面板' },
           { type: 'settlement' }
         ];
+      } else if (slice.id === 'core_decoy') {
+        if (slice.decoyKind === 'multiCore') {
+          char.flags.corpseMultiCoreUsed = true;
+          effectText = '三核共鸣切核成功！顺利化解致命重创并稳住战线！';
+        } else {
+          char.flags.rabbitDecoyUsed = true;
+          effectText = '脱兔分身替死脱身！规避本次重伤代价！';
+        }
+        char.hpStatus = '健康';
+        state.stepQueue.unshift({ type: 'growth_check' });
       } else if (slice.id === 'core_rct') {
-        if (char.skills.indexOf('反转术式') === -1) char.skills.push('反转术式');
+        var rctLabel = char.identityId === 'curse' ? '咒力高速再生' : '反转术式';
+        if (!isHeavenZeroChar(char) && char.skills.indexOf(rctLabel) === -1) char.skills.push(rctLabel);
         char.flags.awakenedRCTInBattle = true;
         char.hpStatus = '健康';
         applyStatDelta(char, 'ceControl', 1);
         applyStatDelta(char, 'ceEfficiency', 1);
-        effectText = '抓准了咒力核心！！绝境觉醒「反转术式」，操纵与效率各 +1！';
+        effectText = '抓准了咒力核心！！绝境觉醒「' + rctLabel + '」，操纵与效率各 +1！';
         state.stepQueue.unshift({ type: 'growth_check' });
       } else {
         if (!step.won && step.canDie) char.statsLog.survivedDeath += 1;
@@ -1727,20 +2022,26 @@
 
     } else if (step.type === 'growth_focus') {
       char.statsLog.growthCount += 1;
+      var zeroCeG = isHeavenZeroChar(char);
       if (slice.id === 'bodyTrain') {
         effectText = '体术升至 ' + applyStatDelta(char, 'taijutsu', 1) + '，身体抗性升至 ' + applyStatDelta(char, 'bodyResist', 1);
       } else if (slice.id === 'ceCondense') {
-        effectText = '咒力总量升至 ' + applyStatDelta(char, 'ceTotal', 1) + '，效率升至 ' + applyStatDelta(char, 'ceEfficiency', 1);
+        effectText = zeroCeG
+          ? '天与体感愈发敏锐！体术升至 ' + applyStatDelta(char, 'taijutsu', 1) + '，战术泛用升至 ' + applyStatDelta(char, 'versatility', 1)
+          : '咒力总量升至 ' + applyStatDelta(char, 'ceTotal', 1) + '，效率升至 ' + applyStatDelta(char, 'ceEfficiency', 1);
       } else if (slice.id === 'soulBarrier') {
-        effectText = '灵魂抗性升至 ' + applyStatDelta(char, 'soulResist', 1) + '，结界术升至 ' + applyStatDelta(char, 'barrier', 1);
+        effectText = zeroCeG
+          ? '天与心神凝练！灵魂抗性升至 ' + applyStatDelta(char, 'soulResist', 1) + '，智力升至 ' + applyStatDelta(char, 'iq', 1)
+          : '灵魂抗性升至 ' + applyStatDelta(char, 'soulResist', 1) + '，结界术升至 ' + applyStatDelta(char, 'barrier', 1);
       } else {
         var avail = getAvailableHighTechSlices(char);
         var learned = avail[Math.floor(Math.random() * avail.length)];
-        if (learned && learned.id !== 'mastery' && char.skills.indexOf(learned.label) === -1) {
+        if (learned && learned.id !== 'mastery' && learned.id !== 'heaven_peak' && char.skills.indexOf(learned.label) === -1) {
           char.skills.push(learned.label);
           effectText = '绝境悟道！成功领悟高阶技巧「' + learned.label + '」！';
         } else {
           applyStatDelta(char, 'talent', 1);
+          if (zeroCeG) applyStatDelta(char, 'taijutsu', 1);
           effectText = '实战经验进一步提升，天赋升至 ' + getRankMeta(char.attrs.talent).code;
         }
       }
@@ -1751,26 +2052,36 @@
       char.currentEraLabel = '新宿决战';
       markVisitedEra(char, 'shinjuku');
       var shinjukuProgNote = syncCanonProgressionForEra(char, 'shinjuku', false);
+      var zeroCePrep = isHeavenZeroChar(char);
       char.statsLog.growthCount += 1;
       if (slice.id === 'taiBody') {
         effectText = '体术 -> ' + applyStatDelta(char, 'taijutsu', 1) + '，身体抗性 -> ' + applyStatDelta(char, 'bodyResist', 1);
       } else if (slice.id === 'soulLearn') {
-        effectText = '灵魂抗性 -> ' + applyStatDelta(char, 'soulResist', 1) + '，结界术 -> ' + applyStatDelta(char, 'barrier', 1);
+        effectText = zeroCePrep
+          ? '灵魂抗性 -> ' + applyStatDelta(char, 'soulResist', 1) + '，战术观察 -> ' + applyStatDelta(char, 'iq', 1)
+          : '灵魂抗性 -> ' + applyStatDelta(char, 'soulResist', 1) + '，结界术 -> ' + applyStatDelta(char, 'barrier', 1);
       } else if (slice.id === 'ceUpgrade') {
-        effectText = '咒力总量 -> ' + applyStatDelta(char, 'ceTotal', 1) + '，效率 -> ' + applyStatDelta(char, 'ceEfficiency', 1);
+        effectText = zeroCePrep
+          ? '身体抗性 -> ' + applyStatDelta(char, 'bodyResist', 1) + '，战术泛用 -> ' + applyStatDelta(char, 'versatility', 1)
+          : '咒力总量 -> ' + applyStatDelta(char, 'ceTotal', 1) + '，效率 -> ' + applyStatDelta(char, 'ceEfficiency', 1);
       } else {
-        var newT = getAvailableHighTechSlices(char)[0];
-        if (newT && newT.id !== 'mastery' && char.skills.indexOf(newT.label) === -1) {
+        var availPrep = getAvailableHighTechSlices(char);
+        var newT = availPrep[Math.floor(Math.random() * availPrep.length)];
+        if (newT && newT.id !== 'mastery' && newT.id !== 'heaven_peak' && char.skills.indexOf(newT.label) === -1) {
           char.skills.push(newT.label);
           effectText = '战前合练顺利领悟新技巧「' + newT.label + '」！';
         } else {
           applyStatDelta(char, 'iq', 1);
+          if (zeroCePrep) applyStatDelta(char, 'taijutsu', 1);
           effectText = '实战思路彻底贯通，智力 +1';
         }
       }
       if (shinjukuProgNote) effectText += '｜' + shinjukuProgNote;
 
     } else if (step.type === 'shinjuku_motive') {
+      if (!char.flags) char.flags = {};
+      char.flags.firstRoundBossBonus = slice.firstRoundBonus || 0;
+      char.flags.shinjukuProtectBonus = slice.protectBonus || 0;
       effectText = slice.buffNote;
       if (!char.flags.bindingVowPicked) {
         state.stepQueue.unshift({ type: 'binding_vow' });
@@ -1989,7 +2300,8 @@
       }
 
     } else if (step.type === 'final_reputation') {
-      char.reputationLevel = slice.level;
+      var repShift = (char.flags && char.flags.repBonusAcc) ? Math.round(char.flags.repBonusAcc / 5) : 0;
+      char.reputationLevel = clamp((slice.level != null ? slice.level : 5) + repShift, 0, 10);
       char.reputationText = slice.label;
       char.currentEraLabel = '尘埃落定';
       effectText = '终局声望确立为：' + slice.label;
@@ -2284,39 +2596,75 @@
 
   function arenaPowerScore(f) {
     var a = f.attrs || {};
-    var base = (a.ceTotal || 4) + (a.ceControl || 4) + (a.ceEfficiency || 4) + (a.taijutsu || 4) * 1.2 +
-      (a.bodyResist || 4) + (a.soulResist || 4) * 0.7 + (a.barrier || 4) * 0.8 + (a.versatility || 4) * 0.8 + (a.iq || 4) * 0.7;
+    var base = (a.ceTotal || 0) + (a.ceControl || 0) + (a.ceEfficiency || 0) + (a.taijutsu || 4) * 1.2 +
+      (a.bodyResist || 4) + (a.soulResist || 4) * 0.7 + (a.barrier || 0) * 0.8 + (a.versatility || 4) * 0.8 + (a.iq || 4) * 0.7;
     var hasD = (f.skills || []).indexOf('领域展开') >= 0;
-    var hasR = (f.skills || []).indexOf('反转术式') >= 0;
-    var toolPts = (f.tools || []).reduce(function (s, x) { return s + (x.bonus || 3); }, 0);
+    var hasR = hasHealingSkill(f);
+    var activeTools = (f.tools || []).filter(function (t) { return !t.destroyed; });
+    var toolPts = activeTools.reduce(function (s, x) { return s + (x.bonus || 3) + (x.extraCe ? 2 : 0); }, 0);
     return Math.round(base * 1.15 + (f.skills || []).length * 3 + (hasD ? 10 : 0) + (hasR ? 6 : 0) + toolPts);
   }
 
+  function getArenaFighterMods(f) {
+    var skills = f.skills || [];
+    var tools = (f.tools || []).filter(function (t) { return !t.destroyed; });
+    var zeroCe = isHeavenZeroChar(f);
+    var ampMult = 1;
+    var hasNullify = false;
+    var hasThunder = false;
+    var hasIndest = false;
+    tools.forEach(function (t) {
+      var eff = t.effect || '';
+      if (t.damageMult && t.damageMult > ampMult) ampMult = t.damageMult;
+      else if (eff.indexOf('伤害增幅') >= 0 && ampMult < 1.25) ampMult = 1.25;
+      if (t.nullify || t.canCancelMove || t.extendRange || eff.indexOf('无效化') >= 0 || eff.indexOf('天逆') >= 0 || eff.indexOf('飞天') >= 0) {
+        hasNullify = true;
+      }
+      if (t.thunderCast || t.dmgStore || eff.indexOf('神武解') >= 0 || eff.indexOf('伤害储存') >= 0) {
+        hasThunder = true;
+      }
+      if (t.indestructible || eff.indexOf('无坚不摧') >= 0 || eff.indexOf('释魂') >= 0) {
+        hasIndest = true;
+      }
+    });
+    return {
+      zeroCe: zeroCe,
+      hasDomain: !zeroCe && skills.indexOf('领域展开') >= 0,
+      hasAntiDomain: zeroCe || skills.indexOf('简易领域') >= 0 || skills.indexOf('弥虚葛笼') >= 0 || skills.indexOf('领域展延') >= 0,
+      hasHeal: hasHealingSkill(f),
+      healLabel: skills.indexOf('咒力高速再生') >= 0 ? '高速再生+12' : '反转回复+12',
+      ampMult: ampMult > 1 ? 1 + (ampMult - 1) * 0.55 : 1,
+      hasNullify: hasNullify,
+      extraDmg: (hasThunder ? 4 : 0) + (hasIndest ? 3 : 0),
+      soulGuard: Math.round(((f.attrs && f.attrs.soulResist) || 4) * 0.6)
+    };
+  }
+
   function simulateArenaBattle(fA, fB) {
-    var hpA = 100 + (fA.attrs.bodyResist || 4) * 8;
-    var hpB = 100 + (fB.attrs.bodyResist || 4) * 8;
+    var mA = getArenaFighterMods(fA);
+    var mB = getArenaFighterMods(fB);
+    var hpA = 100 + ((fA.attrs && fA.attrs.bodyResist) || 4) * 8 + mA.soulGuard * 2;
+    var hpB = 100 + ((fB.attrs && fB.attrs.bodyResist) || 4) * 8 + mB.soulGuard * 2;
     var pA = arenaPowerScore(fA);
     var pB = arenaPowerScore(fB);
-    var hasDomainA = (fA.skills || []).indexOf('领域展开') >= 0;
-    var hasDomainB = (fB.skills || []).indexOf('领域展开') >= 0;
-    var hasRctA = (fA.skills || []).indexOf('反转术式') >= 0;
-    var hasRctB = (fB.skills || []).indexOf('反转术式') >= 0;
 
     var logs = [];
     for (var round = 1; round <= 5 && hpA > 0 && hpB > 0; round++) {
-      var bfA = Math.random() < (0.12 + (fA.attrs.ceControl || 4) * 0.02);
-      var bfB = Math.random() < (0.12 + (fB.attrs.ceControl || 4) * 0.02);
-      var domBoostA = hasDomainA && !hasDomainB && round <= 2 ? 1.25 : 1.0;
-      var domBoostB = hasDomainB && !hasDomainA && round <= 2 ? 1.25 : 1.0;
+      var bfA = !mA.zeroCe && Math.random() < (0.12 + ((fA.attrs && fA.attrs.ceControl) || 0) * 0.02);
+      var bfB = !mB.zeroCe && Math.random() < (0.12 + ((fB.attrs && fB.attrs.ceControl) || 0) * 0.02);
+      var domBoostA = mA.hasDomain && !mB.hasAntiDomain && !mB.hasDomain && round <= 2 ? (mB.hasNullify ? 1.12 : 1.24) : 1.0;
+      var domBoostB = mB.hasDomain && !mA.hasAntiDomain && !mA.hasDomain && round <= 2 ? (mA.hasNullify ? 1.12 : 1.24) : 1.0;
+      var mitigateA = mA.hasNullify ? 0.92 : 1.0;
+      var mitigateB = mB.hasNullify ? 0.92 : 1.0;
 
-      var dmgA = Math.round((14 + pA * 0.32 + Math.random() * 14) * domBoostA * (bfA ? 1.6 : 1));
-      var dmgB = Math.round((14 + pB * 0.32 + Math.random() * 14) * domBoostB * (bfB ? 1.6 : 1));
+      var dmgA = Math.round(((14 + pA * 0.32 + mA.extraDmg + Math.random() * 14) * mA.ampMult * domBoostA * (bfA ? 1.55 : 1)) * mitigateB);
+      var dmgB = Math.round(((14 + pB * 0.32 + mB.extraDmg + Math.random() * 14) * mB.ampMult * domBoostB * (bfB ? 1.55 : 1)) * mitigateA);
       hpB = Math.max(0, hpB - dmgA);
       hpA = Math.max(0, hpA - dmgB);
 
       var rctTxt = '';
-      if (hasRctA && hpA > 0 && hpA < 85) { hpA += 12; rctTxt += fA.name + '反转回复+12；'; }
-      if (hasRctB && hpB > 0 && hpB < 85) { hpB += 12; rctTxt += fB.name + '反转回复+12；'; }
+      if (mA.hasHeal && hpA > 0 && hpA < 85) { hpA += 12; rctTxt += fA.name + mA.healLabel + '；'; }
+      if (mB.hasHeal && hpB > 0 && hpB < 85) { hpB += 12; rctTxt += fB.name + mB.healLabel + '；'; }
 
       logs.push('第' + round + '回合：' + fA.name + '【' + fA.technique + '】造成 ' + dmgA + (bfA ? '(黑闪!)' : '') +
         '｜' + fB.name + '回击 ' + dmgB + (bfB ? '(黑闪!)' : '') + (rctTxt ? '｜' + rctTxt : '') +
@@ -2421,24 +2769,32 @@
     var char = state.char;
     initExtensionFields(char);
     var isTrueForm = slice.id === 'higuruma_squad';
-    if (slice.startWithGojo) char.flags.gojoJoinedInShinjuku = true;
+    var isPlayerGojo = char.canonCharId === 'gojo';
+    var isPlayerSukuna = char.canonCharId === 'sukuna';
+    var baseTitle = isPlayerSukuna ? ('平行世界·' + slice.enemyTitle + '（宿王镜像）') : slice.enemyTitle;
+    var gojoAlly = !isPlayerGojo && Boolean(slice.startWithGojo);
+    var gojoCanJoin = !isPlayerGojo && Boolean(slice.canGojoJoin);
+    if (gojoAlly) char.flags.gojoJoinedInShinjuku = true;
+    var nativeInfinity = isPlayerGojo ? (4 + (char.flags.hasSecretAlly ? 1 : 0)) : 0;
     state.boss = {
       active: true,
       round: 1,
       maxRounds: 3,
       orderId: slice.id,
       isTrueForm: isTrueForm,
+      forbidMahoSummon: Boolean(slice.forbidMahoSummon),
+      mahoragaDestroyed: Boolean(slice.forbidMahoSummon),
       playerWins: 0,
       enemyWins: 0,
-      enemyTitle: slice.enemyTitle,
+      enemyTitle: baseTitle,
       enemyBaseAtk: slice.baseAtk,
       agitoAlive: Boolean(slice.agito),
       mahoragaAlive: Boolean(slice.mahoraga),
       adaptations: {},
       totalAdaptations: 0,
-      gojoJoined: Boolean(slice.startWithGojo),
-      canGojoJoin: Boolean(slice.canGojoJoin),
-      infinityBlocks: (slice.startWithGojo ? 4 : 0) + (slice.startWithGojo && char.flags.hasSecretAlly ? 1 : 0),
+      gojoJoined: gojoAlly,
+      canGojoJoin: gojoCanJoin,
+      infinityBlocks: gojoAlly ? (4 + (char.flags.hasSecretAlly ? 1 : 0)) : nativeInfinity,
       gojoDomainCount: 0,
       gojoMovesTotal: 0,
       gojoMovesLeft: 0,
@@ -2640,17 +2996,20 @@
       };
     }
     if (step.type === 'boss_player_counter_check') {
-      var barBonus = (char.attrs.barrier || 4) + (char.skills.indexOf('简易领域') >= 0 ? 3 : 0) + (char.skills.indexOf('领域展延') >= 0 ? 3 : 0);
-      var bigPct = clamp(18 + barBonus * 2, 18, 52);
-      var midPct = 36;
+      var barBonus = (char.attrs.barrier || 0) + (char.skills.indexOf('简易领域') >= 0 ? 3 : 0) + (char.skills.indexOf('领域展延') >= 0 ? 3 : 0);
+      var stackN = Math.max(1, Math.min(3, step.count || 1));
+      var bigCut = stackN >= 3 ? 0.68 : stackN === 2 ? 0.56 : 0.38;
+      var midCut = stackN >= 3 ? 0.42 : stackN === 2 ? 0.33 : 0.20;
+      var bigPct = clamp(18 + barBonus * 2 + (stackN - 1) * 6, 18, 62);
+      var midPct = 34;
       return {
-        title: '战斗盘 · 主角抵消敌方招式',
-        subtag: '剩余待抵消 ' + (step.count || 1) + ' 次判定',
-        explain: '削减宿傩本回合累积压制总值！',
+        title: '战斗盘 · 主角抵消敌方招式' + (stackN > 1 ? '（×' + stackN + '叠加）' : ''),
+        subtag: '累积抵消层数 ' + (step.count || 1) + ' 层',
+        explain: '多层反制与咒具无效化将成倍提高对宿傩输出的削减幅度！',
         slices: [
-          { id: 'big', label: '大幅抵消！（敌方总战值 -38%）', pct: 0.38, weight: bigPct, color: '#2ac19a' },
-          { id: 'mid', label: '成功格挡消解（敌方战值 -20%）', pct: 0.20, weight: midPct, color: '#29bce8' },
-          { id: 'none', label: '未能完全化解', pct: 0, weight: Math.max(12, 100 - bigPct - midPct), color: '#ef5d58' }
+          { id: 'big', label: '大幅抵消！（敌方总战值 -' + Math.round(bigCut * 100) + '%）', pct: bigCut, weight: bigPct, color: '#2ac19a' },
+          { id: 'mid', label: '成功格挡消解（敌方战值 -' + Math.round(midCut * 100) + '%）', pct: midCut, weight: midPct, color: '#29bce8' },
+          { id: 'none', label: '未能完全化解', pct: 0, weight: Math.max(8, 100 - bigPct - midPct), color: '#ef5d58' }
         ]
       };
     }
@@ -2696,21 +3055,39 @@
       var hasDecoy = (char.cursedCorpses || []).some(function (c) {
         return !c.decoyUsed && (c.cores || []).some(function (core) { return core.id === 'decoy_remnant'; });
       });
-      var hasRCT = char.skills.indexOf('反转术式') >= 0;
+      var hasMultiCore = Boolean(char.flags && char.flags.corpseMultiCoreSave && !char.flags.corpseMultiCoreUsed);
+      var hasRabbitDecoy = Boolean(char.flags && char.flags.rabbitDecoyAvailable && !char.flags.rabbitDecoyUsed);
+      var hasRCT = hasHealingSkill(char);
+      var zeroCeBoss = isHeavenZeroChar(char);
+      var isCurseBoss = char.identityId === 'curse';
       var bodyR = (char.attrs.bodyResist || 4);
-      var deathW = clamp(12 + stacks * 16 - Math.floor(bodyR * 0.8), 6, 56);
-      var coreW = hasRCT ? 8 : 16;
+      var protectBonus = (char.flags && char.flags.shinjukuProtectBonus) || 0;
+      var vowDanger = (char.flags && char.flags.vowDangerDelta) || 0;
+      var deathW = clamp(12 + stacks * 16 + Math.round(vowDanger * 0.5) - Math.floor(bodyR * 0.8) - Math.round(protectBonus * 0.4), 5, 60);
+      var coreW = zeroCeBoss ? 0 : (hasRCT ? 8 : 16);
+      var decoyTotal = hasDecoy ? 26 : (hasMultiCore || hasRabbitDecoy) ? 22 : 0;
       var slices = [];
       if (hasDecoy) {
-        slices.push({ id: 'decoy', label: '替身残骸核心挡刀！（免疫本轮重创）', weight: 28, color: '#2ac19a' });
+        slices.push({ id: 'decoy', decoyKind: 'corpse', label: '替身残骸核心挡刀！（免疫本轮重创）', weight: decoyTotal, color: '#2ac19a' });
+      } else if (hasMultiCore) {
+        slices.push({ id: 'decoy', decoyKind: 'multiCore', label: '三核互辅切换备用核心！（免疫本轮重创）', weight: decoyTotal, color: '#2ac19a' });
+      } else if (hasRabbitDecoy) {
+        slices.push({ id: 'decoy', decoyKind: 'rabbitDecoy', label: '式神脱兔分身替死！（免疫本轮重创）', weight: decoyTotal, color: '#2ac19a' });
       }
-      slices.push({ id: 'core_rct', label: '抓准了咒力核心！！领悟反转术式', weight: coreW, color: '#29bce8' });
-      slices.push({ id: 'heavy', label: '重伤咬牙再战（重创减益+1层：输出-30%）', weight: Math.max(25, 100 - deathW - coreW - (hasDecoy ? 28 : 0)), color: '#f59e0b' });
+      if (coreW > 0) {
+        slices.push({
+          id: 'core_rct',
+          label: isCurseBoss ? '抓准了咒核极境！！领悟咒力高速再生' : '抓准了咒力核心！！领悟反转术式',
+          weight: coreW,
+          color: '#29bce8'
+        });
+      }
+      slices.push({ id: 'heavy', label: '重伤咬牙再战（重创减益+1层：输出-30%）', weight: Math.max(22, 100 - deathW - coreW - decoyTotal), color: '#f59e0b' });
       slices.push({ id: 'dead', label: '力量耗尽战死退场！', weight: deathW, color: '#ef5d58' });
       return {
         title: '战斗盘 · 伤势 · 主角',
         subtag: stacks > 0 ? '当前重创减益×' + stacks + '（死斗边缘）' : '败北伤势判定',
-        explain: '绝境有概率抓准咒力核心领悟反转术式；重伤叠层会扣 30% 输出并拉高死亡率！',
+        explain: zeroCeBoss ? '天与肉体硬抗创伤，死斗中靠自身体魄熬过重创判定。' : '绝境有概率抓准咒力核心领悟再生；重伤叠层会扣 30% 输出并拉高死亡率！',
         slices: slices
       };
     }
@@ -2750,13 +3127,14 @@
     }
     if (step.type === 'boss_tool_survive') {
       var activeT = (char.tools || []).filter(function (t) { return !t.destroyed; });
-      var t0 = activeT[0] || { shape: '咒具', indestructible: false };
-      var t0Indest = Boolean(t0.indestructible || (t0.effect && t0.effect.indexOf('无坚不摧') >= 0));
+      var fragileT = activeT.find(function (t) { return !(t.indestructible || (t.effect && t.effect.indexOf('无坚不摧') >= 0)); });
+      var tTarget = fragileT || activeT[0] || { shape: '咒具', indestructible: false };
+      var allIndest = !fragileT && activeT.length > 0;
       return {
-        title: '咒具「' + t0.shape + '」· 本轮能否存留',
-        subtag: t0Indest ? '无坚不摧特效护体！' : '高烈度对抗耐久检验',
-        explain: t0Indest ? '持有无坚不摧特性，不会在对拼中折断。' : '高强度碰撞中，普通咒具存在损毁风险。',
-        slices: t0Indest
+        title: '咒具「' + tTarget.shape + '」· 本轮能否存留',
+        subtag: allIndest ? '所持咒具均具无坚不摧特效护体！' : '高烈度对抗耐久检验',
+        explain: allIndest ? '无坚不摧特效不会在对拼中折断。' : '高强度碰撞中，非刚体咒具存在损毁风险。',
+        slices: allIndest
           ? [{ id: true, label: '无坚不摧完好存留！', weight: 100, color: '#2ac19a' }]
           : [{ id: true, label: '存留继续参战', weight: 74, color: '#2ac19a' }, { id: false, label: '本轮战斗损毁', weight: 26, color: '#ef5d58' }]
       };
@@ -2797,7 +3175,8 @@
       state.stepQueue.unshift({ type: 'elder_clan_inherit', clan: slice });
 
     } else if (step.type === 'elder_clan_inherit') {
-      if (slice.id === true && step.clan) {
+      var hasCustomTechId = Boolean(state.customPreset && state.customPreset.techId && state.customPreset.techId !== 'random');
+      if (slice.id === true && step.clan && !hasCustomTechId) {
         char.techniqueId = step.clan.techId;
         char.technique = step.clan.techLabel;
         char.techniquePower = step.clan.power || 14;
@@ -2805,8 +3184,13 @@
         // 若后续队列还排着泛用随机术式轮盘，则替换跳过之
         state.stepQueue = state.stepQueue.filter(function (s) { return s.type !== 'technique'; });
         effectText = '直接觉醒祖传术式「' + char.technique + '」！';
+      } else if (slice.id === true && hasCustomTechId) {
+        applyStatDelta(char, 'ceControl', 1);
+        applyStatDelta(char, 'barrier', 1);
+        char.flags.inheritedClanTech = true;
+        effectText = '保留自选术式「' + char.technique + '」，额外获得本家秘传加持：操控与结界 +1！';
       } else {
-        effectText = '未直接觉醒祖传相传术式，继续交由命运分派术式';
+        effectText = hasCustomTechId ? '保留自选术式「' + char.technique + '」，靠自身手腕踏入高层' : '未直接觉醒祖传相传术式，继续交由命运分派术式';
       }
 
     } else if (step.type === 'shikigami_age') {
@@ -2819,6 +3203,9 @@
       char.shikigamiMechId = slice.id;
       char.shikigamiMechLabel = slice.label.split('（')[0];
       char.shikigamiMechBonus = slice.powerDelta || 0;
+      if (slice.id === 'rabbit_decoy') {
+        char.flags.rabbitDecoyAvailable = true;
+      }
       if (slice.statUp) applyStatDelta(char, slice.statUp, 1);
       if (slice.rewardSkill && char.skills.indexOf(slice.rewardSkill) === -1) {
         char.skills.push(slice.rewardSkill);
@@ -2837,7 +3224,8 @@
 
     } else if (step.type === 'shikigami_modern_bond') {
       char.masterBondLabel = slice.label;
-      effectText = '与现代御主关系确立：' + slice.label;
+      char.flags.masterBondScore = slice.score || 0;
+      effectText = '与现代御主关系确立：' + slice.label + (slice.score ? '（羁绊战力修正 ' + (slice.score > 0 ? '+' : '') + (slice.score * 2) + '）' : '');
 
     } else if (step.type === 'future68_decide') {
       char.currentEraId = 'future68';
@@ -2980,8 +3368,12 @@
       var activeTools = (char.tools || []).filter(function (t) { return !t.destroyed; });
       var corpseAssist = getCorpsePowerBonus(char);
       var debuffMult = Math.pow(0.7, boss.heavyDebuffStacks || 0);
-      var basePow = Math.round(getPowerBreakdown(char) * 0.34 * debuffMult) +
+      var motiveR1Bonus = (boss.round === 1 && char.flags && char.flags.firstRoundBossBonus) ? char.flags.firstRoundBossBonus : 0;
+      var secretAllyBonus = (char.flags && char.flags.hasSecretAlly) ? 5 : 0;
+      var basePow = Math.round(getPowerBreakdown(char, boss.enemyTitle) * 0.34 * debuffMult) +
         (boss.round === 1 && char.flags.scriptLevel > 0 ? 5 : 0) +
+        motiveR1Bonus +
+        secretAllyBonus +
         (boss.squadAllyBonus || 0) +
         Math.round(corpseAssist * 0.45);
       boss.playerRoundPower = Math.max(8, basePow);
@@ -2994,7 +3386,7 @@
       boss.sukunaBfStacks = 0;
       boss.playerDomainActive = false;
       boss.sukunaDomainActive = false;
-      boss.playerCancelPending = 0;
+      boss.playerCancelPending = char.shikigamiMechId === 'adapt_wheel_lite' ? 1 : 0;
       boss.gojoCancelPending = 0;
       boss.gojoUvTriggered = false;
       boss.sukunaLastUvPower = 0;
@@ -3002,7 +3394,8 @@
 
       var toolNote = activeTools.length ? '｜参战咒具：' + activeTools.map(function (t) { return t.shape; }).join('、') : '';
       var corpseNote = char.cursedCorpses.length ? '｜咒骸助战+' + corpseAssist : '';
-      effectText = '第 ' + boss.round + ' 回合我方共 ' + cnt + ' 次出招！基础战值 ' + boss.playerRoundPower + toolNote + corpseNote;
+      var extraNote = (motiveR1Bonus ? '｜动机首轮+' + motiveR1Bonus : '') + (secretAllyBonus ? '｜暗盟支援+' + secretAllyBonus : '');
+      effectText = '第 ' + boss.round + ' 回合我方共 ' + cnt + ' 次出招！基础战值 ' + boss.playerRoundPower + toolNote + corpseNote + extraNote;
       state.stepQueue.unshift({ type: 'boss_player_move', nth: 1, total: cnt });
 
     } else if (step.type === 'boss_player_move') {
@@ -3018,7 +3411,8 @@
         if ((boss.heavyDebuffStacks || 0) > 0) boss.heavyDebuffStacks -= 1;
         char.hpStatus = '健康';
         boss.playerRoundPower += 6;
-        effectText = '反转术式修复创伤！伤势清零、减益层数 -1，且保留完整咏唱×' + Math.pow(2, boss.playerChantStacks || 0);
+        var healName = char.skills.indexOf('咒力高速再生') >= 0 && char.skills.indexOf('反转术式') === -1 ? '咒力高速再生' : '反转术式';
+        effectText = healName + '修复创伤！伤势清零、减益层数 -1，且保留完整咏唱×' + Math.pow(2, boss.playerChantStacks || 0);
       } else if (move.isElbow) {
         var elbowGain = Math.round((move.power || 10) * debuffMult2 * bfMult2);
         boss.playerRoundPower += elbowGain;
@@ -3031,7 +3425,7 @@
         boss.usedMovesThisRound.push(move.label);
         effectText = '展开生得领域！领域强压 +' + domGain + '（不消耗完整咏唱）';
       } else {
-        // 常规有效术式攻击 / 黑闪 / 咒术科学 / 多重启动 / 百兵演武
+        // 常规有效术式攻击 / 黑闪 / 咒具秘技 / 咒术科学 / 多重启动 / 百兵演武
         var rawPower = move.power || 16;
         var chantUsedText = '';
         if ((boss.playerChantStacks || 0) > 0 && move.isTechAttack) {
@@ -3041,16 +3435,22 @@
           boss.playerChantStacks = 0;
         }
 
-        // 游云等咒具伤害增幅
-        var ampTools = (char.tools || []).filter(function (t) { return !t.destroyed && t.effect && t.effect.indexOf('伤害增幅') >= 0; });
+        // 所有在手咒具取最高伤害增幅倍率（如游云/释魂刀）
+        var ampTools = (char.tools || []).filter(function (t) {
+          return !t.destroyed && (t.damageMult > 1 || (t.effect && t.effect.indexOf('伤害增幅') >= 0));
+        });
         if (ampTools.length > 0 && move.isTechAttack) {
-          rawPower = Math.round(rawPower * 1.25);
+          var maxAmp = ampTools.reduce(function (mx, t) { return Math.max(mx, t.damageMult || 1.25); }, 1.25);
+          rawPower = Math.round(rawPower * maxAmp);
         }
 
         if (move.breaksTool) {
-          var intactIdx = (char.tools || []).findIndex(function (t) { return !t.destroyed; });
-          if (intactIdx >= 0) {
-            var curToolRef = char.tools[intactIdx];
+          var fragileIdx = (char.tools || []).findIndex(function (t) {
+            return !t.destroyed && !(t.indestructible || (t.effect && t.effect.indexOf('无坚不摧') >= 0));
+          });
+          var targetIdx = fragileIdx >= 0 ? fragileIdx : (char.tools || []).findIndex(function (t) { return !t.destroyed; });
+          if (targetIdx >= 0) {
+            var curToolRef = char.tools[targetIdx];
             var curIndest = Boolean(curToolRef.indestructible || (curToolRef.effect && curToolRef.effect.indexOf('无坚不摧') >= 0));
             if (curIndest) {
               rawPower += 12;
@@ -3197,7 +3597,8 @@
         var blocked = boss.infinityBlocks > 0 && sm.id !== 'worldSlash' && sm.id !== 'malevolentShrine';
         if (blocked) {
           boss.infinityBlocks -= 1;
-          effectText = '【不可侵】完全弹开宿傩「' + sm.label.split('（')[0] + '」！五条悟不可侵剩 ' + boss.infinityBlocks + ' 次';
+          var infLabel = char.canonCharId === 'gojo' ? '无下限·不可侵' : '五条悟不可侵';
+          effectText = '【不可侵】完全弹开宿傩「' + sm.label.split('（')[0] + '」！' + infLabel + '剩 ' + boss.infinityBlocks + ' 次';
         } else {
           var dmg = sm.dmg || 15;
           var loanText = '';
@@ -3283,19 +3684,28 @@
           { type: 'settlement' }
         ];
       } else if (slice.id === 'decoy') {
-        var decoyCorpse = (char.cursedCorpses || []).find(function (c) {
-          return !c.decoyUsed && (c.cores || []).some(function (cr) { return cr.id === 'decoy_remnant'; });
-        });
-        if (decoyCorpse) decoyCorpse.decoyUsed = true;
-        effectText = '咒骸「' + (decoyCorpse ? decoyCorpse.form : '替身') + '」引爆【替身残骸】，代替本体挡下重伤！';
+        if (slice.decoyKind === 'multiCore') {
+          char.flags.corpseMultiCoreUsed = true;
+          effectText = '三核共鸣切核成功！以备用咒核抵消本轮重创！';
+        } else if (slice.decoyKind === 'rabbitDecoy') {
+          char.flags.rabbitDecoyUsed = true;
+          effectText = '脱兔分身替死脱身！免除本轮重创与死亡代价！';
+        } else {
+          var decoyCorpse = (char.cursedCorpses || []).find(function (c) {
+            return !c.decoyUsed && (c.cores || []).some(function (cr) { return cr.id === 'decoy_remnant'; });
+          });
+          if (decoyCorpse) decoyCorpse.decoyUsed = true;
+          effectText = '咒骸「' + (decoyCorpse ? decoyCorpse.form : '替身') + '」引爆【替身残骸】，代替本体挡下重伤！';
+        }
       } else if (slice.id === 'core_rct') {
-        if (char.skills.indexOf('反转术式') === -1) char.skills.push('反转术式');
+        var bossRctLabel = char.identityId === 'curse' ? '咒力高速再生' : '反转术式';
+        if (!isHeavenZeroChar(char) && char.skills.indexOf(bossRctLabel) === -1) char.skills.push(bossRctLabel);
         char.flags.awakenedRCTInBattle = true;
         boss.heavyDebuffStacks = 0;
         char.hpStatus = '健康';
         applyStatDelta(char, 'ceControl', 1);
         applyStatDelta(char, 'ceEfficiency', 1);
-        effectText = '【抓准了咒力核心！！】绝境觉醒「反转术式」并清空重创减益！操纵与效率 +1';
+        effectText = '【抓准了咒力核心！！】绝境觉醒「' + bossRctLabel + '」并清空重创减益！操纵与效率 +1';
       } else {
         boss.heavyDebuffStacks = (boss.heavyDebuffStacks || 0) + 1;
         char.hpStatus = '重伤';
@@ -3317,10 +3727,11 @@
           effectText = '魔虚罗存活且适应度已达上限 13/13！';
         }
       } else {
+        boss.mahoragaDestroyed = true;
         if (char.statsLog.defeatedEnemies.indexOf('魔虚罗') === -1) {
           char.statsLog.defeatedEnemies.push('魔虚罗');
         }
-        effectText = '成功消灭魔虚罗！本场已将其清除出战局。';
+        effectText = '成功消灭魔虚罗！本场已将其彻底清除出战局。';
       }
 
     } else if (step.type === 'boss_mahoraga_adapt_count') {
@@ -3341,13 +3752,15 @@
 
     } else if (step.type === 'boss_tool_survive') {
       var activeTList = (char.tools || []).filter(function (t) { return !t.destroyed; });
-      var firstT = activeTList[0];
-      var isIndest = firstT && (firstT.indestructible || (firstT.effect && firstT.effect.indexOf('无坚不摧') >= 0));
-      if (!slice.id && firstT && !isIndest) {
-        firstT.destroyed = true;
-        effectText = '高强度交锋中，咒具「' + firstT.shape + '」断裂损毁！';
+      var fragileTool = activeTList.find(function (t) {
+        return !(t.indestructible || (t.effect && t.effect.indexOf('无坚不摧') >= 0));
+      });
+      var targetT = fragileTool || activeTList[0];
+      if (!slice.id && fragileTool) {
+        fragileTool.destroyed = true;
+        effectText = '高强度交锋中，咒具「' + fragileTool.shape + '」断裂损毁！';
       } else {
-        effectText = firstT ? '咒具「' + firstT.shape + '」完好存留，下一轮继续参战！' : '无损存留';
+        effectText = targetT ? '咒具「' + targetT.shape + '」完好存留，下一轮继续参战！' : '无损存留';
       }
 
     } else if (step.type === 'boss_gojo_join') {
@@ -3467,6 +3880,8 @@
         if (slice.indestructible) lastT.indestructible = true;
         if (slice.nullify) lastT.nullify = true;
         if (slice.canCancelMove) lastT.canCancelMove = true;
+        if (slice.extendRange) lastT.extendRange = true;
+        if (slice.dmgStore) lastT.dmgStore = true;
         if (slice.damageMult) lastT.damageMult = slice.damageMult;
         if (slice.extraCe) lastT.extraCe = true;
         if (slice.thunderCast) lastT.thunderCast = true;

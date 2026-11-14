@@ -226,10 +226,18 @@
         { label: 'B（二级常规）', level: 5, weight: 21 },
         { label: 'C（三级 / 常人）', level: 4, weight: 12 },
         { label: 'D（四级薄弱）', level: 2, weight: 5 },
-        { label: 'E-（搞笑级别短板）', level: 0, weight: 3 }
+        { label: 'E-（明显短板）', level: 0, weight: 3 }
       ]
     };
   });
+
+  // 普通人开局未觉醒前的咒力与结界低档抽盘（避免市民出生自带特级咒力量/EX结界）
+  var CIVILIAN_LOW_ATTR_SLICES = [
+    { label: 'E-（零星微弱游离）', level: 0, weight: 30 },
+    { label: 'D（常人微弱水平）', level: 2, weight: 40 },
+    { label: 'C（窗口级浅层感知）', level: 4, weight: 22 },
+    { label: 'B（稀缺潜力胚胎）', level: 5, weight: 8 }
+  ];
 
   var SHIKIGAMI_SUB_BRANCHES = {
     autonomous: {
@@ -840,7 +848,7 @@
       technique: '无下限咒术',
       skills: ['反转术式', '领域展开', '黑闪', '简易领域'],
       tools: [],
-      attrs: { ceTotal: 8, ceControl: 10, ceEfficiency: 12, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 10, versatility: 10, iq: 9, talent: 11 }
+      attrs: { ceTotal: 8, ceControl: 11, ceEfficiency: 12, taijutsu: 11, bodyResist: 10, soulResist: 9, barrier: 11, versatility: 11, iq: 10, talent: 11 }
     },
     {
       name: '诅咒之王 · 两面宿傩（模板）',
@@ -848,8 +856,8 @@
       officialGrade: '特级',
       technique: '御厨子',
       skills: ['完整咏唱', '反转术式', '领域展开', '黑闪', '领域展延'],
-      tools: [{ shape: '降魔杵', effect: '咒力传导增幅（输出+20%）', bonus: 6 }],
-      attrs: { ceTotal: 12, ceControl: 10, ceEfficiency: 10, taijutsu: 10, bodyResist: 10, soulResist: 10, barrier: 11, versatility: 10, iq: 10, talent: 11 }
+      tools: [{ shape: '降魔杵（神武解）', effect: '释放咒术（神武解）', bonus: 8, thunderCast: true }],
+      attrs: { ceTotal: 12, ceControl: 11, ceEfficiency: 11, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 11, versatility: 11, iq: 11, talent: 11 }
     },
     {
       name: '天与暴君 · 伏黑甚尔（模板）',
@@ -858,18 +866,21 @@
       technique: '天与咒缚（零咒力）',
       skills: ['百兵演武'],
       tools: [
-        { shape: '短匕', effect: '强制解除敌方术式特攻（天逆系）', bonus: 8 },
-        { shape: '打刀', effect: '直切灵魂忽略防御（释魂系）', bonus: 8 }
+        { shape: '短匕（天逆鉾）', effect: '无效化术式（黑绳/天逆鉾）', bonus: 8, nullify: true, canCancelMove: true },
+        { shape: '大太刀（释魂刀）', effect: '无坚不摧（绝对刚体绝对锋利）', bonus: 8, indestructible: true, damageMult: 1.25 }
       ],
-      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 12, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 8, talent: 7 }
+      attrs: { ceTotal: 0, ceControl: 0, ceEfficiency: 0, taijutsu: 12, bodyResist: 11, soulResist: 9, barrier: 0, versatility: 8, iq: 9, talent: 8 }
     },
     {
       name: '特级后辈 · 乙骨忧太（模板）',
       identityName: '咒术师',
       officialGrade: '特级',
       technique: '模倣·术式拷贝',
-      skills: ['反转术式', '领域展开', '黑闪'],
-      tools: [{ shape: '打刀', effect: '咒力传导增幅（输出+20%）', bonus: 5 }],
+      skills: ['反转术式', '领域展开', '黑闪', '简易领域'],
+      tools: [
+        { shape: '打刀（注入咒力）', effect: '伤害增幅（游云系）', bonus: 6, damageMult: 1.25 },
+        { shape: '里香戒指', effect: '储存咒力（里香戒指）', bonus: 7, extraCe: true }
+      ],
       attrs: { ceTotal: 11, ceControl: 8, ceEfficiency: 7, taijutsu: 8, bodyResist: 8, soulResist: 8, barrier: 9, versatility: 10, iq: 8, talent: 10 }
     },
     {
@@ -878,8 +889,17 @@
       officialGrade: '特级',
       technique: '幻兽琥珀（电气属性）',
       skills: ['弥虚葛笼'],
-      tools: [{ shape: '手杖', effect: '命中附带诅咒侵蚀与灼伤', bonus: 5 }],
-      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 6, versatility: 7, iq: 7, talent: 8 }
+      tools: [{ shape: '如意棒', effect: '伤害增幅（传导电气咒力）', bonus: 5, damageMult: 1.25 }],
+      attrs: { ceTotal: 8, ceControl: 9, ceEfficiency: 8, taijutsu: 10, bodyResist: 9, soulResist: 8, barrier: 7, versatility: 8, iq: 8, talent: 8 }
+    },
+    {
+      name: '人外魔境 · 虎杖悠仁（模板）',
+      identityName: '咒术师',
+      officialGrade: '特级战力（一级评定）',
+      technique: '赤血操术 / 御厨子（现代式）',
+      skills: ['黑闪', '反转术式', '简易领域', '领域展开'],
+      tools: [{ shape: '刚笼手（咒具臂铠）', effect: '伤害增幅（游云系）', bonus: 6, damageMult: 1.25 }],
+      attrs: { ceTotal: 8, ceControl: 9, ceEfficiency: 8, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 7, versatility: 8, iq: 7, talent: 9 }
     }
   ];
 
@@ -1167,8 +1187,8 @@
     corpse_cores: {
       title: '咒骸 · 咒核结构形态',
       slices: [
-        { label: '完全自律三核互辅体（灵魂抗性+1、身体抗性+1）', weight: 30, up1: 'soulResist', up2: 'bodyResist', note: '如熊猫般的复核共鸣，切核亦不致立刻覆灭' },
-        { label: '战斗特化高输出单核体（体术+1、咒力效率+1）', weight: 42, up1: 'taijutsu', up2: 'ceEfficiency', note: '舍弃冗余核数，集中供能打造钢铁肉搏机器' },
+        { label: '完全自律三核互辅体（灵魂抗性+1、身体抗性+1、切核替死）', weight: 30, up1: 'soulResist', up2: 'bodyResist', multiCore: true, note: '如熊猫般的复核共鸣，可切核抵挡一次重创或致命伤' },
+        { label: '战斗特化高输出单核体（体术+1、咒力效率+1）', weight: 42, up1: 'taijutsu', up2: 'ceEfficiency', note: '舍弃冗余核数，集中供能打造高强度肉搏机器' },
         { label: '常规测试型自律咒骸（稳妥积累，常规生长）', weight: 28, note: '按普通觉醒咒骸路径踏入现代风波' }
       ]
     },
@@ -1184,7 +1204,7 @@
       title: '普通人 · 异变潜力与觉醒机缘',
       slices: [
         { label: '死灭回游前夕突遭术式脑改觉醒！（直抽1门生得术式）', weight: 16, awakenTech: true, note: '命运巨轮猛转，平凡市民瞬间踏入术师厮杀榜！' },
-        { label: '天生极限硬核凡胎（体术+2、身体抗性+1）', weight: 22, up1: 'taijutsu', up2: 'bodyResist', note: '无术式却凭借非人健身与危机直觉死里逃生' },
+        { label: '天生极限硬核凡胎（体术+2、身体抗性+1）', weight: 22, up1: 'taijutsu', up1Double: true, up2: 'bodyResist', note: '无术式却凭借非人健身与危机直觉死里逃生' },
         { label: '微弱灵感转入高专辅助监督（咒力+1、结界+1）', weight: 28, up1: 'ceTotal', up2: 'barrier', note: '学会放「帐」并成为前线术师最信赖的调度后盾' },
         { label: '彻底远离漩涡安稳过一生（稳妥低调生存率↑）', weight: 34, note: '在东京霓虹灯下平安度过所有风暴夜晚' }
       ]
@@ -1200,7 +1220,7 @@
     curseUser_bounty: {
       title: '诅咒师 · 暗杀通缉与地下分工',
       slices: [
-        { label: 'S 级暗网悬赏杀手（体术+1、战力+2）', weight: 28, up1: 'taijutsu', repBonus: -5, note: '专接高风险暗杀单，近战下手干脆' },
+        { label: 'S 级暗网悬赏杀手（体术+1、战力+2）', weight: 28, up1: 'taijutsu', powerBonus: 2, repBonus: -5, note: '专接高风险暗杀单，近战下手干脆，地下威名带来实战加权' },
         { label: '地下咒具/情报中间人（智力+1、效率+1）', weight: 36, up1: 'iq', up2: 'ceEfficiency', note: '深谙地下黑市行情与撤退路线' },
         { label: '雇佣外围清道夫（泛用+1，行事低调）', weight: 36, up1: 'versatility', note: '拿钱办事，尽量不和正道特级硬碰硬' }
       ]
@@ -1262,9 +1282,9 @@
     { id: 'storage_ce', label: '储存咒力（里香戒指）', tier: '特级', bonus: 7, extraCe: true, weight: 10 },
     { id: 'dmg_amp', label: '伤害增幅（游云）', tier: '特级', bonus: 8, damageMult: 1.25, weight: 11 },
     { id: 'flight', label: '飞天（飞天）', tier: '一级', bonus: 5, canCancelMove: true, weight: 11 },
-    { id: 'extend', label: '无限延长（万里锁）', tier: '一级', bonus: 5, weight: 12 },
+    { id: 'extend', label: '无限延长（万里锁）', tier: '一级', bonus: 6, extendRange: true, canCancelMove: true, weight: 12 },
     { id: 'nullify', label: '无效化术式（黑绳/天逆鉾）', tier: '特级', bonus: 9, canCancelMove: true, nullify: true, weight: 9 },
-    { id: 'dmg_store', label: '伤害储存（龙骨）', tier: '一级', bonus: 6, weight: 11 },
+    { id: 'dmg_store', label: '伤害储存（龙骨）', tier: '一级', bonus: 6, dmgStore: true, weight: 11 },
     { id: 'cast_tech', label: '释放咒术（神武解）', tier: '特级', bonus: 8, thunderCast: true, weight: 10 },
     { id: 'unbreakable', label: '无坚不摧（绝对刚体绝对锋利）', tier: '特级', bonus: 9, indestructible: true, weight: 10 },
     { id: 'plain_weapon', label: '纯武器（精钢白板）', tier: '二级', bonus: 3, weight: 16 }
@@ -1382,10 +1402,10 @@
   ];
 
   SHINJUKU_SUKUNA_ORDERS = [
-    { id: 'before_gojo', label: '五条前挑战完整十影宿傩', enemyTitle: '完全体·十影两面宿傩', baseAtk: 42, agito: true, mahoraga: true, startWithGojo: false, canGojoJoin: true, weight: 26 },
-    { id: 'with_gojo', label: '与五条悟共同迎战宿傩', enemyTitle: '全盛·十影两面宿傩', baseAtk: 44, agito: true, mahoraga: true, startWithGojo: true, canGojoJoin: false, weight: 28 },
-    { id: 'after_gojo', label: '五条战后挑战残血十影宿傩', enemyTitle: '残血·十影宿傩（无魔虚罗/颚吐）', baseAtk: 31, agito: false, mahoraga: false, startWithGojo: false, canGojoJoin: false, weight: 26 },
-    { id: 'higuruma_squad', label: '鹿紫云之后与日车宽见、虎杖悠仁、胀相对战一削原身宿傩', enemyTitle: '四臂完全体·原身宿傩（围攻篇）', baseAtk: 36, agito: false, mahoraga: false, startWithGojo: false, canGojoJoin: false, squadAlly: true, weight: 20 }
+    { id: 'before_gojo', label: '五条前挑战完整十影宿傩', enemyTitle: '完全体·十影两面宿傩', baseAtk: 40, agito: true, mahoraga: true, startWithGojo: false, canGojoJoin: true, weight: 26 },
+    { id: 'with_gojo', label: '与五条悟共同迎战宿傩', enemyTitle: '全盛·十影两面宿傩', baseAtk: 47, agito: true, mahoraga: true, startWithGojo: true, canGojoJoin: false, weight: 28 },
+    { id: 'after_gojo', label: '五条战后挑战残血十影宿傩', enemyTitle: '残血·十影宿傩（无魔虚罗/颚吐）', baseAtk: 28, agito: false, mahoraga: false, forbidMahoSummon: true, startWithGojo: false, canGojoJoin: false, weight: 26 },
+    { id: 'higuruma_squad', label: '鹿紫云之后与日车宽见、虎杖悠仁、胀相对战一削原身宿傩', enemyTitle: '四臂完全体·原身宿傩（围攻篇）', baseAtk: 38, agito: false, mahoraga: false, forbidMahoSummon: true, startWithGojo: false, canGojoJoin: false, squadAlly: true, weight: 20 }
   ];
 
   var BOSS_COUNT_SLICES = {
@@ -1658,6 +1678,7 @@
     SEANCE_MATERIAL_POOL: SEANCE_MATERIAL_POOL,
     SEANCE_SUMMON_RESULTS: SEANCE_SUMMON_RESULTS,
     ATTRIBUTE_WHEELS: ATTRIBUTE_WHEELS,
+    CIVILIAN_LOW_ATTR_SLICES: CIVILIAN_LOW_ATTR_SLICES,
     SHIKIGAMI_SUB_BRANCHES: SHIKIGAMI_SUB_BRANCHES,
     GRADE_WHEELS: GRADE_WHEELS,
     ERA_EVENTS: ERA_EVENTS,
