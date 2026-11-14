@@ -514,6 +514,9 @@ button:disabled {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 #wheelCanvas {

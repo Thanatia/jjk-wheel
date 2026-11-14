@@ -189,13 +189,26 @@
       return layoutSlices.length - 1;
     }
 
-    function finalizeActiveSpin() {
+    function computeRotationAt(now) {
+      if (!activeSpinState) return currentRotation;
+      var elapsed = Math.max(0, now - activeSpinState.startTime);
+      var t = Math.min(1, elapsed / activeSpinState.durationMs);
+      return activeSpinState.startRot + activeSpinState.totalDelta * easeOutQuart(t);
+    }
+
+    function finalizeActiveSpin(freezeCurrent) {
       if (!activeSpinState) return;
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
         rafId = null;
       }
-      currentRotation = activeSpinState.endRot;
+      if (freezeCurrent) {
+        if (!activeSpinState.paintedOnce) {
+          currentRotation = computeRotationAt(Math.max(performance.now(), activeSpinState.startTime + 14));
+        }
+      } else {
+        currentRotation = activeSpinState.endRot;
+      }
       var landedAll = getAllSlicesAtRotation(currentRotation);
       var primary = landedAll[0] || activeSpinState.targetSlice;
       winnerIndices = landedAll.map(function (s) { return s.index; });
@@ -238,8 +251,13 @@
       var lastReportedLabel = '';
 
       activeSpinState = {
+        startRot: startRot,
+        totalDelta: totalDelta,
+        durationMs: durationMs,
+        startTime: startTime,
         endRot: endRot,
-        targetSlice: slice
+        targetSlice: slice,
+        paintedOnce: false
       };
 
       function frame(now) {
@@ -248,6 +266,7 @@
         var t = Math.min(1, elapsed / durationMs);
         var eased = easeOutQuart(t);
         currentRotation = startRot + totalDelta * eased;
+        if (activeSpinState) activeSpinState.paintedOnce = true;
 
         var curSlice = getSliceAtRotation(currentRotation);
         if (curSlice && curSlice.label !== lastReportedLabel) {
@@ -262,7 +281,7 @@
         if (t < 1) {
           rafId = requestAnimationFrame(frame);
         } else {
-          finalizeActiveSpin();
+          finalizeActiveSpin(false);
         }
       }
 
@@ -272,7 +291,7 @@
 
     function snapToFinish() {
       if (!spinning || !activeSpinState) return false;
-      finalizeActiveSpin();
+      finalizeActiveSpin(true);
       return true;
     }
 
@@ -297,6 +316,8 @@
       snapToFinish: snapToFinish,
       cancel: cancel,
       isSpinning: isSpinning,
+      getCurrentRotation: function () { return currentRotation; },
+      getSliceAtPointer: function () { return getSliceAtRotation(currentRotation); },
       getSlices: function () { return layoutSlices; }
     };
   }

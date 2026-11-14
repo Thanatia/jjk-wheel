@@ -1169,11 +1169,35 @@
       if (paused) startNewRunWithState(paused);
     });
 
-    $('btnMainAction').addEventListener('click', triggerMainAction);
+    var stopClickGuard = { active: false, expiresAt: 0 };
+    function consumeStopClickGuard() {
+      if (!stopClickGuard.active) return false;
+      stopClickGuard.active = false;
+      return performance.now() <= stopClickGuard.expiresAt;
+    }
+    function handleImmediateStopPointerDown(e) {
+      if (!wheelCtrl.isSpinning()) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      stopClickGuard.active = true;
+      stopClickGuard.expiresAt = performance.now() + 450;
+      wheelCtrl.snapToFinish();
+    }
+
+    $('btnMainAction').addEventListener('pointerdown', handleImmediateStopPointerDown);
+    $('btnMainAction').addEventListener('click', function () {
+      if (!wheelCtrl.isSpinning() && consumeStopClickGuard()) return;
+      triggerMainAction();
+    });
+
+    $('wheelTapZone').addEventListener('pointerdown', handleImmediateStopPointerDown);
     $('wheelTapZone').addEventListener('click', function () {
       if (wheelCtrl.isSpinning()) {
         wheelCtrl.snapToFinish();
-      } else if (appState.run && appState.run.currentView === 'wheel') {
+        return;
+      }
+      if (consumeStopClickGuard()) return;
+      if (appState.run && appState.run.currentView === 'wheel') {
         triggerMainAction();
       }
     });
@@ -1553,6 +1577,7 @@
 
     document.addEventListener('keydown', function (e) {
       if (e.code === 'Space') {
+        if (e.repeat) return;
         var tag = document.activeElement && document.activeElement.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         if (anyModalOpen()) return;
