@@ -566,6 +566,9 @@
     if (char.canonDivergenceLabel) quickPills.push('改命：' + char.canonDivergenceLabel.split('（')[0]);
     if (char.flags && char.flags.activeVowLabel) quickPills.push('束缚：' + char.flags.activeVowLabel.split('：')[0]);
     if (char.shikigamiDesc) quickPills.push('式神：' + char.shikigamiDesc);
+    if (char.shikigamiAgeLabel) quickPills.push('现存年龄：' + char.shikigamiAgeLabel);
+    if (char.shikigamiMechLabel) quickPills.push('式神机制：' + char.shikigamiMechLabel);
+    if (char.partnerLabel) quickPills.push('伴侣：' + char.partnerLabel);
     $('charQuickPills').innerHTML = quickPills.map(function (t) {
       return '<span class="dark-mini-pill">' + escapeHtml(t) + '</span>';
     }).join('');
@@ -620,10 +623,19 @@
     openModal('charModal');
   }
 
-  /* ==================== 天命自定配置器 ==================== */
+  /* ==================== 自定义开局配置器 ==================== */
+  var CUSTOM_SELECT_IDS = [
+    'custIdentity', 'custCanonChar', 'custEra', 'custBirthplace', 'custGender',
+    'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk',
+    'custExtraSkill', 'custToolCount', 'custToolEffect',
+    'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custShinjukuOrder'
+  ];
+
   function populateCustomModalOptions() {
     function fillSelect(selId, opts) {
-      $(selId).innerHTML = opts.map(function (o) {
+      var el = $(selId);
+      if (!el) return;
+      el.innerHTML = opts.map(function (o) {
         return '<option value="' + escapeHtml(o.value) + '" data-cost="' + (o.cost || 0) + '">' + escapeHtml(o.label) + '</option>';
       }).join('');
     }
@@ -644,6 +656,14 @@
       })
     ));
 
+    fillSelect('custBirthplace', [{ value: 'random', label: '🎲 随机出生地点 (0 点)', cost: 0 }].concat(
+      (DATA.BIRTHPLACE_SLICES || []).map(function (b) { return { value: b.id, label: b.label, cost: 0 }; })
+    ));
+
+    fillSelect('custGender', [{ value: 'random', label: '🎲 随机性别 (0 点)', cost: 0 }].concat(
+      (DATA.GENDER_WHEEL || []).map(function (g) { return { value: g.id, label: g.label, cost: 0 }; })
+    ));
+
     fillSelect('custTech', [{ value: 'random', label: '🎲 随机术式 (0 点)', cost: 0 }].concat(
       DATA.TECHNIQUES_ALL.map(function (t) { return { value: t.id, label: t.label + ' (' + (t.cost || 2) + ' 点)', cost: t.cost || 2 }; })
     ));
@@ -654,23 +674,102 @@
 
     fillSelect('custTalent', [
       { value: 'random', label: '🎲 随机天赋 (0 点)', cost: 0 },
-      { value: '7', label: 'S · 潜力惊人 (2 点)', cost: 2 },
-      { value: '9', label: 'SSS · 天纵奇才 (5 点)', cost: 5 },
-      { value: '10', label: 'EX · 百年奇观 (8 点)', cost: 8 }
+      { value: '7', label: 'S · 优秀天赋 (2 点)', cost: 2 },
+      { value: '9', label: 'SSS · 罕见资质 (5 点)', cost: 5 },
+      { value: '10', label: 'EX · 特级资质 (8 点)', cost: 8 }
     ]);
+
+    fillSelect('custExtraSkill', [{ value: 'random', label: '🎲 不额外指定 (0 点)', cost: 0 }].concat(
+      (DATA.HIGH_TECHNIQUES || []).map(function (ht) {
+        return { value: ht.id, label: ht.label + ' (2 点)', cost: 2 };
+      })
+    ));
+
+    fillSelect('custToolCount', [
+      { value: 'random', label: '🎲 按转盘抽取 (0 点)', cost: 0 },
+      { value: '0', label: '0 件（纯肉身/术式） (0 点)', cost: 0 },
+      { value: '1', label: '1 件咒具 (1 点)', cost: 1 },
+      { value: '2', label: '2 件咒具 (2 点)', cost: 2 },
+      { value: '3', label: '3 件咒具 (3 点)', cost: 3 }
+    ]);
+
+    fillSelect('custToolEffect', [{ value: 'random', label: '🎲 随机咒具特效 (0 点)', cost: 0 }].concat(
+      (DATA.TOOL_EFFECTS || []).map(function (te) {
+        var c = te.tier === '特级' ? 2 : 1;
+        return { value: te.id, label: te.label + ' (' + c + ' 点)', cost: c };
+      })
+    ));
+
+    fillSelect('custLooks', [{ value: 'random', label: '🎲 随机外貌 (0 点)', cost: 0 }].concat(
+      (DATA.LOOKS_WHEEL || []).map(function (l) { return { value: String(l.level), label: l.label, cost: 0 }; })
+    ));
+
+    fillSelect('custMorality', [{ value: 'random', label: '🎲 随机三观 (0 点)', cost: 0 }].concat(
+      (DATA.MORALITY_WHEEL || []).map(function (m) { return { value: String(m.level), label: m.label, cost: 0 }; })
+    ));
+
+    fillSelect('custAggro', [{ value: 'random', label: '🎲 随机好战度 (0 点)', cost: 0 }].concat(
+      (DATA.AGGRO_WHEEL || []).map(function (a) { return { value: String(a.level), label: a.label, cost: 0 }; })
+    ));
+
+    fillSelect('custFaction', [
+      { value: 'random', label: '🎲 按转盘抽取 (0 点)', cost: 0 },
+      { value: 'good', label: '高专 / 正道阵营 (0 点)', cost: 0 },
+      { value: 'evil', label: '诅咒 / 暗面阵营 (0 点)', cost: 0 },
+      { value: 'neutral', label: '中立游走阵营 (0 点)', cost: 0 }
+    ]);
+
+    fillSelect('custShinjukuOrder', [{ value: 'random', label: '🎲 届时转盘决定 (0 点)', cost: 0 }].concat(
+      (DATA.SHINJUKU_SUKUNA_ORDERS || []).map(function (o) {
+        return { value: o.id, label: o.label + ' (1 点)', cost: 1 };
+      })
+    ));
+
+    var statGrid = $('custStatOverridesGrid');
+    if (statGrid) {
+      statGrid.innerHTML = DATA.ATTRIBUTE_DEFS.map(function (def) {
+        return '<label class="custom-field">' +
+          '<span>' + escapeHtml(def.name) + '</span>' +
+          '<select id="custStat_' + escapeHtml(def.key) + '" class="select-input cust-stat-override" data-statkey="' + escapeHtml(def.key) + '">' +
+          '<option value="random" data-cost="0">🎲 随机 (0)</option>' +
+          '<option value="0" data-cost="1">F · 0 (1点)</option>' +
+          '<option value="2" data-cost="1">D · 2 (1点)</option>' +
+          '<option value="4" data-cost="1">C · 4 (1点)</option>' +
+          '<option value="6" data-cost="1">A · 6 (1点)</option>' +
+          '<option value="8" data-cost="1">SS · 8 (1点)</option>' +
+          '<option value="10" data-cost="1">EX · 10 (1点)</option>' +
+          '</select></label>';
+      }).join('');
+    }
     syncCustomFieldVisibility();
   }
 
   function syncCustomFieldVisibility() {
-    var isCanon = $('custIdentity').value === 'canon';
+    var idVal = $('custIdentity').value;
+    var isCanon = idVal === 'canon';
+    var isShikigami = idVal === 'shikigami';
+    var tcVal = $('custToolCount') ? $('custToolCount').value : 'random';
+    var hasCustomTools = tcVal === '1' || tcVal === '2' || tcVal === '3';
+
     $('custCanonWrap').classList.toggle('is-hidden', !isCanon);
     $('custTechWrap').classList.toggle('is-hidden', isCanon);
     $('custGradeWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custGenderWrap')) $('custGenderWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custLooksWrap')) $('custLooksWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custMoralityWrap')) $('custMoralityWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custAggroWrap')) $('custAggroWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custFactionWrap')) $('custFactionWrap').classList.toggle('is-hidden', isCanon || isShikigami);
+    if ($('custToolCountWrap')) $('custToolCountWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custToolEffectWrap')) $('custToolEffectWrap').classList.toggle('is-hidden', isCanon || !hasCustomTools);
+
     if (isCanon) {
-      $('custTech').value = 'random';
-      $('custGrade').value = 'random';
+      ['custTech', 'custGrade', 'custGender', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custToolCount', 'custToolEffect'].forEach(function (id) {
+        if ($(id)) $(id).value = 'random';
+      });
     } else {
       $('custCanonChar').value = 'random';
+      if (isShikigami && $('custFaction')) $('custFaction').value = 'random';
+      if (!hasCustomTools && $('custToolEffect')) $('custToolEffect').value = 'random';
     }
   }
 
@@ -678,11 +777,16 @@
     syncCustomFieldVisibility();
     var isCanon = $('custIdentity').value === 'canon';
     var ids = isCanon
-      ? ['custIdentity', 'custCanonChar', 'custEra', 'custTalent', 'custAttrTier', 'custPerk']
-      : ['custIdentity', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'];
+      ? ['custIdentity', 'custCanonChar', 'custEra', 'custBirthplace', 'custTalent', 'custAttrTier', 'custPerk', 'custExtraSkill', 'custShinjukuOrder']
+      : ['custIdentity', 'custEra', 'custBirthplace', 'custGender', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk', 'custExtraSkill', 'custToolCount', 'custToolEffect', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custShinjukuOrder'];
     var total = 0;
     ids.forEach(function (id) {
       var sel = $(id);
+      if (!sel || sel.selectedIndex < 0) return;
+      var opt = sel.options[sel.selectedIndex];
+      if (opt) total += parseInt(opt.getAttribute('data-cost') || '0', 10);
+    });
+    document.querySelectorAll('.cust-stat-override').forEach(function (sel) {
       var opt = sel.options[sel.selectedIndex];
       if (opt) total += parseInt(opt.getAttribute('data-cost') || '0', 10);
     });
@@ -691,8 +795,40 @@
     $('btnStartCustomRun').disabled = total > appState.fatePoints;
     $('btnStartCustomRun').textContent = total > appState.fatePoints
       ? '命运点不足（需 ' + total + ' 点）'
-      : '消耗 ' + total + ' 命运点并开启天命人生';
+      : '消耗 ' + total + ' 命运点并开启人生';
     return total;
+  }
+
+  function resetAllCustomFields() {
+    CUSTOM_SELECT_IDS.forEach(function (id) { if ($(id)) $(id).value = 'random'; });
+    document.querySelectorAll('.cust-stat-override').forEach(function (sel) { sel.value = 'random'; });
+  }
+
+  function applyCustomPresetTemplate(presetName) {
+    resetAllCustomFields();
+    if (presetName === 'gojo_tpl') {
+      $('custIdentity').value = 'sorcerer';
+      $('custEra').value = 'canonStart';
+      $('custTech').value = 'limitless';
+      $('custGrade').value = '特级';
+      $('custTalent').value = '9';
+      $('custPerk').value = 'both';
+    } else if (presetName === 'toji_tpl') {
+      $('custIdentity').value = 'sorcerer';
+      $('custTech').value = 'heavenZero';
+      $('custGrade').value = '特级';
+      $('custToolCount').value = '2';
+      $('custToolEffect').value = 'nullify';
+      $('custTalent').value = '7';
+    } else if (presetName === 'shinjuku_test') {
+      $('custIdentity').value = 'sorcerer';
+      $('custEra').value = 'shinjuku';
+      $('custTech').value = 'starRage';
+      $('custGrade').value = '特级';
+      $('custPerk').value = 'rct';
+      $('custShinjukuOrder').value = 'with_gojo';
+    }
+    calcCustomCost();
   }
 
   function openCustomModal() {
@@ -842,7 +978,7 @@
       return;
     }
 
-    listEl.innerHTML = (isLoserBoard ? '<div class="odds-explain" style="margin-bottom:6px;">😈 区区榜按结算总分从低到高排序：专收“黑闪绝缘体/极端加点/被弱者击溃”传奇搞笑档！</div>' : '') +
+    listEl.innerHTML = (isLoserBoard ? '<div class="odds-explain" style="margin-bottom:6px;">😈 区区榜按结算总分从低到高排序：专收“黑闪绝缘体/极端加点/被弱者击溃”搞笑存档！</div>' : '') +
       filtered.map(function (wrap, rank) {
         var c = wrap.card;
         return '<div class="saved-card-item">' +
@@ -1057,6 +1193,14 @@
 
     $('btnStartNotice').addEventListener('click', function () { openModal('noticeModal'); });
     $('btnMenuNotice').addEventListener('click', function () { closeModal('menuModal'); openModal('noticeModal'); });
+    if ($('btnMenuChangelog')) {
+      $('btnMenuChangelog').addEventListener('click', function () {
+        closeModal('menuModal');
+        openModal('noticeModal');
+        var anchor = $('noticeChangelogAnchor');
+        if (anchor && anchor.scrollIntoView) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
     $('btnCloseNoticeModal').addEventListener('click', function () { closeModal('noticeModal'); });
 
     $('btnStartCards').addEventListener('click', function () { openCardsModalOnTab('dream'); });
@@ -1114,17 +1258,32 @@
     $('btnHubCustom').addEventListener('click', function () { closeModal('menuModal'); openCustomModal(); });
     $('btnCloseCustomModal').addEventListener('click', function () { closeModal('customModal'); });
 
-    // 天命自定联动算点与开局
-    ['custIdentity', 'custCanonChar', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'].forEach(function (id) {
-      $(id).addEventListener('change', calcCustomCost);
+    // 自定义开局联动算点、一键预设与开局
+    CUSTOM_SELECT_IDS.forEach(function (id) {
+      if ($(id)) $(id).addEventListener('change', calcCustomCost);
     });
+    if ($('custStatOverridesGrid')) {
+      $('custStatOverridesGrid').addEventListener('change', calcCustomCost);
+    }
+    if ($('customPresetRow')) {
+      $('customPresetRow').addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-preset]');
+        if (!chip) return;
+        applyCustomPresetTemplate(chip.getAttribute('data-preset'));
+      });
+    }
     $('btnResetCustomForm').addEventListener('click', function () {
-      ['custIdentity', 'custCanonChar', 'custEra', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk'].forEach(function (id) { $(id).value = 'random'; });
+      resetAllCustomFields();
       calcCustomCost();
     });
     $('btnStartCustomRun').addEventListener('click', function () {
       var cost = calcCustomCost();
       if (cost > appState.fatePoints) return;
+      var statOverrides = {};
+      document.querySelectorAll('.cust-stat-override').forEach(function (sel) {
+        var k = sel.getAttribute('data-statkey');
+        if (k && sel.value && sel.value !== 'random') statOverrides[k] = sel.value;
+      });
       appState.fatePoints -= cost;
       saveFate();
       closeModal('customModal');
@@ -1132,11 +1291,22 @@
         identityId: $('custIdentity').value,
         canonCharId: $('custCanonChar').value,
         eraId: $('custEra').value,
+        birthplaceId: $('custBirthplace') ? $('custBirthplace').value : 'random',
+        genderId: $('custGender') ? $('custGender').value : 'random',
         techId: $('custTech').value,
         gradeId: $('custGrade').value,
         talentLv: $('custTalent').value,
         attrTier: $('custAttrTier').value,
-        perk: $('custPerk').value
+        perk: $('custPerk').value,
+        extraHighTechId: $('custExtraSkill') ? $('custExtraSkill').value : 'random',
+        toolCount: $('custToolCount') ? $('custToolCount').value : 'random',
+        toolEffectId: $('custToolEffect') ? $('custToolEffect').value : 'random',
+        looksLv: $('custLooks') ? $('custLooks').value : 'random',
+        moralityLv: $('custMorality') ? $('custMorality').value : 'random',
+        aggroLv: $('custAggro') ? $('custAggro').value : 'random',
+        factionChoice: $('custFaction') ? $('custFaction').value : 'random',
+        shinjukuOrderId: $('custShinjukuOrder') ? $('custShinjukuOrder').value : 'random',
+        statOverrides: statOverrides
       }));
     });
 

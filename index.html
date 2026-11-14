@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>咒术转盘 Ω · 穿越人生（静音纯净版）</title>
+  <title>咒术转盘 Ω · 穿越人生</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -23,7 +23,7 @@
             <h1>咒术转盘</h1>
             <span class="title-omega">Ω</span>
           </div>
-          <p class="start-subtitle">静音纯净版（无语音播报）· 含 10 维属性 / 魂穿 22 位原著角色 / 宿傩决战 / 束缚 / 竞技场</p>
+          <p class="start-subtitle">无语音版 · 含 10 维属性 / 魂穿 22 位原著角色 / 新宿宿傩决战 / 束缚 / 竞技场</p>
 
           <div class="split-art-card" aria-hidden="true">
             <div class="split-half split-gojo">
@@ -51,7 +51,7 @@
           <div class="start-secondary-row">
             <button type="button" class="text-link-btn" id="btnStartCards">🃏 图鉴榜 (<span id="startCardCount">0</span>)</button>
             <span class="dot-sep">·</span>
-            <button type="button" class="text-link-btn" id="btnStartTraits">🏅 成就 (<span id="startTraitCount">0/26</span>)</button>
+            <button type="button" class="text-link-btn" id="btnStartTraits">🏅 成就 (<span id="startTraitCount">0/38</span>)</button>
             <span class="dot-sep">·</span>
             <button type="button" class="text-link-btn" id="btnStartArena">⚔ 竞技场</button>
             <span class="dot-sep">·</span>
@@ -216,7 +216,7 @@
     </div>
   </div>
 
-  <!-- ==================== Ω 全能菜单 & 设置弹窗 ==================== -->
+  <!-- ==================== Ω 功能菜单 & 设置弹窗 ==================== -->
   <div class="modal-backdrop is-hidden" id="menuModal" role="dialog" aria-modal="true" aria-labelledby="menuModalTitle">
     <div class="light-modal-panel">
       <div class="light-modal-header">
@@ -243,7 +243,7 @@
           </button>
           <button type="button" class="hub-card-btn" id="btnHubCustom">
             <span class="hub-emoji">✨</span>
-            <strong>天命自定开局</strong>
+            <strong>天命自定</strong>
             <span>花命运点自选词条</span>
           </button>
         </div>
@@ -257,10 +257,10 @@
           </div>
           <input type="range" id="spinDurationRange" min="0.2" max="8.0" step="0.1" value="1.5" class="range-input" />
           <div class="preset-speed-row" id="speedPresetRow">
-            <button type="button" class="preset-chip" data-speed="0.2">0.2s 极速</button>
-            <button type="button" class="preset-chip" data-speed="0.8">0.8s 流畅</button>
+            <button type="button" class="preset-chip" data-speed="0.2">0.2s 快转</button>
+            <button type="button" class="preset-chip" data-speed="0.8">0.8s 较快</button>
             <button type="button" class="preset-chip" data-speed="1.5">1.5s 默认</button>
-            <button type="button" class="preset-chip" data-speed="3.0">3.0s 悬念</button>
+            <button type="button" class="preset-chip" data-speed="3.0">3.0s 较慢</button>
             <button type="button" class="preset-chip" data-speed="5.0">5.0s 慢放</button>
           </div>
         </div>
@@ -297,8 +297,8 @@
         <div class="setting-block">
           <div class="setting-row-between">
             <div>
-              <div class="setting-label">静音纯净模式（无语音播报）</div>
-              <div class="setting-desc">全程完全静音无朗读、无播报卡顿，纯靠界面节奏推进</div>
+              <div class="setting-label">无语音播报模式</div>
+              <div class="setting-desc">无朗读阻塞与音声干扰，按点击或自动间隔推进</div>
             </div>
             <span class="mute-badge">🔇 已静音</span>
           </div>
@@ -312,7 +312,7 @@
               <span>全随机轮盘 · 每10分奖1命运点</span>
             </button>
             <button type="button" class="mode-choice" data-runtype="custom">
-              <strong>天命自定（沙盒）</strong>
+              <strong>天命自定（自选）</strong>
               <span>消耗命运点自选开局 · 不产命运点</span>
             </button>
           </div>
@@ -320,6 +320,7 @@
 
         <div class="menu-action-grid">
           <button type="button" class="menu-btn" id="btnMenuNotice">📖 QA与版本说明</button>
+          <button type="button" class="menu-btn" id="btnMenuChangelog">📝 更新日志与鸣谢</button>
           <button type="button" class="menu-btn" id="btnMenuBackStart">🏠 返回封面</button>
           <button type="button" class="menu-btn menu-btn-danger" id="btnMenuResetAll">🗑 清空本地存档</button>
         </div>
@@ -327,11 +328,11 @@
     </div>
   </div>
 
-  <!-- ==================== 天命自定·开局配置面板 ==================== -->
+  <!-- ==================== 天命自定配置面板 ==================== -->
   <div class="modal-backdrop is-hidden" id="customModal" role="dialog" aria-modal="true" aria-labelledby="customModalTitle">
     <div class="light-modal-panel">
       <div class="light-modal-header">
-        <h2 id="customModalTitle">✨ 天命自定 · 预设开局</h2>
+        <h2 id="customModalTitle">✨ 天命自定 · 预设面板</h2>
         <button type="button" class="light-close-btn" id="btnCloseCustomModal" aria-label="关闭天命自定">✕</button>
       </div>
       <div class="light-modal-body">
@@ -339,8 +340,16 @@
           <span>当前命运点：<strong id="customFateRemain">30</strong></span>
           <span>本次消耗：<strong id="customFateCost">0</strong> 点</span>
         </div>
-        <p class="odds-explain">选为「🎲 随机」不消耗命运点；锁定强力出身/术式/天赋或新宿直通车需消耗对应点数（天命自定局不产出新命运点，成绩入天命自定榜）。</p>
+        <p class="odds-explain">选为「🎲 随机」不消耗命运点；锁定身份、术式、天赋、咒具或直通新宿需消耗对应点数（天命自定局不产出新命运点）。</p>
 
+        <div class="custom-presets-row" id="customPresetRow">
+          <button type="button" class="preset-chip" data-preset="random">🎲 全部随机</button>
+          <button type="button" class="preset-chip" data-preset="gojo_tpl">👁️ 六眼路线</button>
+          <button type="button" class="preset-chip" data-preset="toji_tpl">⚔️ 零咒力体术</button>
+          <button type="button" class="preset-chip" data-preset="shinjuku_test">🔥 新宿决战测试</button>
+        </div>
+
+        <div class="custom-section-title">基础身份与时代</div>
         <div class="custom-form-grid">
           <label class="custom-field">
             <span>初始身份</span>
@@ -351,9 +360,21 @@
             <select id="custCanonChar" class="select-input"></select>
           </label>
           <label class="custom-field">
-            <span>活跃/出生时期（魂穿选随机会走原主本命时期）</span>
+            <span>活跃/出生时期（魂穿选随机会走原主时期）</span>
             <select id="custEra" class="select-input"></select>
           </label>
+          <label class="custom-field">
+            <span>出生地点（0点）</span>
+            <select id="custBirthplace" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custGenderWrap">
+            <span>性别设定（0点）</span>
+            <select id="custGender" class="select-input"></select>
+          </label>
+        </div>
+
+        <div class="custom-section-title">术式、技巧与武装</div>
+        <div class="custom-form-grid">
           <label class="custom-field" id="custTechWrap">
             <span>生得术式</span>
             <select id="custTech" class="select-input"></select>
@@ -371,12 +392,12 @@
             <select id="custAttrTier" class="select-input">
               <option value="random" data-cost="0">🎲 随缘掷点 / 原著默认 (0 点)</option>
               <option value="b" data-cost="2">🔹 全维 B级及以上保底 (2 点)</option>
-              <option value="s" data-cost="5">🔥 全维 S级特级准线保底 (5 点)</option>
-              <option value="ex" data-cost="10">👑 全维 EX破格神域保底 (10 点)</option>
+              <option value="s" data-cost="5">🔥 全维 S级准线保底 (5 点)</option>
+              <option value="ex" data-cost="10">👑 全维 EX保底 (10 点)</option>
             </select>
           </label>
           <label class="custom-field">
-            <span>自带核心底牌</span>
+            <span>自带核心技巧</span>
             <select id="custPerk" class="select-input">
               <option value="random" data-cost="0">🎲 正常随机抽取 (0 点)</option>
               <option value="rct" data-cost="3">💚 必带「反转术式」 (3 点)</option>
@@ -384,12 +405,52 @@
               <option value="both" data-cost="8">👑 反转+领域+黑闪全套 (8 点)</option>
             </select>
           </label>
+          <label class="custom-field">
+            <span>额外指定高阶技巧</span>
+            <select id="custExtraSkill" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custToolCountWrap">
+            <span>开局携带咒具数量</span>
+            <select id="custToolCount" class="select-input"></select>
+          </label>
+          <label class="custom-field is-hidden" id="custToolEffectWrap">
+            <span>首件咒具特效锁定</span>
+            <select id="custToolEffect" class="select-input"></select>
+          </label>
         </div>
 
-        <div class="save-actions" style="margin-top: 14px;">
-          <button type="button" class="btn-primary-small" id="btnStartCustomRun">消耗点数并开启天命人生</button>
-          <button type="button" class="btn-ghost-small" id="btnResetCustomForm">全部设回随机</button>
+        <div class="custom-section-title">外貌、阵营与新宿设定</div>
+        <div class="custom-form-grid">
+          <label class="custom-field" id="custLooksWrap">
+            <span>外貌评级（0点）</span>
+            <select id="custLooks" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custMoralityWrap">
+            <span>道德三观（0点）</span>
+            <select id="custMorality" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custAggroWrap">
+            <span>好战程度（0点）</span>
+            <select id="custAggro" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custFactionWrap">
+            <span>所属阵营（0点）</span>
+            <select id="custFaction" class="select-input"></select>
+          </label>
+          <label class="custom-field">
+            <span>新宿对战宿傩顺序（1点）</span>
+            <select id="custShinjukuOrder" class="select-input"></select>
+          </label>
         </div>
+
+        <details class="custom-stats-details">
+          <summary>十维单项精准锁定（可选，每锁 1 项 +1 点）</summary>
+          <div class="stat-override-grid" id="custStatOverridesGrid"></div>
+        </details>
+      </div>
+      <div class="light-modal-footer">
+        <button type="button" class="btn-primary-small" id="btnStartCustomRun">消耗点数并开启人生</button>
+        <button type="button" class="btn-ghost-small" id="btnResetCustomForm">全部设回随机</button>
       </div>
     </div>
   </div>
@@ -535,15 +596,16 @@
   <div class="modal-backdrop is-hidden" id="noticeModal" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
     <div class="light-modal-panel">
       <div class="light-modal-header">
-        <h2 id="noticeModalTitle">说明与 Q&amp;A（静音纯净版）</h2>
+        <h2 id="noticeModalTitle">说明、Q&amp;A 与更新日志</h2>
         <button type="button" class="light-close-btn" id="btnCloseNoticeModal" aria-label="关闭说明">✕</button>
       </div>
-      <div class="light-modal-body notice-copy">
-        <p><strong>Q1：如何玩转「魂穿原著角色」与各身分特化分支？</strong><br />浮生若梦初始身份轮盘现已收录 <strong>16% 概率的「魂穿原著角色」</strong>（或在「天命自定」中直接指定 22 位原著人物如五条悟、宿傩、虎杖、伏黑惠、乙骨等）！魂穿后会进入专属的 <strong>苏醒时间节点 · 灵魂契合度 · 剧本先知记忆 · 核心改命方针</strong> 四连轮盘；其他如普通人、咒骸、咒灵、咒术高层也各有专属奇缘判定。</p>
-        <p><strong>Q2：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部随时可点 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动跑完剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 精细滑块调整。而且在<strong>转盘旋转过程中点击转盘圆盘任意位置或按 Space 键，都会瞬间急停落定出结果！</strong></p>
-        <p><strong>Q3：为什么默认送 30 命运点？怎么获得与使用？</strong><br />新玩家自带 30 点命运点！每当不满意当前轮盘结果时，点底部「重抽本轮 (-1💎)」即可重抽一次；也可以在「天命自定」中消费点数自选强力开局词条或魂穿原著人物。只有在「浮生若梦」模式通关结算时（每满 10 分奖 1 点，保底 1 点）才会产出新命运点。</p>
-        <p><strong>Q4：新宿决战宿傩与「束缚契约」是怎么算的？</strong><br />进入新宿决战前会二次提升能力、选择参战顺序，并立下<strong>「束缚契约」</strong>（公开术式/限定增幅/死地舍命），随后进入真正的<strong>回合制出招转盘博弈</strong>：每回合抽双方出招数、逐招累积战斗值、简易领域/展延抵消攻击、魔虚罗永久适应已用过的招式（最高 100% 免疫）、咒具损耗，还可触发五条悟入场开「无量空处」！</p>
-        <p><strong>Q5：全程有没有语音播报？</strong><br />本网页按需求已彻底移除所有语音播报与 TTS 阻塞等待，全程静音丝滑体验。</p>
+      <div class="light-modal-body notice-copy" id="noticeModalBody">
+        <p><strong>Q1：如何玩转「魂穿原著角色」与各身份特化分支？</strong><br />浮生若梦初始身份轮盘包含 <strong>「魂穿原著角色」</strong>（或在「自定义开局」直接指定 22 位原著角色）。魂穿后会进入苏醒时间节点、灵魂契合度、剧本记忆、行动方针四连判定；普通人、咒骸、诅咒师、咒灵、式神、咒术高层也各有专属分支事件（包括御三家继承、自律咒骸制作、高专祓除委托与降灵素材召唤）。</p>
+        <p><strong>Q2：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部可点击 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动推进剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 滑块调节。转盘旋转过程中点击圆盘任意位置或按 Space 键可直接停稳落定。</p>
+        <p><strong>Q3：命运点怎么获得与使用？</strong><br />初始赠送 30 点命运点。对当前轮盘结果不满意时，点底部「重抽本轮 (-1💎)」即可重抽；也可在自定义开局面板自选预设。只有在「浮生若梦」模式完整通关结算时（每满 10 分奖 1 点，保底 1 点）才会获得新命运点。</p>
+        <p><strong>Q4：新宿决战宿傩与「束缚契约」如何计算？</strong><br />进入新宿决战前会进行战前特训、选择参战顺序并抽取束缚契约，随后进入回合制出招轮盘：每回合抽双方出招数、逐招累积战值、简易领域/咒具抵消敌方攻击、魔虚罗适应已使用招式（最高 100% 免疫）、咒具耐久判定，以及五条悟入场协同。</p>
+        <p><strong>Q5：有没有语音播报？</strong><br />已移除全部语音合成与播报延迟，只保留纯文字与转盘界面操作。</p>
+        <p id="noticeChangelogAnchor"><strong>更新日志（Omega 完备版）：</strong><br />· 补齐 30 门生得术式在新宿决战中的专属招式池（含咒言、刍灵咒法、降灵术、逆转术法、奇迹存储、收据再现、新阴流等）。<br />· 修复高专祓除委托、降灵素材收集、咒骸制作与御三家继承在多入口下的触发链路。<br />· 补齐式神现存年龄/特殊机制（含退魔之剑）与跨时代现代御主重契流程、68 年后出场与对手契机判定、伴侣羁绊，并接入全 38 项图鉴成就。<br />· 扩展自定义开局面板，支持一键预设、十维单项微调与底部固定确认按钮。</p>
       </div>
     </div>
   </div>

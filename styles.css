@@ -1017,7 +1017,52 @@ button:disabled {
 }
 
 .light-modal-header h2 { margin: 0; font-size: 17px; font-weight: 800; }
-.light-modal-body { padding: 14px 18px 20px; overflow-y: auto; }
+.light-modal-body { padding: 14px 18px 20px; overflow-y: auto; flex: 1; min-height: 0; }
+.light-modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-light);
+  background: #ffffff;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.light-modal-footer .btn-primary-small { flex: 1; }
+
+.custom-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.custom-section-title {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-sub);
+  border-left: 3px solid var(--crimson);
+  padding-left: 7px;
+}
+
+.custom-stats-details {
+  margin-top: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--bg-soft);
+}
+.custom-stats-details summary {
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-main);
+}
+.stat-override-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
 
 .menu-hub-grid {
   display: grid;
@@ -1470,6 +1515,16 @@ body.dark-theme .text-input,
 body.dark-theme .mode-choice {
   background: #1f1f25;
   color: var(--text-main);
+  border-color: var(--border-light);
+}
+
+body.dark-theme .light-modal-footer {
+  background: #1f1f25;
+  border-top-color: var(--border-light);
+}
+
+body.dark-theme .custom-stats-details {
+  background: #18181d;
   border-color: var(--border-light);
 }
 
