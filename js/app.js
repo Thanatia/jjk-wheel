@@ -565,14 +565,21 @@
     $('charSubline').textContent = isPendingCanon ? '请先旋转「魂穿原著角色」轮盘锁定原著人物，随后自动载入对应人物初始面板' : subParts.join(' · ');
 
     var hasDomain = (char.skills || []).indexOf('领域展开') >= 0;
+    var domPill = hasDomain
+      ? ('领域：' + (char.domainProfile ? char.domainProfile.label : '已掌握生得领域'))
+      : '领域：未觉醒';
     var quickPills = [
       '阵营：' + char.factionLabel,
       '声望：' + (char.reputationText || '渐露锋芒'),
-      '领域：' + (hasDomain ? '已掌握生得领域' : '未觉醒'),
+      '特性：' + (char.ceTrait && char.ceTrait.label ? char.ceTrait.label : '常规标准咒力'),
+      domPill,
       '道德：' + char.moralityText,
       '好战：' + char.aggroText,
       '胜 ' + char.statsLog.wins + ' / 负 ' + char.statsLog.losses + ' / 黑闪 ' + char.statsLog.blackFlashes
     ];
+    if ((char.cullingPoints || 0) > 0 || (char.visitedEras || []).indexOf('culling') >= 0) {
+      quickPills.push('死灭积分：' + (char.cullingPoints || 0) + ' 分');
+    }
     if (char.canonSyncLabel) quickPills.push('契合：' + char.canonSyncLabel.split('（')[0]);
     if (char.canonMemoryLabel) quickPills.push('先知：' + char.canonMemoryLabel.split('（')[0]);
     if (char.canonDivergenceLabel) quickPills.push('改命：' + char.canonDivergenceLabel.split('（')[0]);
@@ -607,7 +614,13 @@
         '</div>';
     }).join('');
 
-    $('charTechCard').textContent = char.technique + ' — ' + (char.techniqueDesc || '尚待摸索发挥上限');
+    var domainLine = (hasDomain && char.domainProfile)
+      ? (' ｜ 生得领域：' + char.domainProfile.label)
+      : '';
+    var traitLine = (char.ceTrait && char.ceTrait.id && char.ceTrait.id !== 'standard')
+      ? (' ｜ 咒力性质：' + char.ceTrait.label)
+      : '';
+    $('charTechCard').textContent = char.technique + ' — ' + (char.techniqueDesc || '尚待摸索发挥上限') + traitLine + domainLine;
 
     var detailBox = $('charSkillDetailBox');
     if (detailBox) {
@@ -646,7 +659,7 @@
   /* ==================== 自定义开局配置器 ==================== */
   var CUSTOM_SELECT_IDS = [
     'custIdentity', 'custCanonChar', 'custEra', 'custBirthplace', 'custGender',
-    'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk',
+    'custTech', 'custCeTrait', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk',
     'custExtraSkill', 'custToolCount', 'custToolEffect',
     'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custShinjukuOrder'
   ];
@@ -688,6 +701,13 @@
       DATA.TECHNIQUES_ALL.map(function (t) {
         var tc = t.cost != null ? t.cost : 2;
         return { value: t.id, label: t.label + ' (' + tc + ' 点)', cost: tc };
+      })
+    ));
+
+    fillSelect('custCeTrait', [{ value: 'random', label: '🎲 随机抽取咒力特性 (0 点)', cost: 0 }].concat(
+      (DATA.CE_TRAIT_WHEEL || []).map(function (ct) {
+        var cc = ct.cost || 0;
+        return { value: ct.id, label: ct.label + ' (' + cc + ' 点)', cost: cc };
       })
     ));
 
@@ -787,8 +807,10 @@
       gradeEl.options[0].textContent = isCivilian ? '🎲 按普通人阶层抽选 (0 点)' : '🎲 随机官方评级 (0 点)';
     }
 
+    var isZeroTech = $('custTech') && $('custTech').value === 'heavenZero';
     $('custCanonWrap').classList.toggle('is-hidden', !isCanon);
     $('custTechWrap').classList.toggle('is-hidden', isCanon);
+    if ($('custCeTraitWrap')) $('custCeTraitWrap').classList.toggle('is-hidden', isCanon || isZeroTech);
     $('custGradeWrap').classList.toggle('is-hidden', isCanon);
     if ($('custGenderWrap')) $('custGenderWrap').classList.toggle('is-hidden', isCanon);
     if ($('custLooksWrap')) $('custLooksWrap').classList.toggle('is-hidden', isCanon);
@@ -799,11 +821,12 @@
     if ($('custToolEffectWrap')) $('custToolEffectWrap').classList.toggle('is-hidden', isCanon || !hasCustomTools);
 
     if (isCanon) {
-      ['custTech', 'custGrade', 'custGender', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custToolCount', 'custToolEffect'].forEach(function (id) {
+      ['custTech', 'custCeTrait', 'custGrade', 'custGender', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custToolCount', 'custToolEffect'].forEach(function (id) {
         if ($(id)) $(id).value = 'random';
       });
     } else {
       $('custCanonChar').value = 'random';
+      if (isZeroTech && $('custCeTrait')) $('custCeTrait').value = 'random';
       if (isShikigami && $('custFaction')) $('custFaction').value = 'random';
       if (!hasCustomTools && $('custToolEffect')) $('custToolEffect').value = 'random';
     }
@@ -814,7 +837,7 @@
     var isCanon = $('custIdentity').value === 'canon';
     var ids = isCanon
       ? ['custIdentity', 'custCanonChar', 'custEra', 'custBirthplace', 'custTalent', 'custAttrTier', 'custPerk', 'custExtraSkill', 'custShinjukuOrder']
-      : ['custIdentity', 'custEra', 'custBirthplace', 'custGender', 'custTech', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk', 'custExtraSkill', 'custToolCount', 'custToolEffect', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custShinjukuOrder'];
+      : ['custIdentity', 'custEra', 'custBirthplace', 'custGender', 'custTech', 'custCeTrait', 'custGrade', 'custTalent', 'custAttrTier', 'custPerk', 'custExtraSkill', 'custToolCount', 'custToolEffect', 'custLooks', 'custMorality', 'custAggro', 'custFaction', 'custShinjukuOrder'];
     var total = 0;
     ids.forEach(function (id) {
       var sel = $(id);
@@ -849,6 +872,10 @@
       $('custGrade').value = '特级';
       $('custTalent').value = '9';
       $('custPerk').value = 'both';
+    } else if (presetName === 'sukuna_tpl') {
+      $('custIdentity').value = 'canon';
+      syncCustomFieldVisibility();
+      $('custCanonChar').value = 'sukuna';
     } else if (presetName === 'toji_tpl') {
       $('custIdentity').value = 'sorcerer';
       $('custTech').value = 'heavenZero';
@@ -856,6 +883,13 @@
       $('custToolCount').value = '2';
       $('custToolEffect').value = 'nullify';
       $('custTalent').value = '7';
+    } else if (presetName === 'kashimo_tpl') {
+      $('custIdentity').value = 'sorcerer';
+      $('custEra').value = 'culling';
+      $('custTech').value = 'mythBeast';
+      if ($('custCeTrait')) $('custCeTrait').value = 'electric';
+      $('custGrade').value = '特级';
+      $('custTalent').value = '9';
     } else if (presetName === 'shinjuku_test') {
       $('custIdentity').value = 'sorcerer';
       $('custEra').value = 'shinjuku';
@@ -884,7 +918,10 @@
           name: '本局当前主角',
           identityName: appState.run.char.identityName,
           officialGrade: appState.run.char.officialGrade,
+          techniqueId: appState.run.char.techniqueId,
           technique: appState.run.char.technique,
+          ceTrait: appState.run.char.ceTrait,
+          domainProfile: appState.run.char.domainProfile,
           skills: appState.run.char.skills,
           tools: appState.run.char.tools,
           attrs: appState.run.char.attrs
@@ -906,12 +943,39 @@
     return list;
   }
 
-  function openArenaModal() {
+  function getSelectableArenaOpponents() {
+    var list = [];
+    DATA.ARENA_CHAMPIONS.forEach(function (ch, idx) {
+      list.push({ id: 'champ_' + idx, label: '[内置强敌] ' + ch.name + '（' + ch.technique + '）', fighter: ch });
+    });
+    appState.savedCards.forEach(function (c, i) {
+      if (c.attrs) {
+        list.push({
+          id: 'card_' + i,
+          label: '[本地存档] ' + c.name + '（' + c.officialGrade + '·' + c.technique + '）',
+          fighter: c
+        });
+      }
+    });
+    return list;
+  }
+
+  function openArenaModal(preselectPlayerId) {
     var selectEl = $('arenaPlayerSelect');
     var fighters = getSelectableFighters();
     selectEl.innerHTML = fighters.map(function (item) {
       return '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.label) + '</option>';
     }).join('');
+    if (typeof preselectPlayerId === 'string' && fighters.some(function (f) { return f.id === preselectPlayerId; })) {
+      selectEl.value = preselectPlayerId;
+    }
+    var oppSelectEl = $('arenaOpponentSelect');
+    if (oppSelectEl) {
+      var opps = getSelectableArenaOpponents();
+      oppSelectEl.innerHTML = opps.map(function (item) {
+        return '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.label) + '</option>';
+      }).join('');
+    }
     $('arenaCodeFeedback').textContent = '';
     $('arenaResultBox').classList.add('is-hidden');
     renderArenaHistory();
@@ -923,6 +987,14 @@
     var targetId = $('arenaPlayerSelect').value;
     var hit = fighters.find(function (x) { return x.id === targetId; });
     return (hit || fighters[0]).fighter;
+  }
+
+  function getSelectedArenaOpponent() {
+    var opps = getSelectableArenaOpponents();
+    var oppSel = $('arenaOpponentSelect');
+    var targetId = oppSel ? oppSel.value : '';
+    var hit = opps.find(function (x) { return x.id === targetId; });
+    return (hit || opps[0]).fighter;
   }
 
   function renderArenaBattleResult(res) {
@@ -1024,7 +1096,9 @@
           '</div>' +
           '<div class="saved-card-meta">' + escapeHtml(c.officialGrade) + ' · ' + escapeHtml(c.technique) + ' · 胜' + c.wins + '/负' + c.losses + ' · ' + escapeHtml(c.createdAt) + '</div>' +
           '<div class="saved-card-actions">' +
-          '<button type="button" class="pill-chip" data-replay-card="' + wrap.rawIdx + '">📖 逐盘回放人生与雷达</button>' +
+          '<button type="button" class="pill-chip" data-replay-card="' + wrap.rawIdx + '">📖 逐盘回放</button>' +
+          '<button type="button" class="pill-chip" data-arena-card="' + wrap.rawIdx + '">⚔ 竞技场出战</button>' +
+          '<button type="button" class="pill-chip" data-code-card="' + wrap.rawIdx + '">📋 复制对战码</button>' +
           '<button type="button" class="pill-chip" data-del-card="' + wrap.rawIdx + '">🗑 删除</button>' +
           '</div>' +
           '</div>';
@@ -1143,7 +1217,10 @@
       createdAt: new Date().toLocaleString('zh-CN'),
       identityName: char.identityName,
       officialGrade: char.officialGrade,
+      techniqueId: char.techniqueId || '',
       technique: char.technique,
+      ceTrait: char.ceTrait ? JSON.parse(JSON.stringify(char.ceTrait)) : null,
+      domainProfile: char.domainProfile ? JSON.parse(JSON.stringify(char.domainProfile)) : null,
       skills: char.skills.slice(),
       tools: char.tools.slice(),
       attrs: JSON.parse(JSON.stringify(char.attrs)),
@@ -1354,6 +1431,7 @@
         birthplaceId: $('custBirthplace') ? $('custBirthplace').value : 'random',
         genderId: $('custGender') ? $('custGender').value : 'random',
         techId: $('custTech').value,
+        ceTraitId: $('custCeTrait') ? $('custCeTrait').value : 'random',
         gradeId: $('custGrade').value,
         talentLv: $('custTalent').value,
         attrTier: $('custAttrTier').value,
@@ -1391,6 +1469,14 @@
       $('arenaCodeFeedback').textContent = '已生成并填入下方文本框，可发给好友对战！';
     });
 
+    if ($('btnArenaSelectFight')) {
+      $('btnArenaSelectFight').addEventListener('click', function () {
+        var myFighter = getSelectedArenaFighter();
+        var opp = getSelectedArenaOpponent();
+        renderArenaBattleResult(ENGINE.simulateArenaBattle(myFighter, opp));
+      });
+    }
+
     $('btnArenaRandomFight').addEventListener('click', function () {
       var myFighter = getSelectedArenaFighter();
       var pool = DATA.ARENA_CHAMPIONS;
@@ -1400,15 +1486,20 @@
 
     $('btnArenaCodeFight').addEventListener('click', function () {
       var myFighter = getSelectedArenaFighter();
+      var rawCode = $('arenaFriendCodeInput').value.trim();
+      if (!rawCode) {
+        renderArenaBattleResult(ENGINE.simulateArenaBattle(myFighter, getSelectedArenaOpponent()));
+        return;
+      }
       try {
-        var opp = ENGINE.decodeFighterCode($('arenaFriendCodeInput').value);
+        var opp = ENGINE.decodeFighterCode(rawCode);
         renderArenaBattleResult(ENGINE.simulateArenaBattle(myFighter, opp));
       } catch (err) {
         $('arenaCodeFeedback').textContent = '对战码格式无效，请检查是否完整复制';
       }
     });
 
-    // 排行榜 Tabs / 删除 / 回放
+    // 排行榜 Tabs / 删除 / 回放 / 竞技场联动
     $('cardsTabStrip').addEventListener('click', function (e) {
       var btn = e.target.closest('[data-cardtab]');
       if (!btn) return;
@@ -1426,6 +1517,28 @@
           saveCards();
           updateGlobalCounters();
           renderSavedCardsList();
+        }
+        return;
+      }
+      var arenaBtn = e.target.closest('[data-arena-card]');
+      if (arenaBtn) {
+        var aIdx = parseInt(arenaBtn.getAttribute('data-arena-card'), 10);
+        if (!isNaN(aIdx) && appState.savedCards[aIdx]) {
+          closeModal('cardsModal');
+          openArenaModal('card_' + aIdx);
+        }
+        return;
+      }
+      var codeBtn = e.target.closest('[data-code-card]');
+      if (codeBtn) {
+        var cIdx = parseInt(codeBtn.getAttribute('data-code-card'), 10);
+        if (!isNaN(cIdx) && appState.savedCards[cIdx]) {
+          var codeStr = ENGINE.encodeFighterCode(appState.savedCards[cIdx]);
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(codeStr).catch(function () {});
+          }
+          codeBtn.textContent = '✓ 已复制码';
+          setTimeout(function () { codeBtn.textContent = '📋 复制对战码'; }, 1400);
         }
         return;
       }

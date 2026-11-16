@@ -22,7 +22,7 @@
             <span class="title-crest" aria-hidden="true">❖</span>
             <h1>咒术转盘</h1>
           </div>
-          <p class="start-subtitle">无语音版 · 含 10 维属性 / 魂穿 22 位原著角色 / 新宿宿傩决战 / 束缚 / 竞技场</p>
+          <p class="start-subtitle">无语音版 · 含 10 维属性 / 魂穿 28 位原著角色 / 咒力特性 / 领域形态 / 死灭总则 / 竞技场</p>
 
           <div class="split-art-card" aria-hidden="true">
             <div class="split-half split-gojo">
@@ -344,7 +344,9 @@
         <div class="custom-presets-row" id="customPresetRow">
           <button type="button" class="preset-chip" data-preset="random">🎲 全部随机</button>
           <button type="button" class="preset-chip" data-preset="gojo_tpl">👁️ 六眼路线</button>
+          <button type="button" class="preset-chip" data-preset="sukuna_tpl">👹 宿傩诅咒之王</button>
           <button type="button" class="preset-chip" data-preset="toji_tpl">⚔️ 零咒力体术</button>
+          <button type="button" class="preset-chip" data-preset="kashimo_tpl">⚡ 雷电特性</button>
           <button type="button" class="preset-chip" data-preset="shinjuku_test">🔥 新宿决战测试</button>
         </div>
 
@@ -355,7 +357,7 @@
             <select id="custIdentity" class="select-input"></select>
           </label>
           <label class="custom-field is-hidden is-highlight" id="custCanonWrap">
-            <span>指定魂穿原著人物（22位核心角色）</span>
+            <span>指定魂穿原著人物（28位核心角色）</span>
             <select id="custCanonChar" class="select-input"></select>
           </label>
           <label class="custom-field">
@@ -377,6 +379,10 @@
           <label class="custom-field" id="custTechWrap">
             <span>生得术式</span>
             <select id="custTech" class="select-input"></select>
+          </label>
+          <label class="custom-field" id="custCeTraitWrap">
+            <span>先天咒力特性</span>
+            <select id="custCeTrait" class="select-input"></select>
           </label>
           <label class="custom-field" id="custGradeWrap">
             <span>初始官方评级</span>
@@ -465,7 +471,7 @@
         <div class="tab-strip" id="arenaTabStrip">
           <button type="button" class="tab-btn is-active" data-arenatab="fight">随机切磋 / 好友码</button>
           <button type="button" class="tab-btn" data-arenatab="history">历史战报 (<span id="arenaLogCount">0</span>/100)</button>
-          <button type="button" class="tab-btn" data-arenatab="rules">7大对决规则</button>
+          <button type="button" class="tab-btn" data-arenatab="rules">8大对决规则</button>
         </div>
 
         <!-- 切磋面板 -->
@@ -480,12 +486,14 @@
           </div>
 
           <label class="custom-field" style="margin-top: 10px;">
-            <span>2. 对手来源：随机挑战原型 / 粘贴好友对战码</span>
-            <div class="arena-vs-row">
-              <button type="button" class="btn-primary-small" id="btnArenaRandomFight">🎲 随机匹配强敌开战</button>
+            <span>2. 选择敌方对手（内置强者模板 / 本地存档内战 / 好友对战码）</span>
+            <select id="arenaOpponentSelect" class="select-input" style="margin-bottom:8px;"></select>
+            <div class="arena-vs-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <button type="button" class="btn-primary-small" id="btnArenaSelectFight" style="flex:1;">⚔ 挑战所选对手</button>
+              <button type="button" class="btn-ghost-small" id="btnArenaRandomFight" style="flex:1;">🎲 随机匹配强敌</button>
             </div>
             <div class="arena-friend-row">
-              <input type="text" id="arenaFriendCodeInput" class="text-input" placeholder="粘贴好友对战码（或留空选下方内置强者）" style="margin-bottom:0;" />
+              <input type="text" id="arenaFriendCodeInput" class="text-input" placeholder="或在此粘贴好友 JJK1: 对战码挑战" style="margin-bottom:0;" />
               <button type="button" class="btn-ghost-small" id="btnArenaCodeFight">按码开战</button>
             </div>
           </label>
@@ -498,15 +506,16 @@
           <div class="timeline-list" id="arenaHistoryList"></div>
         </div>
 
-        <!-- 7大规则 -->
+        <!-- 8大规则 -->
         <div id="arenaTabRules" class="is-hidden notice-copy">
           <p><strong>规则1 · 十维基准值</strong>：体术、体质、咒力总量、操纵、效率、灵魂抗性、结界术共同决定回合攻击与减伤基准。</p>
-          <p><strong>规则2 · 术式与觉醒</strong>：生得术式与觉醒程度影响技能系数；天与咒缚拥有超高体术穿透加成。</p>
-          <p><strong>规则3 · 领域压制</strong>：持有领域展开的一方在前三回合可压制无领域或仅简易领域的对手。</p>
-          <p><strong>规则4 · 反转续航</strong>：拥有反转术式会在每回合末自动回复重创损耗，大幅提升耐力战胜率。</p>
-          <p><strong>规则5 · 黑闪暴击</strong>：操纵与体术越高，回合内越容易打出黑闪实现高倍爆发逆转。</p>
-          <p><strong>规则6 · 咒具词条加成</strong>：特级或附带灵魂/破防词条的咒具会参与破盾与额外爆发计算。</p>
-          <p><strong>规则7 · 对战码互通</strong>：任意档案均可导出编码，粘贴即可与任何朋友的角色在本地离线比拼回合战报！</p>
+          <p><strong>规则2 · 术式与觉醒</strong>：生得术式与觉醒程度影响技能系数；天与咒缚拥有高额体术穿透加成。</p>
+          <p><strong>规则3 · 领域博弈与开放式结界</strong>：持有领域展开可压制无反制方；双方同时开领域时比拼结界术与开放式无结界优势。</p>
+          <p><strong>规则4 · 无下限与破防相性</strong>：面对无下限咒术若缺乏领域展开、领域展延、天逆鉾或术式灭绝等手段，常规打击会受不可侵减伤。</p>
+          <p><strong>规则5 · 反转续航</strong>：拥有反转术式或咒力高速再生会在回合末自动回复损耗，提高耐力战胜率。</p>
+          <p><strong>规则6 · 黑闪与咒力特性</strong>：高操纵提高黑闪爆发率；带电、锯刃、极寒、爆燃等特殊咒力特性提供专属追伤或迟滞减伤。</p>
+          <p><strong>规则7 · 咒具词条完整保留</strong>：特级咒具的增幅、无效化术式、神武解、无坚不摧等词条完整参与模拟与对战码编码。</p>
+          <p><strong>规则8 · 存档内战与对战码互通</strong>：支持任意两个本地存档角色内战切磋，也可导出 JJK1 对战码离线跨设备较量！</p>
         </div>
       </div>
     </div>
@@ -599,12 +608,12 @@
         <button type="button" class="light-close-btn" id="btnCloseNoticeModal" aria-label="关闭说明">✕</button>
       </div>
       <div class="light-modal-body notice-copy" id="noticeModalBody">
-        <p><strong>Q1：如何玩转「魂穿原著角色」与各身份特化分支？</strong><br />浮生若梦初始身份轮盘包含 <strong>「魂穿原著角色」</strong>（或在「自定义开局」直接指定 22 位原著角色）。魂穿后会进入苏醒时间节点、灵魂契合度、剧本记忆、行动方针四连判定；普通人、咒骸、诅咒师、咒灵、式神、咒术高层也各有专属分支事件（包括御三家继承、自律咒骸制作、高专祓除委托与降灵素材召唤）。</p>
+        <p><strong>Q1：如何玩转「魂穿原著角色」与各身份特化分支？</strong><br />浮生若梦初始身份轮盘包含 <strong>「魂穿原著角色」</strong>（或在「自定义开局」直接指定 28 位原著角色）。魂穿后会进入苏醒时间节点、灵魂契合度、剧本记忆、行动方针四连判定；普通人、咒骸、诅咒师、咒灵、式神、咒术高层也各有专属分支事件（包括御三家继承、自律咒骸制作、高专祓除委托与降灵素材召唤）。</p>
         <p><strong>Q2：怎样自由控制转盘转速或瞬间急停？</strong><br />顶部可点击 <code>⚡ 1.5s</code> 切换速度、点 <code>自动连抽</code> 自动推进剧情；在 <code>⚙ 设置</code> 里支持 <code>0.2s ~ 8.0s</code> 滑块调节。转盘旋转过程中点击圆盘任意位置或按 Space 键可直接停稳落定。</p>
         <p><strong>Q3：命运点怎么获得与使用？</strong><br />初始赠送 30 点命运点。对当前轮盘结果不满意时，点底部「重抽本轮 (-1💎)」即可重抽；也可在自定义开局面板自选预设。只有在「浮生若梦」模式完整通关结算时（每满 10 分奖 1 点，保底 1 点）才会获得新命运点。</p>
         <p><strong>Q4：新宿决战宿傩与「束缚契约」如何计算？</strong><br />进入新宿决战前会进行战前特训、选择参战顺序并抽取束缚契约，随后进入回合制出招轮盘：每回合抽双方出招数、逐招累积战值、简易领域/咒具抵消敌方攻击、魔虚罗适应已使用招式（最高 100% 免疫）、咒具耐久判定，以及五条悟入场协同。</p>
         <p><strong>Q5：有没有语音播报？</strong><br />已移除全部语音合成与播报延迟，只保留纯文字与转盘界面操作。</p>
-        <p id="noticeChangelogAnchor"><strong>更新日志（版本说明）：</strong><br />· 补齐 30 门生得术式在新宿决战中的专属招式池（含咒言、刍灵咒法、降灵术、逆转术法、奇迹存储、收据再现、新阴流等）。<br />· 修复高专祓除委托、降灵素材收集、咒骸制作与御三家继承在多入口下的触发链路。<br />· 补齐式神现存年龄/特殊机制（含退魔之剑）与跨时代现代御主重契流程、68 年后出场与对手契机判定、伴侣羁绊，并接入全 38 项图鉴成就。<br />· 扩展自定义开局面板，支持一键预设、十维单项微调与底部固定确认按钮。<br />· 魂穿原著角色：初始评级、技巧与咒具按切入时期同步（如虎杖开篇为三级、真希开篇未觉醒），随剧情推进自动解锁后期能力；苏醒时间线只列出该角色原著中已登场的时期。<br />· 其余 7 大身份、咒具与决战联动校准：普通人开局无生得术式且低咒力起点，觉醒后方打通面板；天与咒缚零咒力跳过咒力四维并强化体魄与兵器池；咒灵改用「咒力高速再生」取代反转术式；咒骸多核替死、式神羁绊/脱兔/退魔之剑、高层御三家继承保留自选术式、全 9 类咒具特效、魔虚罗不重复复活与竞技场机制实装。</p>
+        <p id="noticeChangelogAnchor"><strong>更新日志（版本说明）：</strong><br />· 补齐 30 门生得术式在新宿决战中的专属招式池（含咒言、刍灵咒法、降灵术、逆转术法、奇迹存储、收据再现、新阴流等）。<br />· 修复高专祓除委托、降灵素材收集、咒骸制作与御三家继承在多入口下的触发链路。<br />· 补齐式神现存年龄/特殊机制（含退魔之剑）与跨时代现代御主重契流程、68 年后出场与对手契机判定、伴侣羁绊，并接入全 38 项图鉴成就。<br />· 扩展自定义开局面板，支持一键预设、十维单项微调与底部固定确认按钮。<br />· 魂穿原著角色：初始评级、技巧与咒具按切入时期同步（如虎杖开篇为三级、真希开篇未觉醒），随剧情推进自动解锁后期能力；苏醒时间线只列出该角色原著中已登场的时期。<br />· 其余 7 大身份、咒具与决战联动校准：普通人开局无生得术式且低咒力起点，觉醒后方打通面板；天与咒缚零咒力跳过咒力四维并强化体魄与兵器池；咒灵改用「咒力高速再生」取代反转术式；咒骸多核替死、式神羁绊/脱兔/退魔之剑、高层御三家继承保留自选术式、全 9 类咒具特效、魔虚罗不重复复活与竞技场机制实装。<br />· 新增先天咒力特性（雷电/粗糙锯刃/极寒/爆燃/浓稠等）、生得领域结界形态（封闭必杀/规则契约/依托地形/无结界开放式）、死灭回游小金虫积分与满百追加总则、扩充至 28 位魂穿原著角色与 33 门生得术式，并完善竞技场自选对手、存档内战、无下限相性与开放式领域博弈。</p>
       </div>
     </div>
   </div>

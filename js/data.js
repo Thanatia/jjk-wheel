@@ -153,6 +153,9 @@
     { id: 'disasterPlants', label: '灾厄森罗', weight: 6, power: 13, cost: 3, desc: '吸取植物生机凝成供弹大咒花与树海' },
     { id: 'disasterTides', label: '陀艮潮汐', weight: 6, power: 13, cost: 3, desc: '深海累卵式神无休止撕咬敌手' },
     { id: 'deadSwarm', label: '死累累涌军', weight: 7, power: 12, cost: 3, desc: '狂涌魔虫与结界封锁干扰战场视线' },
+    { id: 'graniteBlast', label: '咒力放出（花岗岩冲击）', weight: 6, power: 14, cost: 4, desc: '死灭全泳者最大单发咒力输出，不论是否熔断皆可倾泻高能光束' },
+    { id: 'skyManip', label: '天空操纵（宇守罗弹）', weight: 5, power: 15, cost: 5, desc: '将空间当作幕布抓握扭曲以偏折敌招，并以宇守罗弹击穿防御' },
+    { id: 'angelicExt', label: '术式灭绝（邪去侮之梯）', weight: 4, power: 16, cost: 6, desc: '降下净化圣光消解一切术式、结界与受肉咒物' },
     { id: 'newShadow', label: '新阴流·无生得术式', weight: 9, power: 9, cost: 0, desc: '专注刀术拔刀与简易领域反制一切复杂术式' }
   ];
 
@@ -730,10 +733,21 @@
         intro: '交流会前后高专情报疑似外泄，追踪查至与幸吉的傀儡中继点',
         choiceTitle: '追查内鬼线索时的决断',
         choices: [
-          { label: '截击前来灭口的夏油假体与真人', weight: 50, action: 'fight', enemyName: '涉事诅咒师伏兵', enemyPower: 43, statUp: 'versatility', excludeIds: ['kenjaku', 'mahito'] },
+          { label: '截击前来灭口的夏油假体与真人', weight: 50, action: 'fight', enemyName: '涉事诅咒师伏兵', enemyPower: 43, statUp: 'versatility', excludeIds: ['kenjaku', 'mahito', 'mechamaru'] },
           { label: '提前布控夺取情报样本（傀儡战力测试）', weight: 50, action: 'fight', enemyName: '与幸吉外围武装傀儡', enemyPower: 43, statUp: 'versatility', onlyIds: ['kenjaku', 'mahito'] },
-          { label: '保下与幸吉的情报通道作为暗桩', weight: 50, action: 'safe', effectText: '保留珍贵情报暗线，智力 +1', statUp: 'iq' }
-        ]
+          { label: '保下与幸吉的情报通道作为暗桩', weight: 50, action: 'safe', effectText: '保留珍贵情报暗线，智力 +1', statUp: 'iq', excludeIds: ['mechamaru'] }
+        ],
+        povByChar: {
+          mechamaru: {
+            title: '水坝基地·解除天与肉体束缚迎战真人',
+            intro: '恢复健全肉体后你立刻坐进绝对形态装甲三号机，突围回高专示警',
+            choiceTitle: '面对真人与夏油假体封锁帐幕的决断',
+            choices: [
+              { label: '倾泻十七年咒力储备与简易领域钉正面迎击真人', weight: 66, action: 'fight', enemyName: '真人（自闭圆顿裹）', enemyPower: 52, statUp: 'ceControl' },
+              { label: '引爆备用傀儡假身掩护真身突破帐幕', weight: 34, action: 'safe', effectText: '成功脱身并保全高专联络微型机，智力 +1', statUp: 'iq' }
+            ]
+          }
+        }
       }
     ],
     shibuya_good: [
@@ -906,9 +920,10 @@
         intro: '乌鹭亨子、石流龙、黑沐死与杜鲁夫互相牵制，乙骨忧太入场',
         choiceTitle: '在仙台结界内选择交手对象',
         choices: [
-          { label: '正面对阵仙台石流龙与乌鹭', weight: 40, action: 'fight', enemyName: '石流龙＆乌鹭亨子', enemyPower: 54 },
+          { label: '正面对阵仙台石流龙与乌鹭', weight: 40, action: 'fight', enemyName: '石流龙＆乌鹭亨子', enemyPower: 54, excludeIds: ['ryu', 'uro'] },
           { label: '挑战刚入场的特级·乙骨忧太', weight: 26, action: 'fight', enemyName: '乙骨忧太（死灭回游）', enemyPower: 60, excludeIds: ['yuta'] },
           { label: '独自迎战石流龙、乌鹭与黑沐死围攻', weight: 38, action: 'fight', enemyName: '仙台四天王混战本阵', enemyPower: 58, onlyIds: ['yuta'], statUp: 'ceTotal' },
+          { label: '与乙骨忧太及仙台宿敌展开三方领域混战', weight: 42, action: 'fight', enemyName: '仙台三方领域混战阵', enemyPower: 59, onlyIds: ['ryu', 'uro'], statUp: 'barrier' },
           { label: '在仙台地下遇袭黑沐死蟑螂群', weight: 18, action: 'fight', enemyName: '黑沐死', enemyPower: 46 },
           { label: '暗中收集泳者积分完善结界术', weight: 16, action: 'safe', effectText: '斩获足量总则分数，结界术 +1', statUp: 'barrier' }
         ]
@@ -943,6 +958,15 @@
             choices: [
               { label: '执掌释魂刀以零帧直觉一刀斩破咒灵直哉', weight: 70, action: 'fight', enemyName: '咒灵化·禅院直哉', enemyPower: 51, statUp: 'taijutsu' },
               { label: '借相扑领域磨砺空气踩踏与气味感知', weight: 30, action: 'safe', effectText: '达成与伏黑甚尔比肩的感官境界，身体抗性 +1', statUp: 'bodyResist' }
+            ]
+          },
+          naoya: {
+            title: '死灭回游·樱岛结界亚音速投射突袭',
+            intro: '你将投射咒法推至高速冲刺极限并踏入樱岛结界，与真希、加茂宪纪狭路相逢',
+            choiceTitle: '樱岛结界宿怨对决抉择',
+            choices: [
+              { label: '叠满二十四帧速度展开「时胞月宫殿」强压樱岛防线', weight: 68, action: 'fight', enemyName: '禅院真希＆加茂宪纪联军', enemyPower: 55, statUp: 'taijutsu' },
+              { label: '高速机动先取结界外围泳者积分避免陷入合围', weight: 32, action: 'safe', effectText: '保持高速拉扯稳拿泳者积分，效率 +1', statUp: 'ceEfficiency' }
             ]
           }
         }
@@ -1161,10 +1185,29 @@
       skills: ['黑闪', '反转术式', '简易领域', '领域展开'],
       tools: [{ shape: '刚笼手（咒具臂铠）', effect: '伤害增幅（游云系）', bonus: 6, damageMult: 1.25 }],
       attrs: { ceTotal: 8, ceControl: 9, ceEfficiency: 8, taijutsu: 11, bodyResist: 11, soulResist: 11, barrier: 7, versatility: 8, iq: 7, talent: 9 }
+    },
+    {
+      name: '星之怒 · 九十九由基（模板）',
+      identityName: '咒术师',
+      officialGrade: '特级',
+      technique: '星之怒（质量赋予）',
+      skills: ['反转术式', '领域展开', '简易领域'],
+      tools: [{ shape: '凰轮（式神咒具化）', effect: '伤害增幅（星之怒质量叠加）', bonus: 7, damageMult: 1.25 }],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 10, bodyResist: 8, soulResist: 9, barrier: 8, versatility: 8, iq: 9, talent: 9 }
+    },
+    {
+      name: '千年结界师 · 羂索（模板）',
+      identityName: '诅咒师',
+      officialGrade: '特级',
+      technique: '咒灵操术 / 百年换脑',
+      skills: ['完整咏唱', '反转术式', '领域展开', '领域展延'],
+      tools: [],
+      domainProfile: { id: 'open_divine', name: '胎藏遍野', label: '无结界开放式 · 虚空生得领域' },
+      attrs: { ceTotal: 9, ceControl: 9, ceEfficiency: 9, taijutsu: 8, bodyResist: 7, soulResist: 9, barrier: 11, versatility: 10, iq: 10, talent: 9 }
     }
   ];
 
-  // ==================== 魂穿原著角色全池（22位核心人物） ====================
+  // ==================== 魂穿原著角色全池（28位核心人物） ====================
   var CANON_CHARACTERS = [
     {
       id: 'gojo', name: '五条悟', title: '现代最强 · 六眼无下限', weight: 4, cost: 6,
@@ -1373,6 +1416,60 @@
       tools: [],
       attrs: { ceTotal: 6, ceControl: 4, ceEfficiency: 6, taijutsu: 5, bodyResist: 8, soulResist: 8, barrier: 3, versatility: 10, iq: 5, talent: 8 },
       canonNote: '只要觉得好笑就能改写现象的特殊术式，唯一底线是不夺人性命'
+    },
+    {
+      id: 'kusakabe', name: '日下部笃也', title: '最强一级术师 · 新阴流宗师', weight: 5, cost: 3,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'newShadow', technique: '新阴流·无生得术式',
+      officialGrade: '一级', gradeBonus: 9, looks: 6, morality: 3, aggro: 2,
+      skills: ['简易领域', '自动迎击术式'],
+      tools: [{ shape: '打刀（新阴流居合）', effect: '纯武器（精钢白板）', bonus: 5, tier: '一级' }],
+      attrs: { ceTotal: 6, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 8, soulResist: 7, barrier: 9, versatility: 8, iq: 9, talent: 7 },
+      canonNote: '无生得术式却凭简易领域自动迎击与扎实防反立足一线，涉谷与新宿稳健兜底'
+    },
+    {
+      id: 'naoya', name: '禅院直哉', title: '特别一级 · 投射二十四帧', weight: 4, cost: 3,
+      faction: 'neutral', eraId: 'canonStart', techniqueId: 'projection', technique: '投射咒法',
+      officialGrade: '一级', gradeBonus: 9, looks: 8, morality: -3, aggro: 8,
+      skills: ['落之雪（落花之情）'],
+      tools: [{ shape: '怀中短刀', effect: '纯武器（精钢白板）', bonus: 4, tier: '二级' }],
+      attrs: { ceTotal: 7, ceControl: 8, ceEfficiency: 7, taijutsu: 9, bodyResist: 7, soulResist: 6, barrier: 6, versatility: 7, iq: 7, talent: 8 },
+      canonNote: '禅院家柄头领，叠满二十四帧可逼近亚音速；进入死灭回游后进阶领悟领域「时胞月宫殿」'
+    },
+    {
+      id: 'ryu', name: '石流龙', title: '仙台高功率 · 甜点轰击炮', weight: 4, cost: 4,
+      faction: 'neutral', eraId: 'edo400', techniqueId: 'graniteBlast', technique: '咒力放出（花岗岩冲击）',
+      officialGrade: '特级', gradeBonus: 13, looks: 7, morality: 1, aggro: 7,
+      skills: ['领域展开'],
+      tools: [],
+      attrs: { ceTotal: 9, ceControl: 8, ceEfficiency: 8, taijutsu: 9, bodyResist: 9, soulResist: 7, barrier: 8, versatility: 7, iq: 7, talent: 8 },
+      canonNote: '死灭回游记录在册最高单发咒力输出保持者，肉搏硬朗且不惧术式熔断空窗'
+    },
+    {
+      id: 'uro', name: '乌鹭亨子', title: '藤氏暗杀队长 · 天幕宇守罗弹', weight: 4, cost: 4,
+      faction: 'neutral', eraId: 'heian', techniqueId: 'skyManip', technique: '天空操纵（宇守罗弹）',
+      officialGrade: '特级', gradeBonus: 13, looks: 8, morality: 0, aggro: 6,
+      skills: ['领域展开', '反转术式'],
+      tools: [],
+      attrs: { ceTotal: 8, ceControl: 8, ceEfficiency: 8, taijutsu: 8, bodyResist: 7, soulResist: 7, barrier: 8, versatility: 9, iq: 8, talent: 8 },
+      canonNote: '原日月星进队暗杀部队长，扭曲空间天幕偏折正面攻击并以破冰冲击贯穿防御'
+    },
+    {
+      id: 'hana', name: '来栖华（天使）', title: '千年共生泳者 · 邪去侮之梯', weight: 4, cost: 4,
+      faction: 'good', eraId: 'culling', techniqueId: 'angelicExt', technique: '术式灭绝（邪去侮之梯）',
+      officialGrade: '一级', gradeBonus: 11, looks: 7, morality: 5, aggro: 3,
+      skills: ['反转术式'],
+      tools: [{ shape: '洗礼号角（圣光净化）', effect: '无效化术式（黑绳/天逆鉾）', bonus: 7, nullify: true, canCancelMove: true, tier: '特级' }],
+      attrs: { ceTotal: 8, ceControl: 7, ceEfficiency: 8, taijutsu: 5, bodyResist: 6, soulResist: 8, barrier: 8, versatility: 9, iq: 6, talent: 8 },
+      canonNote: '与千年术师「天使」温和共生，所持术式灭绝能净化一切结界、封印与受肉邪物'
+    },
+    {
+      id: 'mechamaru', name: '与幸吉（机械丸）', title: '天与广域傀儡 · 绝对形态装甲', weight: 4, cost: 3,
+      faction: 'good', eraId: 'canonStart', techniqueId: 'puppetMaster', technique: '傀儡咒术学（咒骸制作）',
+      officialGrade: '准一级', gradeBonus: 9, looks: 6, morality: 3, aggro: 4,
+      skills: ['简易领域', '傀儡咒术学（咒骸制作）'],
+      tools: [{ shape: '绝对形态·三号装甲（十七年蓄能炮）', effect: '伤害增幅（游云）', bonus: 7, damageMult: 1.25, tier: '特级' }],
+      attrs: { ceTotal: 9, ceControl: 8, ceEfficiency: 7, taijutsu: 6, bodyResist: 6, soulResist: 7, barrier: 7, versatility: 9, iq: 9, talent: 8 },
+      canonNote: '天与咒缚换来遍及日本全境的傀儡操纵半径与深厚咒力积蓄，驾驭大型机甲迎敌'
     }
   ];
 
@@ -1408,7 +1505,13 @@
     jogo: ['native', 'shibuya'],
     uraume: ['native', 'shibuya'],
     yorozu: ['native'],
-    takaba: ['native']
+    takaba: ['native'],
+    kusakabe: ['vol0', 'native', 'shibuya'],
+    naoya: ['native', 'shibuya'],
+    ryu: ['native'],
+    uro: ['native'],
+    hana: ['native'],
+    mechamaru: ['native']
   };
 
   // 魂穿灵魂契合度盘
@@ -1879,6 +1982,24 @@
       { id: 'ns_batto', label: '抜刀·贴身居合斩', power: 21, weight: 32 },
       { id: 'ns_hazy_moon', label: '胧月·空刃步法连斩', power: 18, weight: 22 }
     ],
+    graniteBlast: [
+      { id: 'gb_max_sweet', label: '满额甜点 · 最大功率花岗岩直轰', power: 25, weight: 24 },
+      { id: 'gb_homing', label: '折线追踪咒力弹齐射', power: 20, weight: 24 },
+      { id: 'gb_point_blank', label: '零距离背部咒力放出崩击', power: 22, weight: 22 },
+      { id: 'gb_deflect', label: '高密度咒力护体弹反（+14，抵消1次攻击）', power: 14, cancels: 1, weight: 18 }
+    ],
+    skyManip: [
+      { id: 'sky_thin_ice', label: '宇守罗弹 · 碎空贯穿重击', power: 24, piercesInfinity: true, weight: 26 },
+      { id: 'sky_veil_turn', label: '抓握苍穹天幕偏折反击（+16，抵消1次攻击）', power: 16, cancels: 1, weight: 28 },
+      { id: 'sky_warp_ambush', label: '折叠空间视觉错位奇袭', power: 19, extraActions: 1, weight: 22 },
+      { id: 'sky_curtain', label: '层叠空幕封锁防线（+12，抵消1次攻击）', power: 12, cancels: 1, weight: 20 }
+    ],
+    angelicExt: [
+      { id: 'ang_ladder', label: '邪去侮之梯 · 术式灭绝圣光柱', power: 27, piercesInfinity: true, cancels: 1, weight: 24 },
+      { id: 'ang_trumpet', label: '洗礼号角 · 广域术式消解（+15，抵消1次攻击）', power: 15, piercesInfinity: true, cancels: 1, weight: 26 },
+      { id: 'ang_wing_lance', label: '光翼高空净化裁决', power: 20, piercesInfinity: true, weight: 26 },
+      { id: 'ang_ward', label: '天界光幕庇护中和（+11，抵消1次攻击）', power: 11, cancels: 1, weight: 20 }
+    ],
     default: [
       { id: 'def_innate', label: '生得术式·全力出力攻击', power: 17, weight: 34 },
       { id: 'def_rush', label: '贴身连携打击', power: 14, weight: 34 },
@@ -1953,6 +2074,69 @@
     '傀儡咒术学（咒骸制作）': '可亲手制作具备独立核心能力的自律咒骸协同上阵助战。'
   };
 
+  // ==================== 咒力特性系统（Cursed Energy Trait） ====================
+  var CE_TRAIT_WHEEL = [
+    { id: 'standard', label: '常规标准咒力', cost: 0, weight: 54, bonus: 0, note: '平稳纯粹的咒力流动，易于扎实磨炼结界与术式控制' },
+    { id: 'electric', label: '带电雷鸣咒力', cost: 3, weight: 8, bonus: 5, moveLabel: '必中电荷·回传落雷（特性追击）', movePower: 22, piercesInfinity: false, note: '咒力天生处于带电激发态，近战擦中即可麻痹对手并积累电荷落雷' },
+    { id: 'rough', label: '粗糙锯刃咒力', cost: 2, weight: 10, bonus: 4, moveLabel: '锯刃咒力·贴身割裂重拳', movePower: 20, note: '咒力质感如砂纸锯齿般粗粝，普通防具与咒力防御亦会受钝痛割裂' },
+    { id: 'frost', label: '极寒凝霜咒力', cost: 3, weight: 8, bonus: 4, moveLabel: '凝霜寒气·迟滞封锁（+15，抵消1招）', movePower: 15, cancels: 1, note: '自带低温霜冻性质，交锋间冻结空气迟滞对手动作' },
+    { id: 'blazing', label: '灼热爆燃咒力', cost: 2, weight: 8, bonus: 4, moveLabel: '爆燃咒力·焦炎轰击', movePower: 21, note: '高热躁动的攻击型咒力性质，显著放大正面火力输出' },
+    { id: 'dense', label: '渊海浓稠咒力', cost: 3, weight: 7, bonus: 5, moveLabel: '浓稠咒力·全身强化洪流', movePower: 21, note: '密度远胜常人的厚重咒力压迫感，兼顾全身强化与续航厚度' },
+    { id: 'rct_affinity', label: '正能亲和咒力', cost: 3, weight: 5, bonus: 4, moveLabel: '正能回流·攻防一体冲击', movePower: 18, note: '咒力回路清澈顺畅，极易把握反转核心与精密微操' }
+  ];
+
+  var CANON_CE_TRAITS = {
+    gojo: 'rct_affinity',
+    sukuna: 'dense',
+    yuta: 'dense',
+    kashimo: 'electric',
+    hakari: 'rough',
+    uraume: 'frost',
+    jogo: 'blazing',
+    ryu: 'blazing',
+    hana: 'rct_affinity'
+  };
+
+  // ==================== 生得领域形态与必中法则（Domain Morphology） ====================
+  var DOMAIN_FORM_WHEEL = [
+    { id: 'lethal_closed', label: '必杀必中型 · 封闭结界领域', weight: 46, bonus: 3, power: 21, note: '构筑隔绝内外的坚固结界外壳，赋予生得术式必中爆发威力' },
+    { id: 'rule_court', label: '规则强制型 · 古流契约领域', weight: 26, bonus: 4, power: 19, cancels: 1, note: '以强制规则取代直接必杀，展开迅捷且可封锁抵消敌方 1 次出招' },
+    { id: 'incomplete_open', label: '依托地形型 · 未完成扩张领域', weight: 18, bonus: 2, power: 18, extraActions: 1, note: '借现成建筑或暗影铺开无壳领域，术式连携追加 1 次行动机会' },
+    { id: 'open_divine', label: '无结界开放式 · 虚空生得领域', weight: 10, bonus: 7, power: 26, piercesInfinity: true, barrierUp: 1, note: '不在现实分隔空间而直接在虚空作画，结界术 +1 并可从外部击碎普通封闭领域' }
+  ];
+
+  var CANON_DOMAIN_PROFILES = {
+    gojo: { id: 'lethal_closed', name: '无量空处', label: '必杀必中型 ·「无量空处」', bonus: 5, power: 25 },
+    sukuna: { id: 'open_divine', name: '伏魔御厨子', label: '无结界开放式 ·「伏魔御厨子」', bonus: 7, power: 26, piercesInfinity: true },
+    kenjaku: { id: 'open_divine', name: '胎藏遍野', label: '无结界开放式 ·「胎藏遍野」', bonus: 7, power: 25, piercesInfinity: true },
+    yuta: { id: 'lethal_closed', name: '真赝相爱', label: '必杀必中型 ·「真赝相爱」', bonus: 4, power: 22 },
+    megumi: { id: 'incomplete_open', name: '嵌合暗翳庭', label: '依托地形型 ·「嵌合暗翳庭」', bonus: 2, power: 19, extraActions: 1 },
+    hakari: { id: 'rule_court', name: '坐杀博徒', label: '规则强制型 ·「坐杀博徒」', bonus: 4, power: 20, cancels: 1 },
+    higuruma: { id: 'rule_court', name: '诛伏赐死', label: '规则强制型 ·「诛伏赐死」', bonus: 4, power: 20, cancels: 1 },
+    yuki: { id: 'lethal_closed', name: '星怒生得领域', label: '必杀必中型 ·「星怒生得领域」', bonus: 3, power: 21 },
+    mahito: { id: 'lethal_closed', name: '自闭圆顿裹', label: '必杀必中型 ·「自闭圆顿裹」', bonus: 4, power: 22 },
+    jogo: { id: 'lethal_closed', name: '盖棺铁围山', label: '必杀必中型 ·「盖棺铁围山」', bonus: 3, power: 20 },
+    yorozu: { id: 'lethal_closed', name: '三重疾苦', label: '必杀必中型 ·「三重疾苦」', bonus: 4, power: 22 },
+    ryu: { id: 'lethal_closed', name: '甜点飨宴领域', label: '必杀必中型 ·「甜点飨宴领域」', bonus: 3, power: 21 },
+    uro: { id: 'lethal_closed', name: '苍穹天幕领域', label: '必杀必中型 ·「苍穹天幕领域」', bonus: 3, power: 21 },
+    naoya: { id: 'lethal_closed', name: '时胞月宫殿', label: '必杀必中型 ·「时胞月宫殿」', bonus: 4, power: 22 },
+    itadori: { id: 'lethal_closed', name: '解之乡愁领域', label: '必杀必中型 ·「解之乡愁领域」', bonus: 3, power: 21 }
+  };
+
+  // ==================== 死灭回游 · 小金虫积分与追加总则 ====================
+  var CULLING_RULE_SLICES = {
+    hundredPlus: [
+      { id: 'rule_transfer', label: '消耗100分追加「跨结界自由通行＆积分让渡」总则', statUp: 'barrier', allySupport: true, repDelta: 2, weight: 38, note: '打通各大结界增援路线！结界术 +1、声望上升，新宿决战获泳者协防战值 +8' },
+      { id: 'rule_intel', label: '消耗100分追加「公开全体泳者术式与积分」总则', statUp: 'iq', statUp2: 'ceControl', weight: 34, note: '掌握各路受肉强豪底细！智力 +1、咒力操纵 +1' },
+      { id: 'rule_hoard', label: '保留满百高分威慑全结界泳者（不消耗积分）', statUp: 'taijutsu', powerBonus: 4, weight: 28, note: '凭百点战绩震慑各结界挑战者！体术 +1、实战威慑战力 +4' }
+    ],
+    underHundred: [
+      { id: 'survive_swap', label: '与同盟泳者互转 1 分规避十九日术式剥夺惩罚', statUp: 'iq', weight: 40, note: '巧用总则漏洞化解死限危机，智力 +1' },
+      { id: 'survive_hunt', label: '清剿结界残余受肉咒灵补足生存积分', statUp: 'taijutsu', addPts: 35, weight: 34, note: '实战扫荡残敌再添 35 分，体术 +1' },
+      { id: 'survive_escort', label: '协助高专护送结界内滞留市民安全撤离', statUp: 'soulResist', repDelta: 1, weight: 26, note: '守住底线护佑常人撤出结界，灵魂抗性 +1' }
+    ]
+  };
+
   global.JJK_OMEGA_DATA = {
     SLICE_COLORS: SLICE_COLORS,
     RANK_SCALE: RANK_SCALE,
@@ -1966,6 +2150,11 @@
     HIGH_TECHNIQUES: HIGH_TECHNIQUES,
     TOOL_SHAPES: TOOL_SHAPES,
     TOOL_EFFECTS: TOOL_EFFECTS,
+    CE_TRAIT_WHEEL: CE_TRAIT_WHEEL,
+    CANON_CE_TRAITS: CANON_CE_TRAITS,
+    DOMAIN_FORM_WHEEL: DOMAIN_FORM_WHEEL,
+    CANON_DOMAIN_PROFILES: CANON_DOMAIN_PROFILES,
+    CULLING_RULE_SLICES: CULLING_RULE_SLICES,
     LOOKS_WHEEL: LOOKS_WHEEL,
     MORALITY_WHEEL: MORALITY_WHEEL,
     AGGRO_WHEEL: AGGRO_WHEEL,

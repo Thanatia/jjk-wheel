@@ -212,8 +212,33 @@
         ensureCharTool(char, { shape: '手摇铁片（Vibraslap义手）', effect: '可抵消敌方招式减伤护盾（不义游戏·改）', bonus: 6, canCancelMove: true, tier: '一级' });
         char.attrs.versatility = Math.max(char.attrs.versatility || 0, 9);
       }
+    } else if (id === 'naoya') {
+      if (eraIdx >= 6) {
+        char.canonTitle = '亚音速受胎进化 · 时胞月宫殿';
+        char.officialGrade = '准特级';
+        char.gradeBonus = Math.max(char.gradeBonus || 9, 12);
+        ensureCharSkill(char, '领域展开');
+        char.attrs.taijutsu = Math.max(char.attrs.taijutsu || 0, 10);
+        char.attrs.bodyResist = Math.max(char.attrs.bodyResist || 0, 9);
+        char.attrs.barrier = Math.max(char.attrs.barrier || 0, 8);
+        if (!isInit) note = '禅院直哉进入死灭回游阶段，高速冲刺进化并展开领域「时胞月宫殿」';
+      }
+    }
+    if (isHeavenZeroChar(char) && (char.attrs.ceTotal || 0) === 0) {
+      char.ceTrait = { id: 'zero_ce', label: '零咒力天与肉体', bonus: 0 };
+      char.domainProfile = null;
+    } else if (char.skills && char.skills.indexOf('领域展开') >= 0 && DATA.CANON_DOMAIN_PROFILES && DATA.CANON_DOMAIN_PROFILES[id]) {
+      char.domainProfile = cloneState(DATA.CANON_DOMAIN_PROFILES[id]);
+    } else if (char.skills && char.skills.indexOf('领域展开') === -1) {
+      char.domainProfile = null;
     }
     return note;
+  }
+
+  function resolveCeTraitById(traitId) {
+    var list = DATA.CE_TRAIT_WHEEL || [];
+    var hit = list.find(function (t) { return t.id === traitId; });
+    return hit ? cloneState(hit) : { id: 'standard', label: '常规标准咒力', bonus: 0 };
   }
 
   function applyCanonTemplate(char, canonObj, preset) {
@@ -242,7 +267,26 @@
     char.attrs = cloneState(canonObj.attrs);
     char.skills = canonObj.skills.slice();
     char.tools = cloneState(canonObj.tools || []);
-    char.gender = (canonObj.id === 'nobara' || canonObj.id === 'maki' || canonObj.id === 'yuki' || canonObj.id === 'yorozu' || canonObj.id === 'uraume') ? '女' : '男';
+    char.gender = (canonObj.id === 'nobara' || canonObj.id === 'maki' || canonObj.id === 'yuki' || canonObj.id === 'yorozu' || canonObj.id === 'uraume' || canonObj.id === 'uro' || canonObj.id === 'hana') ? '女' : '男';
+    var canonTraitMap = DATA.CANON_CE_TRAITS || {};
+    char.ceTrait = resolveCeTraitById((preset && preset.ceTraitId && preset.ceTraitId !== 'random') ? preset.ceTraitId : (canonTraitMap[canonObj.id] || 'standard'));
+    if (canonObj.id === 'kashimo' || canonObj.id === 'higuruma') char.cullingPoints = 100;
+    else if (canonObj.id === 'ryu') char.cullingPoints = 77;
+    else if (canonObj.id === 'uro') char.cullingPoints = 70;
+    else if (canonObj.id === 'hakari') char.cullingPoints = 60;
+    if (canonObj.id === 'mechamaru') {
+      if (!char.flags) char.flags = {};
+      char.flags.corpseCraftAsked = true;
+      char.cursedCorpses = [{
+        name: '绝对形态·二号傀儡',
+        form: '钢铁武者咒骸',
+        bodyType: '人形咒骸',
+        autonomous: true,
+        atk: 8, def: 7, hp: 7,
+        atkRank: 'SS', defRank: 'S', hpRank: 'S',
+        cores: [{ id: 'echo_cannon', label: '回响炮（隔山打牛贯穿轰击）', atkBonus: 4 }]
+      }];
+    }
     char.looksLevel = canonObj.looks || 7;
     char.looksText = getRankMeta(char.looksLevel).code + '（原著容姿）';
     char.moralityLevel = canonObj.morality >= 3 ? 8 : canonObj.morality <= -3 ? 2 : 6;
@@ -341,13 +385,22 @@
 
   function enforceIdentityAndTechConstraints(char, stepQueue) {
     enforceIdentityStatFloors(char);
-    if (Array.isArray(stepQueue) && isHeavenZeroChar(char)) {
-      for (var i = stepQueue.length - 1; i >= 0; i--) {
-        var st = stepQueue[i];
-        if (st && st.type === 'attr' && DATA.ATTRIBUTE_WHEELS[st.index]) {
-          var ak = DATA.ATTRIBUTE_WHEELS[st.index].attr;
-          if (ak === 'ceTotal' || ak === 'ceControl' || ak === 'ceEfficiency' || ak === 'barrier') {
+    if (isHeavenZeroChar(char)) {
+      if ((char.attrs.ceTotal || 0) === 0) {
+        char.ceTrait = { id: 'zero_ce', label: '零咒力天与肉体', bonus: 0 };
+      }
+      char.domainProfile = null;
+      if (Array.isArray(stepQueue)) {
+        for (var i = stepQueue.length - 1; i >= 0; i--) {
+          var st = stepQueue[i];
+          if (!st) continue;
+          if (st.type === 'ce_trait' || st.type === 'domain_form') {
             stepQueue.splice(i, 1);
+          } else if (st.type === 'attr' && DATA.ATTRIBUTE_WHEELS[st.index]) {
+            var ak = DATA.ATTRIBUTE_WHEELS[st.index].attr;
+            if (ak === 'ceTotal' || ak === 'ceControl' || ak === 'ceEfficiency' || ak === 'barrier') {
+              stepQueue.splice(i, 1);
+            }
           }
         }
       }
@@ -395,11 +448,15 @@
     var antiCurseBonus = (char.shikigamiMechId === 'sword_exorcism' && isCurseEnemyName(enemyName)) ? 8 : 0;
     var seanceBonus = (char.flags && char.flags.seanceAllyBonus) ? char.flags.seanceAllyBonus : 0;
     var flagPowerBonus = (char.flags && char.flags.powerBonusAcc) ? char.flags.powerBonusAcc : 0;
+    var ceTraitBonus = (!trueZeroCe && char.ceTrait && char.ceTrait.bonus) ? Math.round(char.ceTrait.bonus * 0.6) : 0;
+    var domainFormBonus = (!trueZeroCe && hasDomain && char.domainProfile)
+      ? (char.domainProfile.id === 'open_divine' ? 4 : char.domainProfile.id === 'rule_court' ? 1 : 0)
+      : 0;
     var supplyMult = char.masterSupplyMult || 1;
     var vowMult = (char.flags && char.flags.vowAtkMult) ? char.flags.vowAtkMult : 1;
     var scriptBonus = (char.flags && char.flags.scriptLevel > 0) ? char.flags.scriptLevel * 2 : 0;
     var injuryPenalty = char.hpStatus === '重伤' ? 9 : char.hpStatus === '轻伤' ? 3 : 0;
-    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + bondBonus + heavenZeroBonus + antiCurseBonus + seanceBonus + flagPowerBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
+    var raw = ((sumTen * 0.56 + skillBonus + toolBonus + corpseBonus + shikigamiExtra + bondBonus + heavenZeroBonus + antiCurseBonus + seanceBonus + flagPowerBonus + ceTraitBonus + domainFormBonus + (char.gradeBonus || 2)) * supplyMult * vowMult) + scriptBonus - injuryPenalty;
     return clamp(Math.round(raw), 1, 210);
   }
 
@@ -438,6 +495,7 @@
         queue.push({ type: 'era_count', eraId: 'shibuya' });
       } else if (era.id === 'culling') {
         queue.push({ type: 'era_count', eraId: 'culling' });
+        queue.push({ type: 'culling_rule' });
         queue.push({ type: 'sukuna_vessel' });
         queue.push({ type: 'radar', stage: 'mid', title: '死灭回游后能力面板' });
       } else if (era.id === 'shinjuku') {
@@ -492,6 +550,7 @@
     }
 
     var hasExplicitTech = Boolean(preset && preset.techId && preset.techId !== 'random');
+    var hasExplicitCeTrait = Boolean(preset && preset.ceTraitId && preset.ceTraitId !== 'random');
     var hasExplicitTools = Boolean(preset && preset.toolCount && preset.toolCount !== 'random');
     var isCivilianDefault = char.identityId === 'civilian' && !hasExplicitTech;
     if (isCivilianDefault) {
@@ -499,6 +558,7 @@
       char.technique = '无生得术式（常人）';
       char.techniquePower = 1;
       char.techniqueDesc = '生于平凡世俗，暂未觉醒生得术式';
+      char.ceTrait = { id: 'standard', label: '微弱常人咒力', bonus: 0 };
     }
 
     if (char.identityId === 'shikigami') {
@@ -509,6 +569,7 @@
       setup.push({ type: 'shikigami_age' });
       setup.push({ type: 'shikigami_mechanism' });
       if (!hasExplicitTech) setup.push({ type: 'technique' });
+      if (!hasExplicitCeTrait && !isHeavenZeroChar(char)) setup.push({ type: 'ce_trait' });
       setup.push({ type: 'shikigami_master' });
       setup.push({ type: 'shikigami_supply' });
       setup.push({ type: 'shikigami_bond' });
@@ -516,6 +577,7 @@
       if (!preset || !preset.eraId || preset.eraId === 'random') setup.push({ type: 'birth_era' });
       if (!preset || !preset.birthplaceId || preset.birthplaceId === 'random') setup.push({ type: 'birthplace' });
       if (!hasExplicitTech && !isCivilianDefault) setup.push({ type: 'technique' });
+      if (!hasExplicitCeTrait && !isCivilianDefault && !isHeavenZeroChar(char)) setup.push({ type: 'ce_trait' });
     }
 
     if (!preset || !preset.looksLv || preset.looksLv === 'random') setup.push({ type: 'looks' });
@@ -566,6 +628,12 @@
       setup.push({ type: 'identity_extra', key: 'curse_origin' });
     } else if (char.identityId === 'curseUser') {
       setup.push({ type: 'identity_extra', key: 'curseUser_bounty' });
+    }
+
+    if (char.skills && char.skills.indexOf('领域展开') >= 0 && !isHeavenZeroChar(char) && !char.domainProfile) {
+      if (!char.flags) char.flags = {};
+      char.flags.domainFormAsked = true;
+      setup.push({ type: 'domain_form' });
     }
 
     enforceIdentityAndTechConstraints(char, setup);
@@ -621,6 +689,9 @@
         technique: '尚未抽取',
         techniquePower: 4,
         techniqueDesc: '暂未觉醒生得术式',
+        ceTrait: { id: 'standard', label: '常规标准咒力', bonus: 0 },
+        domainProfile: null,
+        cullingPoints: 0,
         officialGrade: '未评级',
         gradeBonus: 2,
         master: null,
@@ -768,6 +839,9 @@
         state.char.techniquePower = techObj.power;
         state.char.techniqueDesc = techObj.desc;
       }
+    }
+    if (preset && preset.ceTraitId && preset.ceTraitId !== 'random' && state.char.identityId !== 'canon') {
+      state.char.ceTrait = resolveCeTraitById(preset.ceTraitId);
     }
     if (preset && preset.gradeId && preset.gradeId !== 'random' && state.char.identityId !== 'canon') {
       var allGrades = DATA.GRADE_WHEELS.standard.concat(DATA.GRADE_WHEELS.civilian || []);
@@ -1072,9 +1146,36 @@
       });
     }
 
+    if (!zeroCe && char.ceTrait && char.ceTrait.moveLabel) {
+      list.push({
+        id: 'ce_trait_strike',
+        label: char.ceTrait.moveLabel,
+        power: char.ceTrait.movePower || 19,
+        cancels: char.ceTrait.cancels || 0,
+        piercesInfinity: Boolean(char.ceTrait.piercesInfinity),
+        isTechAttack: true,
+        weight: 12
+      });
+    }
+
     if (!zeroCe && char.skills.indexOf('领域展开') >= 0) {
       if (boss.isSukunaPlayer) {
         list.push({ id: 'domain', label: '领域展开·伏魔御厨子（开放式必破无量空处，不耗咏唱）', power: 26, isDomain: true, piercesInfinity: true, weight: 14 });
+      } else if (char.domainProfile) {
+        var dp = char.domainProfile;
+        var domLbl = dp.name
+          ? ('领域展开·「' + dp.name + '」（不耗咏唱）')
+          : ('领域展开·' + dp.label.split(' · ')[0] + '（不耗咏唱）');
+        list.push({
+          id: 'domain',
+          label: domLbl,
+          power: dp.power || 20,
+          cancels: dp.cancels || 0,
+          extraActions: dp.extraActions || 0,
+          piercesInfinity: Boolean(dp.piercesInfinity),
+          isDomain: true,
+          weight: 13
+        });
       } else {
         list.push({ id: 'domain', label: '领域展开·生得领域强压（不耗咏唱）', power: 19, isDomain: true, weight: 12 });
       }
@@ -1987,6 +2088,7 @@
         }
         effectText = '原本沉睡的术式获得觉醒！咒力与结界基准同步打通，接下来补抽生得术式与高级技巧。';
         state.stepQueue.unshift({ type: 'high_tech_pick', nth: 1, total: 1 });
+        state.stepQueue.unshift({ type: 'ce_trait' });
         state.stepQueue.unshift({ type: 'technique' });
       } else {
         effectText = slice.note || slice.label;
@@ -2029,7 +2131,12 @@
         state.stepQueue.unshift({ type: 'fight_outcome', eraLabel: char.currentEraLabel, encounter: slice });
       } else {
         if (slice.statUp) applyStatDelta(char, slice.statUp, 1);
-        effectText = (slice.effectText || '平稳度过时代节点') + (eraProgNote ? '｜' + eraProgNote : '');
+        var safeCullTxt = '';
+        if (char.currentEraId === 'culling') {
+          char.cullingPoints = (char.cullingPoints || 0) + 30;
+          safeCullTxt = '｜小金虫积分 +30（累计 ' + char.cullingPoints + ' 分）';
+        }
+        effectText = (slice.effectText || '平稳度过时代节点') + safeCullTxt + (eraProgNote ? '｜' + eraProgNote : '');
       }
 
     } else if (step.type === 'cross_era') {
@@ -2106,7 +2213,14 @@
         char.statsLog.blackFlashes += 1;
         if (char.skills.indexOf('黑闪') === -1) char.skills.push('黑闪');
       }
-      effectText = (won ? '击败 ' : '不敌 ') + step.encounter.enemyName + (hitBF ? ' · 本战打出「黑闪」！！' : '');
+      var cullBattleNote = '';
+      if (won && char.currentEraId === 'culling') {
+        var ep = (step.encounter && step.encounter.enemyPower) || 45;
+        var addPts = (ep >= 56 ? 60 : 45) + ((char.flags && char.flags.scriptLevel >= 1) || (char.attrs && char.attrs.iq >= 9) ? 15 : 0);
+        char.cullingPoints = (char.cullingPoints || 0) + addPts;
+        cullBattleNote = ' · 小金虫积分 +' + addPts + '（共 ' + char.cullingPoints + ' 分）';
+      }
+      effectText = (won ? '击败 ' : '不敌 ') + step.encounter.enemyName + (hitBF ? ' · 本战打出「黑闪」！！' : '') + cullBattleNote;
       state.stepQueue.unshift({
         type: 'fight_injury',
         won: won,
@@ -2589,6 +2703,12 @@
     if ((char.cursedCorpses || []).length > 0) {
       addTrait('百鬼造骸大匠', +8, '成功亲手制造并率领 ' + char.cursedCorpses.length + ' 具自律咒骸参战', 't_corpse_master');
     }
+    if (char.domainProfile && char.domainProfile.id === 'open_divine') {
+      addTrait('虚空作画 · 开放式领域', +6, '踏入不在现实分隔空间的无结界生得领域境界', 't_domain');
+    }
+    if (flags.addedCullingRule) {
+      addTrait('死灭总则制定者', +6, '在死灭回游斩获百点积分并成功追加新总则改写结界格局');
+    }
     if (log.beatStronger) {
       addTrait('以下克上', +5, '战胜至少一名综合战力强于自己的敌人', 't_overcome');
     }
@@ -2728,8 +2848,24 @@
       i: fighter.identityName || '咒术师',
       g: fighter.officialGrade || '一级',
       t: fighter.technique || '无生得术式',
-      s: (fighter.skills || []).slice(0, 8),
-      w: (fighter.tools || []).map(function (x) { return { shape: x.shape, bonus: x.bonus || 4 }; }).slice(0, 3),
+      ti: fighter.techniqueId || '',
+      ct: fighter.ceTrait ? { id: fighter.ceTrait.id, label: fighter.ceTrait.label, bonus: fighter.ceTrait.bonus || 0 } : null,
+      dp: fighter.domainProfile ? { id: fighter.domainProfile.id, name: fighter.domainProfile.name || '', label: fighter.domainProfile.label || '' } : null,
+      s: (fighter.skills || []).slice(0, 10),
+      w: (fighter.tools || []).filter(function (x) { return !x.destroyed; }).map(function (x) {
+        return {
+          shape: x.shape,
+          effect: x.effect || '',
+          bonus: x.bonus || 4,
+          damageMult: x.damageMult,
+          nullify: Boolean(x.nullify),
+          canCancelMove: Boolean(x.canCancelMove),
+          indestructible: Boolean(x.indestructible),
+          thunderCast: Boolean(x.thunderCast),
+          dmgStore: Boolean(x.dmgStore),
+          extraCe: Boolean(x.extraCe)
+        };
+      }).slice(0, 4),
       a: fighter.attrs
     };
     var json = JSON.stringify(minimal);
@@ -2748,6 +2884,9 @@
       identityName: String(p.i || '咒术师'),
       officialGrade: String(p.g || '一级'),
       technique: String(p.t || '秘传术式'),
+      techniqueId: String(p.ti || ''),
+      ceTrait: p.ct || null,
+      domainProfile: p.dp || null,
       skills: Array.isArray(p.s) ? p.s : [],
       tools: Array.isArray(p.w) ? p.w : [],
       attrs: p.a
@@ -2759,16 +2898,19 @@
     var base = (a.ceTotal || 0) + (a.ceControl || 0) + (a.ceEfficiency || 0) + (a.taijutsu || 4) * 1.2 +
       (a.bodyResist || 4) + (a.soulResist || 4) * 0.7 + (a.barrier || 0) * 0.8 + (a.versatility || 4) * 0.8 + (a.iq || 4) * 0.7;
     var hasD = (f.skills || []).indexOf('领域展开') >= 0;
+    var isOpenD = Boolean(hasD && ((f.domainProfile && f.domainProfile.id === 'open_divine') || (f.technique || '').indexOf('御厨子') >= 0 || (f.name || '').indexOf('宿傩') >= 0 || (f.name || '').indexOf('羂索') >= 0));
     var hasR = hasHealingSkill(f);
     var activeTools = (f.tools || []).filter(function (t) { return !t.destroyed; });
     var toolPts = activeTools.reduce(function (s, x) { return s + (x.bonus || 3) + (x.extraCe ? 2 : 0); }, 0);
-    return Math.round(base * 1.15 + (f.skills || []).length * 3 + (hasD ? 10 : 0) + (hasR ? 6 : 0) + toolPts);
+    var ceBonus = (f.ceTrait && f.ceTrait.bonus) ? Math.round(f.ceTrait.bonus * 0.8) : 0;
+    return Math.round(base * 1.15 + (f.skills || []).length * 3 + (hasD ? 10 : 0) + (isOpenD ? 5 : 0) + (hasR ? 6 : 0) + toolPts + ceBonus);
   }
 
   function getArenaFighterMods(f) {
     var skills = f.skills || [];
     var tools = (f.tools || []).filter(function (t) { return !t.destroyed; });
     var zeroCe = isHeavenZeroChar(f);
+    var techStr = String(f.technique || '');
     var ampMult = 1;
     var hasNullify = false;
     var hasThunder = false;
@@ -2787,15 +2929,27 @@
         hasIndest = true;
       }
     });
+    var hasDomain = !zeroCe && skills.indexOf('领域展开') >= 0;
+    var isOpenDomain = Boolean(hasDomain && ((f.domainProfile && f.domainProfile.id === 'open_divine') || (techStr.indexOf('御厨子') >= 0 && (f.attrs && f.attrs.barrier >= 11)) || (f.name || '').indexOf('羂索') >= 0));
+    var hasLimitless = !zeroCe && (f.techniqueId === 'limitless' || techStr.indexOf('无下限') >= 0);
+    var canBypassInfinity = hasDomain || hasNullify || skills.indexOf('领域展延') >= 0 ||
+      f.techniqueId === 'angelicExt' || techStr.indexOf('术式灭绝') >= 0 || techStr.indexOf('天空操纵') >= 0 ||
+      (techStr.indexOf('御厨子') >= 0 && ((f.attrs && f.attrs.iq >= 10) || (f.name || '').indexOf('宿傩') >= 0));
+    var traitId = (f.ceTrait && f.ceTrait.id) || (techStr.indexOf('幻兽琥珀') >= 0 ? 'electric' : techStr.indexOf('冰凝') >= 0 ? 'frost' : '');
     return {
       zeroCe: zeroCe,
-      hasDomain: !zeroCe && skills.indexOf('领域展开') >= 0,
+      hasDomain: hasDomain,
+      isOpenDomain: isOpenDomain,
+      hasLimitless: hasLimitless,
+      canBypassInfinity: canBypassInfinity,
+      traitId: traitId,
       hasAntiDomain: zeroCe || skills.indexOf('简易领域') >= 0 || skills.indexOf('弥虚葛笼') >= 0 || skills.indexOf('领域展延') >= 0,
       hasHeal: hasHealingSkill(f),
       healLabel: skills.indexOf('咒力高速再生') >= 0 ? '高速再生+12' : '反转回复+12',
       ampMult: ampMult > 1 ? 1 + (ampMult - 1) * 0.55 : 1,
       hasNullify: hasNullify,
-      extraDmg: (hasThunder ? 4 : 0) + (hasIndest ? 3 : 0),
+      extraDmg: (hasThunder ? 4 : 0) + (hasIndest ? 3 : 0) + (traitId === 'electric' || traitId === 'rough' || traitId === 'blazing' ? 4 : 0),
+      frostSlow: traitId === 'frost' ? 0.93 : 1.0,
       soulGuard: Math.round(((f.attrs && f.attrs.soulResist) || 4) * 0.6)
     };
   }
@@ -2812,13 +2966,39 @@
     for (var round = 1; round <= 5 && hpA > 0 && hpB > 0; round++) {
       var bfA = !mA.zeroCe && Math.random() < (0.12 + ((fA.attrs && fA.attrs.ceControl) || 0) * 0.02);
       var bfB = !mB.zeroCe && Math.random() < (0.12 + ((fB.attrs && fB.attrs.ceControl) || 0) * 0.02);
-      var domBoostA = mA.hasDomain && !mB.hasAntiDomain && !mB.hasDomain && round <= 2 ? (mB.hasNullify ? 1.12 : 1.24) : 1.0;
-      var domBoostB = mB.hasDomain && !mA.hasAntiDomain && !mA.hasDomain && round <= 2 ? (mA.hasNullify ? 1.12 : 1.24) : 1.0;
-      var mitigateA = mA.hasNullify ? 0.92 : 1.0;
-      var mitigateB = mB.hasNullify ? 0.92 : 1.0;
+      var domBoostA = 1.0;
+      var domBoostB = 1.0;
+      var clashNote = '';
+      if (round <= 2) {
+        if (mA.hasDomain && mB.hasDomain) {
+          var barA = ((fA.attrs && fA.attrs.barrier) || 6) + (mA.isOpenDomain ? 3.5 : 0);
+          var barB = ((fB.attrs && fB.attrs.barrier) || 6) + (mB.isOpenDomain ? 3.5 : 0);
+          if (barA > barB + 0.5) {
+            domBoostA = 1.18;
+            clashNote = '｜' + fA.name + (mA.isOpenDomain ? '【开放式领域击破外壳】' : '【领域博弈占优】');
+          } else if (barB > barA + 0.5) {
+            domBoostB = 1.18;
+            clashNote = '｜' + fB.name + (mB.isOpenDomain ? '【开放式领域击破外壳】' : '【领域博弈占优】');
+          } else if (round === 1) {
+            clashNote = '｜双方生得领域互角抵消必中';
+          }
+        } else if (mA.hasDomain && !mB.hasAntiDomain) {
+          domBoostA = mB.hasNullify ? 1.12 : 1.24;
+        } else if (mB.hasDomain && !mA.hasAntiDomain) {
+          domBoostB = mA.hasNullify ? 1.12 : 1.24;
+        }
+      }
+      var infMultVsB = (mB.hasLimitless && !mA.canBypassInfinity) ? 0.58 : 1.0;
+      var infMultVsA = (mA.hasLimitless && !mB.canBypassInfinity) ? 0.58 : 1.0;
+      if (round === 1) {
+        if (mB.hasLimitless) clashNote += mA.canBypassInfinity ? '｜我方手段贯穿无下限' : '｜受敌方无下限不可侵减伤';
+        if (mA.hasLimitless) clashNote += mB.canBypassInfinity ? '｜敌方手段穿透无下限' : '｜我方无下限不可侵生效';
+      }
+      var mitigateA = (mA.hasNullify ? 0.92 : 1.0) * mA.frostSlow;
+      var mitigateB = (mB.hasNullify ? 0.92 : 1.0) * mB.frostSlow;
 
-      var dmgA = Math.round(((14 + pA * 0.32 + mA.extraDmg + Math.random() * 14) * mA.ampMult * domBoostA * (bfA ? 1.55 : 1)) * mitigateB);
-      var dmgB = Math.round(((14 + pB * 0.32 + mB.extraDmg + Math.random() * 14) * mB.ampMult * domBoostB * (bfB ? 1.55 : 1)) * mitigateA);
+      var dmgA = Math.round(((14 + pA * 0.32 + mA.extraDmg + Math.random() * 14) * mA.ampMult * domBoostA * infMultVsB * (bfA ? 1.55 : 1)) * mitigateB);
+      var dmgB = Math.round(((14 + pB * 0.32 + mB.extraDmg + Math.random() * 14) * mB.ampMult * domBoostB * infMultVsA * (bfB ? 1.55 : 1)) * mitigateA);
       hpB = Math.max(0, hpB - dmgA);
       hpA = Math.max(0, hpA - dmgB);
 
@@ -2827,7 +3007,7 @@
       if (mB.hasHeal && hpB > 0 && hpB < 85) { hpB += 12; rctTxt += fB.name + mB.healLabel + '；'; }
 
       logs.push('第' + round + '回合：' + fA.name + '【' + fA.technique + '】造成 ' + dmgA + (bfA ? '(黑闪!)' : '') +
-        '｜' + fB.name + '回击 ' + dmgB + (bfB ? '(黑闪!)' : '') + (rctTxt ? '｜' + rctTxt : '') +
+        '｜' + fB.name + '回击 ' + dmgB + (bfB ? '(黑闪!)' : '') + clashNote + (rctTxt ? '｜' + rctTxt : '') +
         '（余血 ' + hpA + ' vs ' + hpB + '）');
     }
 
@@ -2848,6 +3028,9 @@
   /* ==================== 扩展引擎：性别/御三家/咒骸/委托/降灵/新宿完全体/多指针 ==================== */
   var EXT_STEP_MAP = {
     gender: true,
+    ce_trait: true,
+    domain_form: true,
+    culling_rule: true,
     elder_clan_decide: true,
     elder_clan_pick: true,
     elder_clan_inherit: true,
@@ -2922,6 +3105,25 @@
     if (hasPuppetCraftSkill(char) && !char.flags.corpseCraftAsked) {
       char.flags.corpseCraftAsked = true;
       state.stepQueue.unshift({ type: 'corpse_decide' });
+    }
+  }
+
+  function maybeQueueDomainForm(state) {
+    var char = state.char;
+    initExtensionFields(char);
+    if (isHeavenZeroChar(char)) {
+      char.domainProfile = null;
+      return;
+    }
+    if ((char.skills || []).indexOf('领域展开') >= 0 && !char.domainProfile) {
+      if (char.canonCharId && DATA.CANON_DOMAIN_PROFILES && DATA.CANON_DOMAIN_PROFILES[char.canonCharId]) {
+        char.domainProfile = cloneState(DATA.CANON_DOMAIN_PROFILES[char.canonCharId]);
+        return;
+      }
+      if (!char.flags.domainFormAsked && !(state.boss && state.boss.active)) {
+        char.flags.domainFormAsked = true;
+        state.stepQueue.unshift({ type: 'domain_form' });
+      }
     }
   }
 
@@ -3009,6 +3211,34 @@
 
     if (step.type === 'gender') {
       return { title: '穿越后的性别判定', subtag: '重塑新生肉身轮廓', explain: '决定你在咒术界的初始性别特征。', slices: getSliceColors(DATA.GENDER_WHEEL) };
+    }
+    if (step.type === 'ce_trait') {
+      return {
+        title: '咒力特性 · 先天咒力质感判定',
+        subtag: '常规流动 / 带电 / 粗糙锯刃 / 极寒 / 爆燃 / 浓稠',
+        explain: '罕见术师天生携带特殊咒力性质（如鹿紫云雷电、秤金次锯齿咒力），不仅提升战力，还可在新宿决战解锁专属特性招式！',
+        slices: getSliceColors(DATA.CE_TRAIT_WHEEL)
+      };
+    }
+    if (step.type === 'domain_form') {
+      return {
+        title: '生得领域 · 结界形态与必中法则',
+        subtag: '封闭必杀 / 规则契约 / 依托地形 / 无结界开放式',
+        explain: '决定你所修成生得领域的结界构造与必中特性，直接影响新宿决战与竞技场领域博弈！',
+        slices: getSliceColors(DATA.DOMAIN_FORM_WHEEL)
+      };
+    }
+    if (step.type === 'culling_rule') {
+      var curPts = char.cullingPoints || 0;
+      var hasHundred = curPts >= 100;
+      return {
+        title: hasHundred ? '死灭回游 · 满百积分追加总则' : '死灭回游 · 小金虫积分与结界结算',
+        subtag: '当前累计积分：' + curPts + ' 分' + (hasHundred ? '（已达 100 分总则门槛！）' : '（十九日规则存续判定）'),
+        explain: hasHundred
+          ? '你在死灭回游已积满 100 分以上，可向小金虫消耗 100 分追加全新总则，或保留高分威慑全结界！'
+          : '死灭回游临近尾声，需妥善处理积分变动条款以规避「术式剥夺」惩罚并备战新宿。',
+        slices: getSliceColors(hasHundred ? DATA.CULLING_RULE_SLICES.hundredPlus : DATA.CULLING_RULE_SLICES.underHundred)
+      };
     }
     if (step.type === 'elder_clan_decide') {
       return { title: '咒术高层 · 是否出身御三家', subtag: '高层门阀血脉判定', explain: '出身五条/禅院/加茂御三家有机会直接继承祖传相传术式！', slices: getSliceColors(DATA.ELDER_CLAN_DECIDE) };
@@ -3345,6 +3575,39 @@
       char.gender = slice.label;
       effectText = '性别设定：' + slice.label;
 
+    } else if (step.type === 'ce_trait') {
+      char.ceTrait = cloneState(slice);
+      effectText = '觉醒咒力特性【' + slice.label + '】：' + (slice.note || '咒力性质确立');
+
+    } else if (step.type === 'domain_form') {
+      char.domainProfile = {
+        id: slice.id,
+        name: '',
+        label: slice.label,
+        bonus: slice.bonus || 3,
+        power: slice.power || 20,
+        cancels: slice.cancels || 0,
+        extraActions: slice.extraActions || 0,
+        piercesInfinity: Boolean(slice.piercesInfinity)
+      };
+      if (slice.barrierUp) {
+        applyStatDelta(char, 'barrier', slice.barrierUp);
+      }
+      effectText = '确立领域形态【' + slice.label + '】：' + (slice.note || '生得领域成形');
+
+    } else if (step.type === 'culling_rule') {
+      if ((char.cullingPoints || 0) >= 100 && (slice.id === 'rule_transfer' || slice.id === 'rule_intel')) {
+        char.cullingPoints = Math.max(0, (char.cullingPoints || 0) - 100);
+        char.flags.addedCullingRule = true;
+      }
+      if (slice.addPts) char.cullingPoints = (char.cullingPoints || 0) + slice.addPts;
+      if (slice.statUp) applyStatDelta(char, slice.statUp, 1);
+      if (slice.statUp2) applyStatDelta(char, slice.statUp2, 1);
+      if (slice.allySupport) char.flags.cullingAllySupport = true;
+      if (slice.powerBonus) char.flags.powerBonusAcc = (char.flags.powerBonusAcc || 0) + slice.powerBonus;
+      if (slice.repDelta) char.reputationLevel = clamp((char.reputationLevel || 4) + slice.repDelta, 0, 10);
+      effectText = slice.note || slice.label;
+
     } else if (step.type === 'elder_clan_decide') {
       if (slice.id === true) {
         effectText = '身份为御三家嫡系出身！准备抽选所属名门';
@@ -3555,10 +3818,12 @@
       var debuffMult = Math.pow(0.7, boss.heavyDebuffStacks || 0);
       var motiveR1Bonus = (boss.round === 1 && char.flags && char.flags.firstRoundBossBonus) ? char.flags.firstRoundBossBonus : 0;
       var secretAllyBonus = (char.flags && char.flags.hasSecretAlly) ? 5 : 0;
+      var cullingAllyBonus = (boss.round === 1 && char.flags && char.flags.cullingAllySupport) ? 8 : 0;
       var basePow = Math.round(getPowerBreakdown(char, boss.enemyTitle) * 0.34 * debuffMult) +
         (boss.round === 1 && char.flags.scriptLevel > 0 ? 5 : 0) +
         motiveR1Bonus +
         secretAllyBonus +
+        cullingAllyBonus +
         (boss.squadAllyBonus || 0) +
         Math.round(corpseAssist * 0.45);
       boss.playerRoundPower = Math.max(8, basePow);
@@ -3608,13 +3873,23 @@
         var domGain = Math.round(((move.power || 19) + (char.attrs.barrier || 5) * 0.9) * debuffMult2 * bfMult2);
         boss.playerRoundPower += domGain;
         boss.usedMovesThisRound.push(move.label);
+        if (move.cancels) boss.playerCancelPending += move.cancels;
+        if (move.extraActions && step.total < 15) {
+          var addDomAct = Math.min(2, move.extraActions);
+          boss.playerMovesLeft += addDomAct;
+          step.total += addDomAct;
+        }
         if (boss.isSukunaPlayer) {
           var domStrip = boss.enemyInfinityBlocks > 0 ? Math.min(boss.enemyInfinityBlocks, 2) : 0;
           if (domStrip > 0) boss.enemyInfinityBlocks -= domStrip;
           effectText = '展开「伏魔御厨子」强压领域！战斗值 +' + domGain +
             (domStrip > 0 ? ' · 必中砍穿五条无下限 ' + domStrip + ' 层（剩 ' + boss.enemyInfinityBlocks + ' 层）' : '（不消耗完整咏唱）');
         } else {
-          effectText = '展开生得领域！领域强压 +' + domGain + '（不消耗完整咏唱）';
+          effectText = '展开' + (char.domainProfile && char.domainProfile.name ? '「' + char.domainProfile.name + '」' : '生得领域') +
+            '！领域强压 +' + domGain +
+            (move.cancels ? '｜必中规则封锁敌方 1 招' : '') +
+            (move.extraActions ? '｜地形连携追加行动' : '') +
+            '（不消耗完整咏唱）';
         }
       } else {
         // 常规有效术式攻击 / 黑闪 / 咒具秘技 / 咒术科学 / 多重启动 / 百兵演武
@@ -4136,6 +4411,7 @@
       }
 
       maybeQueueCorpseCraft(state);
+      maybeQueueDomainForm(state);
 
       if (preType === 'shinjuku_motive' && state.presetShinjukuOrderId && state.presetShinjukuOrderId !== 'random') {
         var presetOrder = DATA.SHINJUKU_SUKUNA_ORDERS.find(function (o) { return o.id === state.presetShinjukuOrderId; });
